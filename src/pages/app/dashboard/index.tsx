@@ -26,7 +26,8 @@ import { filterStringsContainingImageExtensions } from 'helper';
 import { useNavigate } from 'react-router-dom';
 import { billingData, dashboardData } from './dashboardData';
 import { cn } from 'lib/utils';
-import Chart from './Chart/chart';
+import PieChartComponent from 'components/general/Charts/PieChart';
+import LineChartComponent from 'components/general/Charts/LineChart';
 type filterTypes = 'All' | 'Adverts' | 'Blog Posts' | 'BTS' | 'Assets' | 'Upcoming Events';
 
 const generalFilters: filterTypes[] = [
@@ -107,7 +108,9 @@ const Dashboard = () => {
               </button>
             </div>
           </div>
-
+          {/* <SearchComboBox /> */}
+          <LineChartComponent />
+          <PieChartComponent />
           <section className='mt-12 grid grid-cols-[1fr_1fr]  gap-[2rem] rounded-lg md:grid-cols-[1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr_1fr]'>
             {dashboardData.map((report, index) => {
               return (
@@ -162,7 +165,6 @@ const Dashboard = () => {
                         </div>
                       );
                     })}
-                    <Chart />
                   </div>
                 </article>
               );
