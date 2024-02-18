@@ -104,7 +104,7 @@ const Dashboard = () => {
 
   return (
     <div className='container flex h-full w-full flex-col overflow-auto px-container-md py-[1rem]'>
-      <div className='flex items-center justify-between'>
+      {/* <div className='flex items-center justify-between'>
         <h3 className='text-2xl font-bold'>Welcome Edmund</h3>
         <div className='flex  gap-3'>
           <DropdownMenu>
@@ -130,9 +130,10 @@ const Dashboard = () => {
           </DropdownMenu>
           <SearchComboBox />
         </div>
-      </div>
-      <section className='mt-16 grid gap-[4rem]  rounded-lg md:grid-cols-[2fr_1fr] '>
+      </div> */}
+      <section className=' grid gap-[4rem]  rounded-lg md:grid-cols-[2fr_1fr] '>
         <div>
+          <h3 className=' mb-16 text-2xl font-bold'>Welcome Edmund</h3>
           <div
             className={cn(
               `}   grid cursor-pointer grid-cols-[1fr_1fr] gap-[2rem] rounded-lg rounded-lg  transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr]`,
@@ -160,7 +161,32 @@ const Dashboard = () => {
             <LineChartComponent />
           </div>
         </div>
-        <div className='flex flex-col gap-3'>
+        <div className='flex flex-col gap-4'>
+          <p className='text-end text-[0.75rem] text-gray-400'>Today: 10:23am, 30th Oct 2023</p>
+          <div className='mb-12 flex   gap-3'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='group flex w-8/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
+                >
+                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-56 text-[0.65rem]'>
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <SearchComboBox />
+          </div>
           <p className=' text-lg font-medium text-primary-1'>Today’s activity</p>
           <p className=' text-xs'>Today</p>
           <PieChartComponent />

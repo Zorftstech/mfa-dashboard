@@ -226,7 +226,7 @@ const SideNav = () => {
   return (
     <div
       className={`sticky bottom-0 top-0 ${
-        navOpen ? ` w-[260px]` : `w-[70px]`
+        navOpen ? ` w-[200px] xl:w-[260px]` : `w-[70px]`
       } bg relative flex h-full flex-col bg-primary-3 py-[1.65rem] shadow-3 transition-[width] duration-300 ease-in-out`}
     >
       <button

@@ -98,7 +98,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 .sideNavScroll::-webkit-scrollbar {
   height: 5px;
-  width: 8px;
+  width: 6px;
 }
 .sideNavScroll::-webkit-scrollbar-thumb {
   background: #e1e2df;
