@@ -34,7 +34,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
   const { setAuthDetails, setLoggedIn } = useStore((store) => store);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
   const [params] = useSearchParams();
   const [checked, setChecked] = useState(false);
 
@@ -77,7 +77,7 @@ const Login = () => {
   }, []);
 
   return (
-    <div className=' flex h-full w-full items-center justify-center'>
+    <div className='flex h-full w-full items-center justify-center bg-secondary-1'>
       <Dialog open={emailVerifiedOpen} onOpenChange={setEmailVerifiedOpen}>
         <DialogContent className='h-screen !max-w-[1120px] bg-white sm:h-max sm:w-[80vw] lg:w-[50vw]'>
           <div className='mx-auto flex h-full w-full flex-col gap-[1.5rem] pb-[5.31rem] pt-[6.56rem]  md:max-w-[30rem]'>
@@ -108,42 +108,42 @@ const Login = () => {
         </DialogContent>
       </Dialog>
 
-      <div className=' mx-auto flex   w-full flex-col items-center justify-center  bg-white px-4 md:max-w-xl md:px-[3rem]  '>
-        <div className='flex w-full flex-col items-center'>
+      <div className=' mx-auto flex w-full  flex-col items-center justify-center gap-8  px-4 md:max-w-xl md:px-[3rem]'>
+        <div className='flex w-full flex-col items-center gap-8'>
           <div className=' flex cursor-pointer items-center' onClick={() => navigate(`/`)}>
-            <Icon name='nfmLogo' svgProp={{ className: 'w-[6rem] h-[4rem]' }} />
+            <Icon name='nfmLogo' svgProp={{ className: 'w-[8rem] h-[5rem]' }} />
           </div>
 
           <h5 className='tracking-[0.18px]] font-inter text-[20px] font-[600] leading-[32px]'>
             Log in to your account{' '}
           </h5>
         </div>
-        <section className='w-full rounded-lg border p-8 pt-10'>
+        <section className='w-full  rounded-lg bg-white p-6 px-8 shadow-sm'>
           <form
             onSubmit={handleSubmit(onSubmit)}
             className='mx-auto flex w-full flex-col items-start justify-center'
           >
             <div className='mb-[1.25rem] flex w-full flex-col gap-4'>
               <div className='relative'>
-                <label className=' text-sm font-semibold text-gray-700'>Username</label>
+                <label className=' text-[0.8rem] font-medium'>Email Address</label>
                 <InputErrorWrapper error={errors?.email?.message}>
                   <Input
                     {...register('email')}
-                    className='mt-1 w-full  py-3 placeholder:text-primary-9/[0.38]'
-                    // placeholder='Email'
+                    className='mt-2 w-full  py-3 placeholder:text-xs placeholder:text-primary-9/[0.38]'
+                    placeholder='Enter your email address'
                   />
                 </InputErrorWrapper>
               </div>
               <div className='relative'>
-                <label className=' text-sm font-semibold text-gray-700'>Password</label>
+                <label className=' text-[0.8rem] font-medium'>Password</label>
 
                 <InputErrorWrapper error={errors?.password?.message}>
-                  <div className='flex items-center gap-4 rounded-lg border p-1   pr-4'>
+                  <div className='mt-2 flex items-center gap-4 rounded-lg border p-1  pr-4'>
                     <Input
                       {...register('password')}
-                      className=' h-2/3 w-full rounded-r-none border-0 text-[0.8rem]  placeholder:text-[0.8rem]   '
-                      placeholder='Password'
-                      type={showPassword ? '' : 'password'}
+                      className=' h-[70%] w-full rounded-r-none border-0 text-[0.8rem] placeholder:text-xs  placeholder:text-primary-9/[0.38]   '
+                      placeholder='Enter your password'
+                      type={showPassword ? 'text' : 'password'}
                     ></Input>
                     {showPassword ? (
                       <button onClick={() => setShowPassword(false)} type='button'>
@@ -186,10 +186,10 @@ const Login = () => {
             <button
               onClick={() => navigate('/app/dashboard')}
               disabled={isLoading}
-              className='mb-[1.75rem] w-full rounded-[8px] bg-primary-1 py-2 text-[15px] font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
+              className=' w-full rounded-[8px] bg-primary-1 py-2 text-xs font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
             >
               <BtnLoader isLoading={isLoading}>
-                <span className='leading-[0.46px]'>Sign in</span>
+                <span className='leading-[0.46px]'>Log in</span>
               </BtnLoader>
             </button>
           </form>

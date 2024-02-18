@@ -94,5 +94,19 @@ body::-webkit-scrollbar-track {
 *::-webkit-scrollbar-thumb:hover,
 html::-webkit-scrollbar-thumb:hover,
 body::-webkit-scrollbar-thumb:hover {
-  background: #7ab42c;
+  background: #e1e2df;
+}
+.sideNavScroll::-webkit-scrollbar {
+  height: 5px;
+  width: 8px;
+}
+.sideNavScroll::-webkit-scrollbar-thumb {
+  background: #e1e2df;
+}
+.sideNavScroll::-webkit-scrollbar-track {
+  background-color: transparent;
+  width: 0px;
+}
+.sideNavScroll::-webkit-scrollbar-thumb:hover {
+  background: #e1e2df;
 }

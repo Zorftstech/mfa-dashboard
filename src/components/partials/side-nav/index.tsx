@@ -227,14 +227,18 @@ const SideNav = () => {
     <div
       className={`sticky bottom-0 top-0 ${
         navOpen ? ` w-[260px]` : `w-[100px]`
-      } relative flex h-full flex-col py-[1.65rem] shadow-3 transition-[width] duration-300 ease-in-out`}
+      } bg relative flex h-full flex-col bg-primary-3 py-[1.65rem] shadow-3 transition-[width] duration-300 ease-in-out`}
     >
       <button
         onClick={() => setNavOpen((prev) => !prev)}
-        className='absolute -right-[11px] top-[2rem] z-10 h-[17px] w-[22px] rounded-[5px] bg-primary-1 ring-[7px] ring-primary-13/60'
+        className='absolute -right-[11px] top-[2rem] z-10 h-[17px] w-[22px] rounded-[5px] bg-primary-1 ring-[7px] ring-primary-13/80'
       >
         <div className='flex h-full w-full items-center justify-center'>
-          {navOpen ? <ArrowLeft size={12} color='#fff' /> : <ArrowRight size={12} color='#fff' />}
+          {navOpen ? (
+            <ArrowLeft className='fill-white text-white' size={12} color='#fff' />
+          ) : (
+            <ArrowRight className='fill-white text-white' size={12} color='#fff' />
+          )}
         </div>
       </button>
       <div className='pb-[2.5rem]'>
@@ -244,7 +248,7 @@ const SideNav = () => {
         >
           <h4
             className={cn(
-              ` text-[16px] font-[600] leading-[20px] tracking-[0.15px] text-primary-1   md:font-[700] md:leading-[24px] ${
+              ` text-[16px] font-[600] leading-[20px] tracking-[0.15px] text-white   md:font-[700] md:leading-[24px] ${
                 navOpen ? `opacity-100 md:px-4 md:text-[22px]` : `opacity-100  md:text-[17px]`
               }  transition-all duration-300 ease-in-out`,
             )}
@@ -253,17 +257,17 @@ const SideNav = () => {
           </h4>
         </div>
       </div>
-      <div className=' flex flex-grow flex-col gap-[1.125rem] overflow-y-auto overflow-x-hidden'>
-        <div className='mb-[1.125rem] flex flex-col gap-2'>
+      <div className='sideNavScroll flex flex-grow flex-col gap-[1.125rem] overflow-y-auto overflow-x-hidden bg-primary-1 py-3'>
+        <div className=' flex flex-col gap-2'>
           {sideNavLinks?.map((i, idx) => (
             <div className='px-4' key={idx}>
               <div
                 onClick={() => navigate(`/app/${i?.link}`)}
-                className={`flex cursor-pointer items-center gap-[0.625rem] rounded-[6px] px-4 py-[0.3rem]  hover:bg-primary-light hover:text-primary-1 2xl:py-2
+                className={`flex cursor-pointer items-center gap-[0.625rem] rounded-[6px] px-4 py-[0.3rem] text-white  hover:bg-primary-light hover:text-primary-1 2xl:py-2
                 ${isAllowed(i?.plan) ? `text-secondary-9` : `text-secondary-13`} 
                 ${
                   location?.pathname === `/app/${i?.link}`
-                    ? `font-semibold !text-primary-1 shadow-md`
+                    ? `bg-white font-semibold !text-black shadow-md`
                     : ``
                 }
                 group
@@ -295,7 +299,7 @@ const SideNav = () => {
         </div>
       </div>
       <div
-        className={`flex flex-col gap-4 px-[1.8rem]
+        className={`flex flex-col gap-4 px-[1.8rem] py-4
               ${navOpen ? `opacity-100` : `scale-0 opacity-0`}
               transition-all duration-300 ease-in-out`}
       >
@@ -306,32 +310,14 @@ const SideNav = () => {
                 width: 22.75,
                 height: 22.75,
               }}
-              name='help'
-            />
-            <h6
-              className={`whitespace-nowrap text-[13px] font-[600] leading-[24px] tracking-[0.15px]  text-primary-1
-              ${navOpen ? `opacity-100` : `scale-0 opacity-0`}
-              duration-300`}
-            >
-              Help
-            </h6>
-          </div>
-        </button>
-        <button>
-          <div className='flex items-center gap-4 text-primary-1'>
-            <Icon
-              svgProp={{
-                width: 22.75,
-                height: 22.75,
-              }}
               name='BookmarkIcon'
             />
             <h6
-              className={`whitespace-nowrap text-[13px] font-[600] leading-[24px] tracking-[0.15px]  text-primary-1
+              className={`whitespace-nowrap text-[13px] font-[600] leading-[24px] tracking-[0.15px]  text-white
               ${navOpen ? `opacity-100` : `scale-0 opacity-0`}
               duration-300`}
             >
-              Documentation
+              Log out
             </h6>
           </div>
         </button>

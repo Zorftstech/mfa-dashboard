@@ -14,6 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { resetPasswordFormSchema, resetPasswordInterface } from './reset.model';
 
 import useStore from 'store';
+import { ArrowLeft } from 'lucide-react';
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { setAuthDetails, setLoggedIn } = useStore((store) => store);
@@ -49,53 +50,57 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className='flex h-full w-full items-center'>
-      <div className='mx-auto w-full bg-white px-4 md:max-w-[calc(96px+494px)] md:px-[3rem]'>
-        <div className='mx-auto flex w-full flex-col items-start justify-center'>
-          <div className='flex w-full flex-col items-center'>
+    <div className='flex h-full w-full items-center bg-secondary-1'>
+      <div className='mx-auto w-full  px-4 md:max-w-[calc(96px+494px)] md:px-[3rem]'>
+        <div className='mx-auto flex w-full flex-col items-start justify-center gap-8'>
+          <div className='flex w-full flex-col items-center gap-8'>
             <div className=' flex cursor-pointer items-center' onClick={() => navigate(`/`)}>
-              <Icon name='nfmLogo' svgProp={{ className: 'w-[6rem] h-[4rem]' }} />
+              <Icon name='nfmLogo' svgProp={{ className: 'w-[8rem] h-[5rem]' }} />
             </div>
 
             <h5 className='tracking-[0.18px]] font-inter text-[20px] font-[600] leading-[32px]'>
               Reset Password
             </h5>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)} className='mx-auto flex w-full flex-col gap-4 '>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className='mx-auto flex w-full flex-col gap-4 rounded-lg  bg-white p-6 px-8 pb-8 shadow-sm '
+          >
             <div className='relative'>
-              <label className=' text-sm font-semibold text-gray-700'>Old password</label>
+              <label className='  text-[0.8rem] font-medium'>Old password</label>
               <InputErrorWrapper error={errors?.password?.message}>
                 <Input
                   {...register('password')}
-                  className='mt-1 w-full  py-3 placeholder:text-primary-9/[0.38]'
+                  className='mt-2 w-full  py-3 placeholder:text-primary-9/[0.38]'
                   // placeholder='Email'
                 />
               </InputErrorWrapper>
             </div>
             <div className='relative'>
-              <label className=' text-sm font-semibold text-gray-700'>New password</label>
+              <label className='  text-[0.8rem] font-medium'>New password</label>
               <InputErrorWrapper error={errors?.confirmPassword?.message}>
                 <Input
                   {...register('confirmPassword')}
-                  className='mt-1 w-full  py-3 placeholder:text-primary-9/[0.38]'
+                  className='mt-2 w-full  py-3 placeholder:text-primary-9/[0.38]'
                   // placeholder='Email'
                 />
               </InputErrorWrapper>
             </div>
             <button
               onClick={() => navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`)}
-              className='mb-[1.75rem] w-full rounded-[8px] bg-primary-1 py-2 text-[15px] font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90'
+              className=' w-full rounded-[8px] bg-primary-1 py-2 text-xs font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90'
             >
               <span className='leading-[0.46px]'>Reset Password</span>
             </button>
-            <button
-              onClick={() => navigate(`/${CONSTANTS.ROUTES['login']}`)}
-              className='flex cursor-pointer items-center gap-1 place-self-center text-[14px] leading-[21px] tracking-[0.15px] text-primary-1 hover:underline'
-            >
-              <Icon name='arrowBackTailess' svgProp={{ width: 14 }} />
-              <span> Back to login</span>
-            </button>
           </form>
+          <button
+            onClick={() => navigate(`/${CONSTANTS.ROUTES['login']}`)}
+            className='flex cursor-pointer items-center gap-1 place-self-center text-xs font-medium leading-[21px] tracking-[0.15px] text-primary-4 hover:underline'
+          >
+            {/* <Icon name='arrowBackTailess' svgProp={{ width: 14 }} /> */}
+            <ArrowLeft className='text-primary-4' size={14} />
+            <span> Return to log in</span>
+          </button>
         </div>
       </div>
     </div>

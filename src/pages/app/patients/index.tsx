@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import UserTableComponent from 'components/Tables/UsersTable/UsersTable';
+import { Link } from 'react-router-dom';
+import CONSTANTS from 'constant';
 
 type filterTypes = 'patients records' | 'patients reports';
 
@@ -73,6 +75,21 @@ const PatientsPage = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div> */}
+      <Link
+        to={`/app/${CONSTANTS.ROUTES['create-patient']}`}
+        className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1  px-4 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
+      >
+        <Icon
+          name='addIcon'
+          svgProp={{
+            className:
+              'text-primary-1 cursor-pointer hover:opacity-95 transition-opacity duration-300 ease-in-out active:opacity-100',
+          }}
+        />
+        <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
+          New Patient
+        </span>
+      </Link>
       <div className='relative grid w-full'>
         <UserTableComponent />
         {/* ... */}
