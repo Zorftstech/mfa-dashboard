@@ -48,126 +48,51 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
+import { cn, checkStatus } from 'lib/utils';
+import DeleteModal from 'components/modal/DeleteModal';
+import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
+import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
+import MergePatientModal from 'components/modal/Patients/MergePatient';
+import SampleAccordion from 'components/sampleAccordion';
+import { de } from 'date-fns/locale';
 export type Page = {
   id: string;
-  type: string;
+  value: string;
   title: string;
-  url: string;
+  invoiceDate: string;
+  status: string;
+  description: string;
+  progress: number;
 };
 
-const pages = {
+const projects = {
   items: [
     {
       id: 1,
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      title: 'Home Page',
-      url: '/app/home',
-    },
-    {
-      id: 2,
-      description: 'Nulla facilisi. Sed id tellus nec orci ullamcorper.',
-      title: 'About Page',
-      url: '/dash/about',
-    },
-    {
-      id: 3,
-      description: 'Fusce a dolor sit amet velit ultrices laoreet.',
-      title: 'Contact Page',
-      url: '/contact',
-    },
-    {
-      id: 4,
-      description:
-        'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.',
-      title: 'Blog Page',
-      url: '/blog',
-    },
-    {
-      id: 5,
-      description:
-        'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci.',
-      title: 'Services Page',
-      url: '/services',
-    },
-    {
-      id: 6,
-      description: 'Donec eu est non lacus lacinia semper.',
-      title: 'Portfolio Page',
-      url: '/portfolio',
+      value: 'N1,000,000',
+      title: 'Hospitals',
+      invoiceDate: 'Jan 5, 2024',
+      status: 'scheduled',
+      description: 'Plumber',
+      progress: 5,
     },
     {
       id: 7,
-      description: 'Suspendisse in orci enim.',
-      title: 'Testimonials Page',
-      url: '/testimonials',
-    },
-    {
-      id: 8,
-      description: 'Aenean nec eros.',
-      title: 'FAQ Page',
-      url: '/faq',
-    },
-    {
-      id: 9,
-      description: 'Morbi in sem quis dui placerat ornare.',
-      title: 'Terms of Service Page',
-      url: '/terms-of-service',
-    },
-    {
-      id: 10,
-      description: 'Aliquam dapibus tincidunt metus.',
-      title: 'Privacy Policy Page',
-      url: '/privacy-policy',
+      value: 'N2,000,000',
+      title: 'Flyover',
+      invoiceDate: 'Jan 5, 2024',
+      description: 'Carpenter',
+      status: 'completed',
+      progress: 7,
     },
     {
       id: 3,
-      description: 'Fusce a dolor sit amet velit ultrices laoreet.',
-      title: 'Contact Page',
-      url: '/contact',
-    },
-    {
-      id: 4,
-      description:
-        'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.',
-      title: 'Blog Page',
-      url: '/blog',
-    },
-    {
-      id: 5,
-      description:
-        'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci.',
-      title: 'Services Page',
-      url: '/services',
-    },
-    {
-      id: 6,
-      description: 'Donec eu est non lacus lacinia semper.',
-      title: 'Portfolio Page',
-      url: '/portfolio',
-    },
-    {
-      id: 7,
-      description: 'Suspendisse in orci enim.',
-      title: 'Testimonials Page',
-      url: '/testimonials',
-    },
-    {
-      id: 8,
-      description: 'Aenean nec eros.',
-      title: 'FAQ Page',
-      url: '/faq',
-    },
-    {
-      id: 9,
-      description: 'Morbi in sem quis dui placerat ornare.',
-      title: 'Terms of Service Page',
-      url: '/terms-of-service',
-    },
-    {
-      id: 10,
-      description: 'Aliquam dapibus tincidunt metus.',
-      title: 'Privacy Policy Page',
-      url: '/privacy-policy',
+      value: 'N3,000,000',
+      title: 'Schools',
+      invoiceDate: 'Jan 5, 2024',
+      status: 'scheduled',
+      description: 'Plumber',
+      progress: 2,
     },
   ],
 };
@@ -178,19 +103,22 @@ function UserTableComponent() {
 
   // refactor this
   const data = React.useMemo(() => {
-    if (!pages?.items) return [];
+    if (!projects?.items) return [];
 
-    return pages.items.map((i: any) => ({
+    return projects.items.map((i: any) => ({
       id: i?.id,
-      type: i?.description?.slice(0, 10),
+      value: i?.value?.slice(0, 10),
       title: i?.title,
-      url: i?.url,
+      invoiceDate: i?.invoiceDate,
+      status: i?.status,
+      description: i?.description,
+      progress: i?.progress,
     }));
-  }, [pages]);
+  }, [projects]);
   const deletePage = async (id: string) => {
     setIsLoading(true);
     //     try {
-    //       const res = await API.delete(`/pages/${id}`);
+    //       const res = await API.delete(`/projects/${id}`);
     //       toast.success('Page deleted successfully');
     //       setTimeout(() => {
     //         refetch();
@@ -202,18 +130,6 @@ function UserTableComponent() {
   };
   const columns: ColumnDef<Page>[] = [
     {
-      id: 'select',
-      header: 'S/N',
-      cell: ({ row }) => (
-        <Link to={`/${CONSTANTS.ROUTES['profile']}/${row.original.id}`}>
-          <div className='capitalize'>{row.index + 1}</div>
-        </Link>
-      ),
-
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
       accessorKey: 'title',
       header: ({ column }) => {
         return (
@@ -222,51 +138,101 @@ function UserTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Page Title
-            <ArrowUpDown className='ml-2 h-4 w-4' />
+            Name of Project
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <Link to={`/${CONSTANTS.ROUTES['profile']}/${row.original.id}`}>
-          <div className='capitalize'>{row.getValue('title')}</div>
-        </Link>
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className='text-sm capitalize'>{row.getValue('title')}</div>
+        // </Link>
       ),
+      enableHiding: false,
     },
     {
-      accessorKey: 'url',
+      accessorKey: 'description',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0'
+            className='px-0 '
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Page URL
-            <ArrowUpDown className='ml-2 h-4 w-4' />
+            Description
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <Link to={`/${CONSTANTS.ROUTES['profile']}/${row.original.id}`}>
-          <div className='lowercase'>{row.getValue('url')}</div>
-        </Link>
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className='flex w-fit items-center   gap-2 rounded-lg'>
+          <p className='text-center text-sm '>{row.getValue('description')}</p>
+        </div>
+        // </Link>
       ),
     },
+
     {
-      accessorKey: 'type',
-      header: () => <div className='text-right'>Page Type</div>,
-      cell: ({ row }) => {
+      accessorKey: 'value',
+      header: ({ column }) => {
         return (
-          <div className=''>
-            <Link to={`/${CONSTANTS.ROUTES['profile']}/${row.original.id}`}>
-              <div className='text-right font-medium'>{row.getValue('type')}</div>
-              {/* <Icon name='linkIcon' svgProp={{ className: '' }}></Icon> */}
-            </Link>
-          </div>
+          <Button
+            className='px-0 '
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Amount
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
+          </Button>
         );
       },
+      cell: ({ row }) => (
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className='flex w-fit items-center   gap-2 rounded-lg  '>
+          <p className='text-center text-sm '>{row.getValue('value')}</p>
+        </div>
+        // </Link>
+      ),
     },
+
+    {
+      accessorKey: 'status',
+      header: ({ column }) => {
+        return (
+          <Button className='px-0' variant='ghost'>
+            Loan Status
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div
+          className={`flex w-fit items-center gap-2 rounded-2xl px-4  py-1 capitalize ${checkStatus(
+            row.getValue('status'),
+          )}`}
+        >
+          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
+          {row.getValue('status')}
+        </div>
+        // </Link>
+      ),
+      enableSorting: false,
+    },
+    {
+      id: 'invoiceDate',
+      accessorKey: 'invoiceDate',
+      header: 'Date requested',
+      cell: ({ row }) => (
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className='text-sm capitalize'>
+          {/* {Number(row.original.id) * 1245632} */}
+          {row.getValue('invoiceDate')}
+        </div>
+        // </Link>
+      ),
+    },
+
     {
       id: 'actions',
       enableHiding: false,
@@ -274,36 +240,36 @@ function UserTableComponent() {
         const page = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-8 w-8 p-0'>
-                <span className='sr-only'>Open menu</span>
-                <MoreVertical className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='px-4 py-2'>
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigate(`/${CONSTANTS.ROUTES['profile']}/${page.id}`)}
-                className='flex items-center gap-2'
-              >
-                <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
-                <p> Edit Page</p>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem
-                className='flex items-center gap-2 text-red-500 disabled:cursor-not-allowed disabled:opacity-50'
-                onClick={() => {
-                  deletePage(page.id);
-                }}
-                disabled={isLoading}
-              >
-                <Icon name='trash' svgProp={{ className: 'text-black' }}></Icon>
-                <p> Delete Page</p>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className='flex items-center gap-4'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant='ghost' className='h-8 w-8 p-0'>
+                  <span className='sr-only'>Open menu</span>
+                  <MoreVertical className='h-4 w-4' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end' className='px-4 py-2'>
+                {/* <MergePatientModal
+                  trigger={ */}
+                <Button
+                  variant='outline'
+                  className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2  capitalize  disabled:cursor-not-allowed disabled:opacity-50'
+                  onClick={() => {
+                    setTimeout(() => {
+                      console.log('delete');
+                    }, 500);
+                  }}
+                >
+                  <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
+                  <p>Edit </p>
+                </Button>
+                {/* }
+                ></MergePatientModal> */}
+                <DropdownMenuSeparator />
+                <DeleteModal btnText='Delete Subcontractor' />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
@@ -316,6 +282,7 @@ function UserTableComponent() {
   const table = useReactTable({
     data,
     columns,
+
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -333,93 +300,117 @@ function UserTableComponent() {
   });
 
   return (
-    <div className='w-full'>
-      <div className='flex items-center py-4'>
-        <Input
-          placeholder='Filter page title...'
-          value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
-          className='max-w-sm'
-        />
-        <button
-          className='  mx-4 rounded-md border px-4 py-1 text-sm shadow-md'
-          onClick={() => {
-            table.resetSorting();
-          }}
-        >
-          reset
-        </button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className='ml-auto'>
-              <Button variant='outline'>
-                Columns <ChevronDown className='ml-2 h-4 w-4' />
+    <div className='flex w-full flex-col gap-2 rounded-xl bg-slate-50 px-6  py-6'>
+      <div className='flex flex-col justify-between gap-4 md:flex-row md:items-center '>
+        <h3 className='font-semibold'>Financial Requests</h3>
+        <div className='flex  items-center justify-between gap-3'>
+          <div className='flex  items-center rounded-lg border px-4'>
+            <input
+              value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
+              className='form-input w-32 max-w-xs flex-grow border-0 bg-inherit py-2  placeholder:text-xs placeholder:font-semibold  placeholder:text-textColor-disabled focus:!ring-0 md:w-full md:max-w-xl'
+              placeholder='Search Projects'
+            />
+            <Icon name='searchIcon' svgProp={{ className: 'text-primary-9 w-3' }} />
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' className='h-12 w-12 p-0'>
+                <span className='sr-only'>Open menu</span>
+                <MoreHorizontal className='h-4 w-4' />
               </Button>
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end' className='px-4 py-4  pb-4'>
+              {/* <DropdownMenuLabel className='px-0 text-center text-sm font-normal'>
+                Actions
+              </DropdownMenuLabel> */}
+              <DropdownMenuItem
+                onClick={() => {
+                  table.resetSorting();
+                }}
+                className='flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-center text-xs'
+              >
+                Reset Sorting
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className='my-2' />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className=''>
+                    <Button variant='outline' className='py-1 text-xs'>
+                      Columns <ChevronDown className='ml-2 h-3 w-3' />
+                    </Button>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align='end'>
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => {
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className='text-xs capitalize'
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                        >
+                          {column.id}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <Table className=''>
+        <TableHeader className='border-0  [&_tr]:border-b-0'>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className='border-0 '>
+              {headerGroup.headers.map((header) => {
                 return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className='capitalize'
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
+                  <TableHead key={header.id} className='border-b border-b-black/30 px-0'>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
                 );
               })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className=' bg-white'>
-        <Table className=''>
-          <TableHeader className='border-0 [&_tr]:border-b-0'>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className='border-0'>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className='border-0'>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && 'selected'}
+                className='border-0'
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className='px-0 py-3 font-medium'>
+                    {/* <Link to={`/${CONSTANTS.ROUTES['view-projects']}/${cell.id}`}> */}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {/* </Link> */}
+                  </TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className='border-t-0'
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {/* <Link to={`/${CONSTANTS.ROUTES['view-pages']}/${cell.id}`}> */}
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      {/* </Link> */}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className='h-[400px] text-center'>
+                <div>
+                  <p className='text-base font-semibold text-gray-500'>No Project Records</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
       <div className='flex items-center justify-end space-x-2 py-4'>
         <div className='flex-1 text-sm text-muted-foreground'>
           Showing {table.getRowModel().rows?.length ?? 0} of {data.length} results

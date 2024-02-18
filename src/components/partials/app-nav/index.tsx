@@ -67,7 +67,6 @@ const AppNav = () => {
       >
         <div className=' hidden h-full w-full items-center justify-between bg-white  pt-2       md:flex md:px-container-base'>
           <div className='h-[3rem] '>
-            {/* <Icon name='nfmLogo' svgProp={{ className: 'w-[5rem] h-full' }} /> */}
             <img src={Logo} alt='logo' className='h-full w-[5rem]' />
           </div>
           <div className='relative max-w-[400px] md:w-full  '>
@@ -169,9 +168,9 @@ const AppNav = () => {
             className='flex cursor-pointer items-center gap-[0.39rem] md:gap-[0.625rem]'
             onClick={() => navigate(`/`)}
           >
-            <h4 className='text-[16px] font-[600] leading-[20px] tracking-[0.15px] text-primary-8 md:text-[24px] md:font-[500] md:leading-[24px]'>
-              mfa-dashboard
-            </h4>
+            <div className=''>
+              <img src={Logo} alt='logo' className=' w-[3rem]' />
+            </div>
           </div>
           <div className='flex items-center'>
             {' '}

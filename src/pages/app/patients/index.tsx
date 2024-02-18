@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
+import UserTableComponent from 'components/Tables/UsersTable/UsersTable';
 
 type filterTypes = 'patients records' | 'patients reports';
 
@@ -41,9 +42,9 @@ const PatientsPage = () => {
   const [currFilter, setCurrFilter] = useState<filterTypes>('patients records');
 
   return (
-    <div className='container flex h-full w-full max-w-[150.75rem]  flex-col overflow-auto px-container-base py-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem]  flex-col  px-container-base py-[2.1rem]'>
       {/* to be refactored */}
-      <div className='flex justify-between '>
+      {/* <div className='flex justify-between '>
         <p className='text-base font-semibold text-primary-1'>Patients</p>
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -71,13 +72,14 @@ const PatientsPage = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
       <div className='relative grid w-full'>
+        <UserTableComponent />
         {/* ... */}
 
-        <div className='mt-7'>
+        {/* <div className='mt-7'>
           <DisplayTab title={currFilter} />
-        </div>
+        </div> */}
       </div>
     </div>
   );
