@@ -10,12 +10,18 @@ export type AuthStateType = {
   setAuthLoading: (arg: boolean) => void;
   authDetails: authDetailsInterface;
   setAuthDetails: (arg: authDetailsInterface) => void;
+  resetEmail: string;
+  setResetEmail: (arg: string) => void;
 };
 
 const authSlice: StateCreator<AuthStateType, [['zustand/devtools', never]], []> = (set) => ({
   authLoading: true,
+  resetEmail: '',
   loggedIn: true,
   plan: 'master',
+  setResetEmail: (arg) => {
+    set({ resetEmail: arg });
+  },
   setAuthLoading: (arg) => {
     set({ authLoading: arg });
   },

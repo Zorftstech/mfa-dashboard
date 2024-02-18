@@ -28,13 +28,15 @@ import {
   FormLabel,
   FormDescription,
 } from 'components/shadcn/ui/form';
+import { EyeOff, Eye } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
   const { setAuthDetails, setLoggedIn } = useStore((store) => store);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [params] = useSearchParams();
+  const [checked, setChecked] = useState(false);
 
   const email_verfied = params.get('email');
 
@@ -107,22 +109,16 @@ const Login = () => {
       </Dialog>
 
       <div className=' mx-auto flex   w-full flex-col items-center justify-center  bg-white px-4 md:max-w-xl md:px-[3rem]  '>
-        <div
-          className='mb-[2.125rem] flex w-full cursor-pointer   items-center
-             justify-center gap-2'
-          onClick={() => navigate(`/`)}
-        >
-          <h4 className=' text-center text-[17px] font-[700]  leading-[24px] tracking-[0.15px] text-primary-1 md:text-[2.5rem]'>
-            mfa-dashboard
-          </h4>
-        </div>
-        <section className='w-full rounded-lg border p-8 pt-10'>
-          <div className='mb-[1.5rem] flex w-full flex-col'>
-            <h5 className='font-inter text-[17px] font-[600] leading-[32px] tracking-[0.18px] '>
-              Welcome Back!
-            </h5>
+        <div className='flex w-full flex-col items-center'>
+          <div className=' flex cursor-pointer items-center' onClick={() => navigate(`/`)}>
+            <Icon name='nfmLogo' svgProp={{ className: 'w-[6rem] h-[4rem]' }} />
           </div>
 
+          <h5 className='tracking-[0.18px]] font-inter text-[20px] font-[600] leading-[32px]'>
+            Log in to your account{' '}
+          </h5>
+        </div>
+        <section className='w-full rounded-lg border p-8 pt-10'>
           <form
             onSubmit={handleSubmit(onSubmit)}
             className='mx-auto flex w-full flex-col items-start justify-center'
@@ -133,7 +129,7 @@ const Login = () => {
                 <InputErrorWrapper error={errors?.email?.message}>
                   <Input
                     {...register('email')}
-                    className='mt-1 w-full placeholder:text-primary-9/[0.38]'
+                    className='mt-1 w-full  py-3 placeholder:text-primary-9/[0.38]'
                     // placeholder='Email'
                   />
                 </InputErrorWrapper>
@@ -142,12 +138,48 @@ const Login = () => {
                 <label className=' text-sm font-semibold text-gray-700'>Password</label>
 
                 <InputErrorWrapper error={errors?.password?.message}>
-                  <Input
-                    {...register('password')}
-                    className='mt-1 w-full placeholder:text-primary-9/[0.38]'
-                    // placeholder='Password'
-                  />
+                  <div className='flex items-center gap-4 rounded-lg border p-1   pr-4'>
+                    <Input
+                      {...register('password')}
+                      className=' h-2/3 w-full rounded-r-none border-0 text-[0.8rem]  placeholder:text-[0.8rem]   '
+                      placeholder='Password'
+                      type={showPassword ? '' : 'password'}
+                    ></Input>
+                    {showPassword ? (
+                      <button onClick={() => setShowPassword(false)} type='button'>
+                        <EyeOff className='h-full  w-5  text-gray-400' />
+                      </button>
+                    ) : (
+                      <button onClick={() => setShowPassword(true)} type='button'>
+                        <Eye className='h-full w-5 text-gray-400' />
+                      </button>
+                    )}
+                  </div>
                 </InputErrorWrapper>
+              </div>
+              <div className='my-4 flex w-full items-center justify-between gap-[0.75rem]'>
+                <div className='flex items-center gap-2 '>
+                  <Checkbox
+                    checked={checked}
+                    onClick={() => setChecked(!checked)}
+                    className='rounded-sm border-gray-300  checked:!bg-primary-1 checked:!text-black data-[state=checked]:bg-primary-1 data-[state=checked]:!text-white'
+                    id='Remember Me'
+                  />
+                  <Label
+                    htmlFor='Remember Me'
+                    className=' text-[0.7rem] leading-[21px] tracking-[0.15px] text-gray-600'
+                  >
+                    Remember Me
+                  </Label>
+                </div>
+                <button
+                  disabled={isLoading}
+                  type='button'
+                  onClick={() => navigate(`/${CONSTANTS.ROUTES['forgot-password']}`)}
+                  className='cursor-pointe  text-[12px] leading-[21px] tracking-[0.15px] text-primary-3  hover:underline'
+                >
+                  Forgot Password?
+                </button>
               </div>
             </div>
 
