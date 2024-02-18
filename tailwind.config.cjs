@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -47,9 +48,9 @@ module.exports = {
         white: '#ffffff',
         primary: {
           light: 'rgba(102, 108, 255, 0.12)',
-          1: '#7EB024',
+          1: '#87BC41',
           2: '#F8FAFC',
-          3: '#6062E8',
+          3: '#7AB42C',
           4: '#5456CC',
           6: 'rgba(102, 108, 255, 0.05)',
           7: 'rgba(102, 108, 255, 0.5)',
@@ -88,7 +89,8 @@ module.exports = {
           13: 'rgba(50, 71, 92, 0.32)',
           14: '#263238',
           15: '#301104',
-          16: '#272A2E',
+          16: '#DFE0EB',
+
           17: '#222121',
           18: '#333333',
           19: '#002333',
@@ -98,7 +100,6 @@ module.exports = {
           23: '#FAFAFF;',
           24: '#A2A2A3',
           25: '#EEEEEE',
-          16: '#DFE0EB',
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
         },

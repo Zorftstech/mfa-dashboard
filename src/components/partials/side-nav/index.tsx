@@ -7,6 +7,7 @@ import useStore from 'store';
 import { ItitleLinks, planTypes, routePathTypes } from 'types';
 import Icon from 'utils/Icon';
 import { cn } from 'lib/utils';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 type ISideNavTitles =
   | 'Blogs'
@@ -230,8 +231,12 @@ const SideNav = () => {
     >
       <button
         onClick={() => setNavOpen((prev) => !prev)}
-        className='absolute -right-[11px] top-[1.5rem] z-10 h-[25px] w-[25px] rounded-[30px] bg-primary-1 ring-[7px] ring-primary-15'
-      />
+        className='absolute -right-[11px] top-[2rem] z-10 h-[17px] w-[22px] rounded-[5px] bg-primary-1 ring-[7px] ring-primary-13/60'
+      >
+        <div className='flex h-full w-full items-center justify-center'>
+          {navOpen ? <ArrowLeft size={12} color='#fff' /> : <ArrowRight size={12} color='#fff' />}
+        </div>
+      </button>
       <div className='pb-[2.5rem]'>
         <div
           // onClick={() => navigate(`/app/dashboard`)}
@@ -239,16 +244,16 @@ const SideNav = () => {
         >
           <h4
             className={cn(
-              ` text-[16px] font-[700] leading-[20px] tracking-[0.15px] text-primary-1   md:font-[700] md:leading-[24px] ${
-                navOpen ? `opacity-100 md:px-4 md:text-[25px]` : `opacity-100  md:text-[19px]`
+              ` text-[16px] font-[600] leading-[20px] tracking-[0.15px] text-primary-1   md:font-[700] md:leading-[24px] ${
+                navOpen ? `opacity-100 md:px-4 md:text-[22px]` : `opacity-100  md:text-[17px]`
               }  transition-all duration-300 ease-in-out`,
             )}
           >
-            mfa-dashboard
+            Menu
           </h4>
         </div>
       </div>
-      <div className='no-scrollbar flex flex-grow flex-col gap-[1.125rem] overflow-y-auto overflow-x-hidden'>
+      <div className=' flex flex-grow flex-col gap-[1.125rem] overflow-y-auto overflow-x-hidden'>
         <div className='mb-[1.125rem] flex flex-col gap-2'>
           {sideNavLinks?.map((i, idx) => (
             <div className='px-4' key={idx}>

@@ -67,117 +67,32 @@
     --ring: 217.2 32.6% 17.5%;
   }
 }
-/* For Firefox */
-input[type='text']::-webkit-inner-spin-button,
-input[type='text']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-  border: none;
-  outline: none; /* Removes the outline */
-}
 
-/* For Chrome, Safari, and newer versions of Opera */
-input[type='text']::-webkit-inner-spin-button,
-input[type='text']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-  border: none;
-  outline: none;
-}
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+.main-wrapper::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  height: 5px;
 
-/* For Internet Explorer */
-input[type='text']::-ms-clear {
-  display: none;
-  border: none;
-  outline: none; /* Removes the outline */
+  width: 5px;
 }
-input[type='text']:focus {
-  outline: none;
+*::-webkit-scrollbar-thumb,
+.stats-display::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #7ab42c;
+  border-radius: 3px;
 }
+*::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track,
+.main-wrapper::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background-color: transparent;
 
-/* For Firefox */
-input[type='text'] {
-  -moz-appearance: textfield;
+  width: 0px;
 }
-input[type='text'] {
-  border: 1px solid rgb(233, 228, 228);
-  box-shadow: none;
-}
-
-input:focus {
-  outline: none;
-  border: 1px solid rgb(233, 228, 228);
-  box-shadow: none;
-}
-input[type='text']:focus {
-  outline: none;
-  border: 1px solid rgb(233, 228, 228);
-  box-shadow: none;
-}
-
-input[type='text']::-webkit-inner-spin-button,
-input[type='text']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='text'] {
-  -moz-appearance: textfield;
-}
-/* For Firefox */
-input[type='password']::-webkit-inner-spin-button,
-input[type='password']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-  border: none;
-  outline: none; /* Removes the outline */
-}
-
-/* For Chrome, Safari, and newer versions of Opera */
-input[type='password']::-webkit-inner-spin-button,
-input[type='password']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-  border: none;
-  outline: none;
-}
-
-/* For Internet Explorer */
-input[type='password']::-ms-clear {
-  display: none;
-  border: none;
-  outline: none; /* Removes the outline */
-}
-input[type='password']:focus {
-  outline: none;
-}
-
-/* For Firefox */
-input[type='password'] {
-  -moz-appearance: textfield;
-}
-input[type='password'] {
-  border: 1px solid rgb(233, 228, 228);
-  box-shadow: none;
-}
-
-input:focus {
-  outline: none;
-  border: 1px solid rgb(233, 228, 228);
-  box-shadow: none;
-}
-input[type='password']:focus {
-  outline: none;
-  border: 1px solid rgb(233, 228, 228);
-  box-shadow: none;
-}
-
-input[type='password']::-webkit-inner-spin-button,
-input[type='password']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='password'] {
-  -moz-appearance: textfield;
+*::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: #7ab42c;
 }

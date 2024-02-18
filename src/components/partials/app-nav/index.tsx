@@ -8,8 +8,10 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ItitleLinks, routePathTypes } from 'types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from 'assets/svg/nfmLogo.svg';
+
 // import { useWindowSize } from 'usehooks-ts';
 import Menu from '../Menu';
 import useStore from 'store';
@@ -39,8 +41,12 @@ export const menuLinks: IDropNavLinks = {
 
 const AppNav = () => {
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState('');
   const { authDetails, loggedIn, setAuthDetails, setLoggedIn } = useStore((store) => store);
 
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(event.target.value);
+  };
   const tags = useMemo(() => {
     const chatCount = 2;
     return {
@@ -57,23 +63,37 @@ const AppNav = () => {
   return (
     <>
       <nav
-        className={` containter sticky left-0  right-0 z-40 h-max  w-full border-b border-b-extraColor-borderBottom-3 transition-all duration-300 ease-in-out md:h-[3rem] md:border-0 md:px-container-base md:pt-[0.75rem]`}
+        className={` container sticky left-0 right-0  z-40 h-max w-full  border-b border-b-extraColor-borderBottom-3 transition-all duration-300 ease-in-out  md:border-0 md:px-container-base md:pt-[0.75rem]`}
       >
-        <div className=' hidden h-full w-full   justify-end  border-b  bg-white    py-[2rem] pb-12  md:flex md:px-container-base'>
-          <div className='flex items-center gap-[1.125rem]'>
-            <div className='flex flex-grow items-center rounded-lg border px-6 '>
-              <input
-                className='form-input mx-2 flex-grow border-0  placeholder:text-sm placeholder:font-bold placeholder:text-textColor-disabled focus:!ring-0'
-                placeholder='Search Patients'
-              />
-              <Icon name='searchIcon' svgProp={{ className: 'text-primary-9' }} />
+        <div className=' hidden h-full w-full items-center justify-between bg-white  pt-2       md:flex md:px-container-base'>
+          <div className='h-[3rem] '>
+            {/* <Icon name='nfmLogo' svgProp={{ className: 'w-[5rem] h-full' }} /> */}
+            <img src={Logo} alt='logo' className='h-full w-[5rem]' />
+          </div>
+          <div className='relative max-w-[400px] md:w-full  '>
+            <div className='rounded-[12px] bg-slate-100/60  px-[1.125rem] py-[0.175rem]  shadow-sm md:w-full'>
+              <div className='flex h-full w-full items-center'>
+                <Icon name='searchIcon' svgProp={{ className: 'text-primary-9 w-4' }} />
+                <div className='flex-grow'>
+                  <input
+                    className='form-input border-0 bg-inherit placeholder:text-textColor-disabled focus:!ring-0 md:w-full'
+                    placeholder='Search'
+                    type='text'
+                    value={searchInput}
+                    onChange={handleSearchInputChange}
+                  />
+                </div>
+              </div>
             </div>
-
+          </div>
+          <div className='flex  items-center gap-[1.125rem]'>
+            <Icon name='notificationIcon' />
+            <Icon name='settingIcon' />
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}
               >
-                <article className='flex gap-3'>
+                {/* <article className='flex gap-3'>
                   <div
                     style={{ outline: '#7EB024 solid 1px' }}
                     className='flex  items-center justify-center  rounded-md bg-primary-1 p-2 outline-offset-[3px] md:p-2 md:px-4'
@@ -88,10 +108,11 @@ const AppNav = () => {
                     </p>
                     <p className='text-sm text-gray-400'>Oladimeji Ajayi</p>
                   </div>
-                </article>
+                </article> */}
 
-                {/* <Icon name='demoDp' /> */}
+                <Icon name='demoDp' />
               </DropdownMenuTrigger>
+
               <DropdownMenuContent className='mr-[1.5rem] w-[14.375rem]  bg-white shadow-5'>
                 <DropdownMenuLabel className='flex items-center gap-[0.625rem] !px-[1.25rem] !py-[0.875rem]'>
                   <Icon name='demoDp' />

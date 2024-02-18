@@ -22,21 +22,21 @@ const checkOutRoutes: routeTypes = [
   //   path: 'select-plan',
   //   plan: 'starter',
   // },
-  // {
-  //   element: <ForgotPassword />,
-  //   path: 'forgot-password',
-  //   plan: 'starter',
-  // },
-  // {
-  //   element: <ResetPassword />,
-  //   path: 'reset-password',
-  //   plan: 'starter',
-  // },
-  // {
-  //   element: <VerifyEmail />,
-  //   path: 'verify-email',
-  //   plan: 'starter',
-  // },
+  {
+    element: <ForgotPassword />,
+    path: 'forgot-password',
+    plan: 'starter',
+  },
+  {
+    element: <ResetPassword />,
+    path: 'reset-password',
+    plan: 'starter',
+  },
+  {
+    element: <VerifyEmail />,
+    path: 'verify-email',
+    plan: 'starter',
+  },
 ];
 
 export default checkOutRoutes;
