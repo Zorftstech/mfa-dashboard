@@ -24,10 +24,23 @@ import EmptyContentWrapper from 'components/Hocs/EmptyContentWrapper';
 import productService from 'services/product';
 import { filterStringsContainingImageExtensions } from 'helper';
 import { useNavigate } from 'react-router-dom';
-import { billingData, dashboardData } from './dashboardData';
+import { data } from './dashboardData';
 import { cn } from 'lib/utils';
 import PieChartComponent from 'components/general/Charts/PieChart';
 import LineChartComponent from 'components/general/Charts/LineChart';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from 'components/shadcn/dropdown-menu';
+import { Button } from 'components/shadcn/ui/button';
+import { ChevronDown, Filter } from 'lucide-react';
 type filterTypes = 'All' | 'Adverts' | 'Blog Posts' | 'BTS' | 'Assets' | 'Upcoming Events';
 
 const generalFilters: filterTypes[] = [
@@ -41,7 +54,7 @@ const generalFilters: filterTypes[] = [
 
 const Dashboard = () => {
   const [currFilter, setCurrFilter] = useState<filterTypes>('All');
-
+  const [position, setPosition] = useState('bottom');
   //TODO: handle key searchparam of type filterTypes
 
   const navigate = useNavigate();
@@ -90,88 +103,112 @@ const Dashboard = () => {
   // });
 
   return (
-    <div className='container flex h-full w-full flex-col overflow-auto px-container-base py-[1.875rem]'>
-      {/* <FunkyPagesHero
-        // description='Find advertisements and track your activities here'
-        title=' Dashboard'
-      /> */}
-      <PlanGuard page='dashboard'>
-        <>
-          <div className='flex items-center justify-between'>
-            <h3 className='text-primary-1'>Dashboard</h3>
-            <div className='flex gap-3'>
-              <button className=' flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1  px-4 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                New patient
-              </button>
-              <button className=' flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1  px-4 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                New Appointment
-              </button>
+    <div className='container flex h-full w-full flex-col overflow-auto px-container-md py-[1rem]'>
+      <div className='flex items-center justify-between'>
+        <h3 className='text-2xl font-bold'>Welcome Edmund</h3>
+        <div className='flex  gap-3'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='outline'
+                className='group flex w-6/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
+              >
+                <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-56 text-[0.65rem]'>
+              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <SearchComboBox />
+        </div>
+      </div>
+      <section className='mt-16 grid gap-[4rem]  rounded-lg md:grid-cols-[2fr_1fr] '>
+        <div>
+          <div
+            className={cn(
+              `}   grid cursor-pointer grid-cols-[1fr_1fr] gap-[2rem] rounded-lg rounded-lg  transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr]`,
+            )}
+          >
+            {data.map((item, key) => {
+              return (
+                <div
+                  className=' flex items-center  gap-4 rounded-lg  px-4  py-3 shadow-md'
+                  key={key}
+                >
+                  <div className='flex items-center justify-center rounded-lg bg-primary-3 px-4 py-4 '>
+                    {item.icons}
+                  </div>
+                  <div className='  flex-col gap-1'>
+                    <p className='font-bold md:text-[0.9rem]'>{item.count}</p>
+                    <h3 className='text-[0.65rem]'>{item.subHeading}</h3>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className='mt-12'>
+            <p className='mb-10 text-lg font-medium text-primary-1'>Statistical Chart</p>
+            <LineChartComponent />
+          </div>
+        </div>
+        <div className='flex flex-col gap-3'>
+          <p className=' text-lg font-medium text-primary-1'>Today’s activity</p>
+          <p className=' text-xs'>Today</p>
+          <PieChartComponent />
+          <div className='mt-6 space-y-4'>
+            <div className=' flex  items-center gap-2 '>
+              <div className='h-5 w-5 rounded-sm bg-[#00BABA]'></div>
+              <p className='text-[0.65rem]'>Products ordered</p>
+            </div>
+            <div className=' flex items-center gap-2 '>
+              <div className='h-5 w-5 rounded-sm bg-[#EADB55]'></div>
+              <p className='text-[0.65rem]'>Transactions</p>
             </div>
           </div>
-          {/* <SearchComboBox /> */}
-          <LineChartComponent />
-          <PieChartComponent />
-          <section className='mt-12 grid grid-cols-[1fr_1fr]  gap-[2rem] rounded-lg md:grid-cols-[1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr_1fr]'>
-            {dashboardData.map((report, index) => {
-              return (
-                <article key={index}>
-                  <span className='text-sm'>{report.heading}</span>
-                  <div
-                    className={cn(
-                      `} mt-[1rem] flex cursor-pointer rounded-lg border px-5 py-6 opacity-50 transition-all duration-500 ease-in-out`,
-                    )}
-                  >
-                    {report.items.map((item, key) => {
-                      return (
-                        <div className='flex flex-col gap-1  px-2' key={key}>
-                          <h3 className='text-sm font-semibold'>{item.subHeading}</h3>
-                          <p>
-                            <span className='font-bold md:text-[1.5rem]'>{item.count}</span>
-                            {/* <span className='text-[0.8rem] font-semibold'>%</span> */}
-                          </p>
-                          <p className='text-[0.79rem] leading-[130%] tracking-[0.02rem] md:leading-[1.2rem] md:tracking-[0.0125rem]'>
-                            {item.paragraph}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+          <div className='mt-8 flex flex-col gap-3 border-t-2 border-t-gray-100 pt-6'>
+            <p className=' text-lg font-medium text-primary-1'>Recent Activity</p>
+            <section className='flex justify-between'>
+              <div>
+                <p className=' text-xs font-medium'>Registered users</p>
 
-          <section className='mt-12 grid grid-cols-[1fr]  gap-[2rem] rounded-lg '>
-            {billingData.map((report, index) => {
-              return (
-                <article key={index}>
-                  <span className='text-sm'>{report.heading}</span>
-                  <div
-                    className={cn(
-                      `} mt-[1rem] flex grid cursor-pointer grid-cols-[1fr_1fr] gap-[2rem] rounded-lg rounded-lg border px-5 py-6 opacity-50 transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr_1fr]`,
-                    )}
-                  >
-                    {report.items.map((item, key) => {
-                      return (
-                        <div className='flex flex-col gap-1  px-2' key={key}>
-                          <h3 className='text-sm font-semibold'>{item.subHeading}</h3>
-                          <p>
-                            <span className='font-bold md:text-[1.5rem]'>{item.count}</span>
-                            {/* <span className='text-[0.8rem] font-semibold'>%</span> */}
-                          </p>
-                          <p className='text-[0.79rem] leading-[130%] tracking-[0.02rem] md:leading-[1.2rem] md:tracking-[0.0125rem]'>
-                            {item.paragraph}
-                          </p>
-                        </div>
-                      );
-                    })}
+                <div className='mt-6 space-y-4'>
+                  <div className=' flex  items-center gap-2 '>
+                    <p className='text-[0.65rem]'>5:08 AM</p>
+                    <p className='text-[0.65rem]'>Yemi lawal new user</p>
                   </div>
-                </article>
-              );
-            })}
-          </section>
-        </>
-      </PlanGuard>
+                  <div className=' flex  items-center gap-2 '>
+                    <p className='text-[0.65rem]'>5:08 AM</p>
+                    <p className='text-[0.65rem]'>Yemi lawal new user</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className='text-end text-xs font-medium'>Recent orders</p>
+
+                <div className='mt-6 space-y-4'>
+                  <div className=' flex  items-center gap-2 '>
+                    <p className='text-[0.65rem]'>5:08 AM</p>
+                    <p className='text-[0.65rem]'>Products ordered</p>
+                  </div>
+                  <div className=' flex  items-center gap-2 '>
+                    <p className='text-[0.65rem]'>5:08 AM</p>
+                    <p className='text-[0.65rem]'>Products ordered</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

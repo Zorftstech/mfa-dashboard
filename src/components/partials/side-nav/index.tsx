@@ -226,7 +226,7 @@ const SideNav = () => {
   return (
     <div
       className={`sticky bottom-0 top-0 ${
-        navOpen ? ` w-[260px]` : `w-[100px]`
+        navOpen ? ` w-[260px]` : `w-[70px]`
       } bg relative flex h-full flex-col bg-primary-3 py-[1.65rem] shadow-3 transition-[width] duration-300 ease-in-out`}
     >
       <button
@@ -249,7 +249,7 @@ const SideNav = () => {
           <h4
             className={cn(
               ` text-[16px] font-[600] leading-[20px] tracking-[0.15px] text-white   md:font-[700] md:leading-[24px] ${
-                navOpen ? `opacity-100 md:px-4 md:text-[22px]` : `opacity-100  md:text-[17px]`
+                navOpen ? `opacity-100 md:px-4 md:text-[22px]` : `opacity-100  md:text-[10px]`
               }  transition-all duration-300 ease-in-out`,
             )}
           >
@@ -257,13 +257,13 @@ const SideNav = () => {
           </h4>
         </div>
       </div>
-      <div className='sideNavScroll flex flex-grow flex-col gap-[1.125rem] overflow-y-auto overflow-x-hidden bg-primary-1 py-3'>
+      <div className='sideNavScroll flex flex-grow flex-col gap-[1.125rem] overflow-y-auto overflow-x-hidden bg-primary-1 pb-3'>
         <div className=' flex flex-col gap-2'>
           {sideNavLinks?.map((i, idx) => (
-            <div className='px-4' key={idx}>
+            <div className='' key={idx}>
               <div
                 onClick={() => navigate(`/app/${i?.link}`)}
-                className={`flex cursor-pointer items-center gap-[0.625rem] rounded-[6px] px-4 py-[0.3rem] text-white  hover:bg-primary-light hover:text-primary-1 2xl:py-2
+                className={`flex cursor-pointer items-center  gap-[0.625rem] px-4 py-[0.8rem] text-white  hover:bg-primary-light  2xl:py-2
                 ${isAllowed(i?.plan) ? `text-secondary-9` : `text-secondary-13`} 
                 ${
                   location?.pathname === `/app/${i?.link}`
@@ -271,7 +271,7 @@ const SideNav = () => {
                     : ``
                 }
                 group
-                transition duration-300 hover:text-primary-1`}
+                transition duration-300`}
               >
                 <div className='flex items-center'>
                   {!isAllowed(i?.plan) ? (
@@ -299,7 +299,7 @@ const SideNav = () => {
         </div>
       </div>
       <div
-        className={`flex flex-col gap-4 px-[1.8rem] py-4
+        className={`flex flex-col gap-4 px-[1rem] py-4
               ${navOpen ? `opacity-100` : `scale-0 opacity-0`}
               transition-all duration-300 ease-in-out`}
       >

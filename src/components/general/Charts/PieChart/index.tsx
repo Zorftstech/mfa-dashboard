@@ -3,10 +3,10 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 const data = [
   { name: 'Group A', value: 400 },
-  { name: 'Group B', value: 300 },
+  { name: 'Group B', value: 50 },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#00BABA', '#EADB55', '#FFBB28', '#FF8042'];
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({
@@ -30,11 +30,11 @@ const renderCustomizedLabel = ({
 };
 export default function PieChartComponent() {
   return (
-    <PieChart width={400} height={400}>
+    <PieChart width={190} height={190} className='mx-auto ml-10 text-xs'>
       <Pie
         data={data}
-        cx={200}
-        cy={200}
+        cx={100}
+        cy={100}
         labelLine={false}
         label={renderCustomizedLabel}
         outerRadius={80}

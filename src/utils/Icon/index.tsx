@@ -4,7 +4,7 @@ import { ReactComponent as BigTIcon } from 'assets/svg/bigTIcon.svg';
 import { ReactComponent as BtsIcon } from 'assets/svg/btsIcon.svg';
 import { ReactComponent as ConsultancyIcon } from 'assets/svg/consultancyIcon.svg';
 import { ReactComponent as CvIcon } from 'assets/svg/cvIcon.svg';
-import { ReactComponent as DashboardIcon } from 'assets/svg/dashboardIcon.svg';
+import { ReactComponent as DashboardIcon } from 'assets/svg/home.svg';
 import { ReactComponent as FileIcon } from 'assets/svg/fileIcon.svg';
 import { ReactComponent as GForumIcon } from 'assets/svg/gForumIcon.svg';
 import { ReactComponent as MasterClassesIcon } from 'assets/svg/masterClassesIcon.svg';
@@ -13,7 +13,7 @@ import { ReactComponent as NotificationIcon } from 'assets/svg/notificationIcon.
 import { ReactComponent as OnlineTrainingIcon } from 'assets/svg/onlineTrainingIcon.svg';
 import { ReactComponent as PalleteIcon } from 'assets/svg/palleteIcon.svg';
 import { ReactComponent as PForumIcon } from 'assets/svg/pForumIcon.svg';
-import { ReactComponent as SearchIcon } from 'assets/svg/searchIcon.svg';
+import { ReactComponent as SearchIcon } from 'assets/svg/magnifying-glass.svg';
 import { ReactComponent as ThreeDotIcon } from 'assets/svg/threeDotIcon.svg';
 import { ReactComponent as PadLock } from 'assets/svg/padLock.svg';
 import { ReactComponent as PadLockV2 } from 'assets/svg/padLockV2.svg';
@@ -130,6 +130,12 @@ import { ReactComponent as Lab } from 'assets/svg/lab.svg';
 import { ReactComponent as Reports } from 'assets/svg/reports.svg';
 import { ReactComponent as Help } from 'assets/svg/help.svg';
 import { ReactComponent as Sort } from 'assets/svg/sort.svg';
+import { ReactComponent as RegUsers } from 'assets/svg/reg-users.svg';
+import { ReactComponent as Orders } from 'assets/svg/orders.svg';
+import { ReactComponent as FlashSale } from 'assets/svg/flashSale.svg';
+import { ReactComponent as Products } from 'assets/svg/products.svg';
+import { ReactComponent as Categories } from 'assets/svg/categories.svg';
+import { ReactComponent as SubCat } from 'assets/svg/subCat.svg';
 
 export type iconTypes =
   | 'sort'
@@ -264,7 +270,13 @@ export type iconTypes =
   | 'trash'
   | 'patients'
   | 'consult'
-  | 'billing';
+  | 'billing'
+  | 'RegUsers'
+  | 'Orders'
+  | 'FlashSale'
+  | 'Products'
+  | 'Categories'
+  | 'SubCat';
 
 interface IconInterface {
   name: iconTypes;
@@ -273,6 +285,13 @@ interface IconInterface {
 
 const Icon = ({ name, svgProp }: IconInterface) => {
   const icons: Record<iconTypes, JSX.Element> = {
+    SubCat: <SubCat {...svgProp} />,
+    Categories: <Categories {...svgProp} />,
+    Products: <Products {...svgProp} />,
+    FlashSale: <FlashSale {...svgProp} />,
+    Orders: <Orders {...svgProp} />,
+    RegUsers: <RegUsers {...svgProp} />,
+
     sort: <Sort {...svgProp} />,
     help: <Help {...svgProp} />,
     reports: <Reports {...svgProp} />,
