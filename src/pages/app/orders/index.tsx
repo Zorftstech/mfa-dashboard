@@ -25,7 +25,19 @@ import CONSTANTS from 'constant';
 import { filterStringsContainingDoc, filterStringsContainingImageExtensions } from 'helper';
 import FileSaver from 'file-saver';
 import { useSearchParams } from 'react-router-dom';
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from 'components/shadcn/dropdown-menu';
+import { ChevronDown, Filter } from 'lucide-react';
+import OrdersTableComponent from 'components/Tables/OrdersTable/OrdersTable';
 type filterTypes =
   | 'All'
   | 'Pre-Production'
@@ -41,6 +53,8 @@ const generalFilters: filterTypes[] = [
 ];
 
 const AppointmentPage = () => {
+  const [position, setPosition] = useState('bottom');
+
   // const [currFilter, setCurrFilter] = useState<filterTypes>('All');
   // const [templateExpanded, setTemplateExpanded] = useState(false);
   // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
@@ -78,136 +92,43 @@ const AppointmentPage = () => {
   // }, [searchparams, data]);
 
   return (
-    <>
-      {/* <Dialog open={downloadConfirmationOpen} onOpenChange={setDownloadConfirmationOpen}>
-        <DialogContent className='flex h-full flex-col justify-center bg-white sm:h-max'>
-          <DialogHeader>
-            <DialogTitle className='my-[0.63rem] text-center text-[1.2rem] font-[500] leading-[2rem] text-primary-9/[0.87]'>
-              Confirm
-            </DialogTitle>
-            <DialogDescription className='mx-auto max-w-[19rem] text-center text-[0.875rem] leading-[1.3125rem] tracking-[0.00938rem] text-primary-9/60'>
-              Are you sure you would like to export this template?
-            </DialogDescription>
-          </DialogHeader>
-          <div className='my-[2rem] flex items-center justify-between'>
-            <Button
-              onClick={() => setDownloadConfirmationOpen(false)}
-              className='border bg-primary-1 px-[2rem]  py-4 text-white transition-opacity hover:bg-primary-1 hover:bg-opacity-90'
-            >
-              No, Cancel
-            </Button>
-            <Button
-              onClick={() => doFileDownLoad()}
-              className='border border-primary-1 bg-white px-[2rem] py-4 text-primary-9 hover:bg-primary-1/10'
-            >
-              Yes, Continue
-            </Button>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col  overflow-auto px-container-md pb-[2.1rem]'>
+      <div className='flex justify-between '>
+        <h3 className=' mb-16 text-base font-semibold md:text-2xl'>Track orders</h3>
+        <div>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
+            Today: 10:23am, 30th Oct 2023
+          </p>
+          <div className='flex   gap-3'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='group flex w-6/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
+                >
+                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-56 text-[0.65rem]'>
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <SearchComboBox />
           </div>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={templateExpanded} onOpenChange={setTemplateExpanded}>
-        <DialogContent className='h-full w-full bg-white py-0 sm:h-max md:min-w-[40rem] xl:min-w-[59.75rem]'>
-          <DialogHeader>
-            <DialogTitle className='border-b border-b-secondary-16 py-[1.25rem] text-[1.2rem]'>
-              {currentFocusedTemplate?.name}
-            </DialogTitle>
-          </DialogHeader>
-          <div className='flex w-full flex-col items-center p-[2rem]'>
-            <div className='h-[20rem] w-full overflow-hidden border border-slate-50 md:max-w-[30rem]'>
-              <LazyLoadImage
-                placeholderSrc={`data:image/svg+xml;base64,${toBase64(shimmer(700, 475))}`}
-                src={`${CONSTANTS?.TIMBU_KEYS?.IMAGE_BASE_URL}/${
-                  filterStringsContainingImageExtensions(
-                    currentFocusedTemplate?.photos?.map((i) => i?.url) as string[],
-                  )?.[0]
-                }`}
-                className='h-full w-full  bg-cover bg-top transition-transform duration-300 ease-in-out group-hover:scale-105'
-                alt=' '
-                effect='blur'
-              />
-            </div>
-            <div className='mb-[1.5rem]'></div>
-            <div className='flex w-full flex-col md:max-w-[34rem]'>
-              <h4 className='font-[700] leading-[1.5rem] text-[1.125re] text-secondary-14 '>
-                {currentFocusedTemplate?.name}
-              </h4>
-              <p className='mb-4 leading-[1.5rem] text-primary-9/50'>Asset type: Word Document</p>
-              <p className='text-[0.875rem] leading-[1.3125rem] tracking-[0.00938rem] text-primary-9/60 '>
-                {currentFocusedTemplate?.description}
-              </p>
-            </div>
-          </div>
-          <div className='flex w-full items-center justify-between pb-[2rem]'>
-            <Button
-              onClick={() => setTemplateExpanded(false)}
-              className='border border-primary-1 bg-white px-[2rem] py-4 text-primary-9 hover:bg-primary-1/10'
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setStagedFile(
-                  `${CONSTANTS?.TIMBU_KEYS?.IMAGE_BASE_URL}/${
-                    filterStringsContainingDoc(
-                      currentFocusedTemplate?.photos?.map((i) => i?.url) as string[],
-                    )?.[0]
-                  }`,
-                );
-                setTemplateExpanded(false);
-                setDownloadConfirmationOpen(true);
-              }}
-              className='border bg-primary-1 px-[2rem]  py-4 text-white transition-opacity hover:bg-primary-1 hover:bg-opacity-90'
-            >
-              Download this Asset
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog> */}
-      <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
-        <FunkyPagesHero
-          // description='Find and download fimmaking assets you need'
-          title='Orders'
-        />
-
-        {/* <div className='relative mx-auto my-[1.5rem] w-full max-w-[800px] md:-top-[1.5rem] md:my-0 md:mb-[1.75rem]'>
-              <SearchComboBox />
-            </div>
-            <div className='mb-[1.5rem] flex w-full justify-center'>
-              <PillTabs
-                tabs={generalFilters}
-                currActive={currFilter}
-                onSelect={(i) => setCurrFilter(i)}
-              />
-            </div>
-            <ContentLoader numberOfBlocks={4} isLoading={isLoading}>
-              <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[3.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-                {data?.items?.map((i, idx) => (
-                  <div
-                    onClick={() => {
-                      setTemplateExpanded(true);
-                    }}
-                    key={idx}
-                    className='h-full w-full'
-                  >
-                    <AssetCard
-                      desc='Storytelling blueprint for movies.'
-                      image={`${CONSTANTS?.TIMBU_KEYS?.IMAGE_BASE_URL}/${
-                        filterStringsContainingImageExtensions(
-                          i?.photos?.map((i) => i?.url) as string[],
-                        )?.[0]
-                      }`}
-                      title={i?.name}
-                      onClick={() => {
-                        setCurrentFocusedTemplate(i);
-                        setTemplateExpanded(true);
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </ContentLoader> */}
+        </div>
       </div>
-    </>
+      <div className='relative grid w-full'>
+        <OrdersTableComponent />
+      </div>
+    </div>
   );
 };
 
