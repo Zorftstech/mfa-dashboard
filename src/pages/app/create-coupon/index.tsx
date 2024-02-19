@@ -2,7 +2,6 @@ import BtsCard from 'components/general/BtsCard';
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import LinksFilter from 'components/general/LinksFilter';
 import SearchComboBox from 'components/general/SearchComboBox';
-import PlanGuard from 'guards/PlanGuard';
 import filmImg from 'assets/image/heyyou.png?format=webp&w=240&h=153&imagetools';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';

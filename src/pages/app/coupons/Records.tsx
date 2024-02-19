@@ -7,7 +7,6 @@ import CustomSelectTrigger from 'components/shadcn/customSelectTrigger';
 import { Label } from 'components/shadcn/label';
 import { handleUploadProfile } from 'utils/images/upload-profile';
 import { Input } from 'components/shadcn/input';
-import VisitsTableComponent from 'components/Tables/VisitsTable/VisitsTable';
 
 const PatientsRecordsComponent = () => {
   const [disabled] = useState(true);
@@ -18,11 +17,7 @@ const PatientsRecordsComponent = () => {
     setSelectedFile(handleUploadProfile(event));
   };
 
-  return (
-    <section>
-      <VisitsTableComponent />
-    </section>
-  );
+  return <section></section>;
 };
 
 export default PatientsRecordsComponent;

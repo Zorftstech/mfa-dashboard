@@ -3,7 +3,6 @@ import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import InputAddComboBox from 'components/general/InputAddComboBox';
 import LinksFilter from 'components/general/LinksFilter';
 import PillTabs from 'components/general/PillTabs';
-import PlanGuard from 'guards/PlanGuard';
 import { useState } from 'react';
 
 type filterTypes = 'Trending' | 'Recently added' | 'Your Threads' | 'Starred' | 'Interactions';

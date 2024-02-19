@@ -1,4 +1,3 @@
-import PlanGuard from 'guards/PlanGuard';
 import PersonalInformationSection from 'components/general/Cv-profile/PersonalInformation';
 import EducationSectionCvProfile from 'components/general/Cv-profile/Education';
 import ExperienceSectionCvProfile from 'components/general/Cv-profile/Experiences';

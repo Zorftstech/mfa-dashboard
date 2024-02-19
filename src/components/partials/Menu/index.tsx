@@ -3,7 +3,6 @@ import useOnClickOutside from 'hooks/useClickOutside';
 import { useRef, useState } from 'react';
 import Icon from 'utils/Icon';
 import AuthMenu from './views/auth';
-import NonAuthMenu from './views/non-auth';
 import { createPortal } from 'react-dom';
 import { useLockBodyScroll } from 'hooks/useLockBodyScroll';
 import useStore from 'store';

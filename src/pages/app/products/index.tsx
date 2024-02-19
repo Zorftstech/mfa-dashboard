@@ -1,5 +1,4 @@
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
-import PlanGuard from 'guards/PlanGuard';
 
 const BillingPage = () => {
   return (

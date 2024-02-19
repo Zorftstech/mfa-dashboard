@@ -2,7 +2,6 @@ import BlogCard from 'components/general/Card';
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import LinksFilter from 'components/general/LinksFilter';
 import SearchComboBox from 'components/general/SearchComboBox';
-import PlanGuard from 'guards/PlanGuard';
 import blogImg from 'assets/image/blogImg.png?format=webp&w=330&h=280&imagetools';
 import dpIcon from 'assets/image/demoDp.jpg?format=webp&imagetools';
 import { LazyLoadImage } from 'react-lazy-load-image-component';

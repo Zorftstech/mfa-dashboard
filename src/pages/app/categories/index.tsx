@@ -1,6 +1,5 @@
 import PatientsRecords from './Records';
 import PatientsReports from './Reports';
-import PlanGuard from 'guards/PlanGuard';
 import { useState } from 'react';
 import Icon from 'utils/Icon';
 

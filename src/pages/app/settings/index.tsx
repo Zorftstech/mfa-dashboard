@@ -3,7 +3,6 @@ import BillingAndPlan from './BillingAndPlan';
 import Connections from './Connections';
 import Notification from './Notification';
 import Security from './Security';
-import PlanGuard from 'guards/PlanGuard';
 import { useState } from 'react';
 import Icon from 'utils/Icon';
 

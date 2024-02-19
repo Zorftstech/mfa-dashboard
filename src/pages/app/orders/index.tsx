@@ -2,7 +2,6 @@ import AssetCard from 'components/general/AssetCard';
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import PillTabs from 'components/general/PillTabs';
 import SearchComboBox from 'components/general/SearchComboBox';
-import PlanGuard from 'guards/PlanGuard';
 import { useEffect, useState } from 'react';
 import filmImg from 'assets/image/assetFilmImg.png';
 import {

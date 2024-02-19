@@ -247,10 +247,6 @@ const CreateNewProduct = () => {
 
       const res = await API.post(`/auth/create-patients`, formData);
       toast.success('Patient Created Successfully');
-
-      setTimeout(() => {
-        navigate(`/app/${CONSTANTS.ROUTES.patients}`);
-      }, 1000);
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {

@@ -3,7 +3,6 @@ import Tests from './Tests';
 import Consultation from './Consultation';
 import Billing from './Billing';
 import Visits from './Visits';
-import PlanGuard from 'guards/PlanGuard';
 import { useState } from 'react';
 import Icon from 'utils/Icon';
 

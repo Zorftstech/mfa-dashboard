@@ -247,10 +247,6 @@ const CreatePatient = () => {
 
       const res = await API.post(`/auth/create-patients`, formData);
       toast.success('Patient Created Successfully');
-
-      setTimeout(() => {
-        navigate(`/app/${CONSTANTS.ROUTES.patients}`);
-      }, 1000);
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {
@@ -277,6 +273,7 @@ const CreatePatient = () => {
             name='arrowBack'
             svgProp={{ width: '1.5rem', height: '1.5rem', className: 'text-black' }}
           />
+
           <InlineLoader isLoading={false}>
             <div className='flex items-center gap-1'>
               <h5 className='text-base font-[500] capitalize leading-[113%] text-black'>Back</h5>

@@ -1,7 +1,6 @@
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import PillTabs from 'components/general/PillTabs';
 import SearchComboBox from 'components/general/SearchComboBox';
-import PlanGuard from 'guards/PlanGuard';
 import { useState } from 'react';
 import demoAd from 'assets/image/dashboardAdSample.png';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
