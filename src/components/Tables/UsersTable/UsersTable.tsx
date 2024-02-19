@@ -52,47 +52,55 @@ import { cn, checkStatus } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import MergePatientModal from 'components/modal/Patients/MergePatient';
+import EditWalletBalance from 'components/modal/Patients/EditWalletBalanceModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
-export type Page = {
+export type User = {
   id: string;
-  value: string;
-  title: string;
-  invoiceDate: string;
+  number: string;
+  name: string;
+  city: string;
   status: string;
-  description: string;
-  progress: number;
+  email: string;
+  orders: number;
+  created: string;
+  total: string;
 };
 
-const projects = {
+const usersList = {
   items: [
     {
       id: 1,
-      value: 'N1,000,000',
-      title: 'Hospitals',
-      invoiceDate: 'Jan 5, 2024',
+      number: '+234 80234849',
+      name: 'Sadiq kepper',
+      city: 'Lagos',
       status: 'scheduled',
-      description: 'Plumber',
-      progress: 5,
+      email: 'sample@gmail.com',
+      orders: 5,
+      created: '2021-10-10',
+      total: 'N, 1,000,000',
     },
     {
       id: 7,
-      value: 'N2,000,000',
-      title: 'Flyover',
-      invoiceDate: 'Jan 5, 2024',
-      description: 'Carpenter',
+      number: '+234 80234849',
+      name: 'Sadiq kepper',
+      city: 'Lagos',
+      email: 'sample@gmail.com',
       status: 'completed',
-      progress: 7,
+      orders: 7,
+      created: '2021-10-10',
+      total: 'N, 2,000,000',
     },
     {
       id: 3,
-      value: 'N3,000,000',
-      title: 'Schools',
-      invoiceDate: 'Jan 5, 2024',
+      number: '+234 80234849',
+      name: 'Sadiq kepper',
+      city: 'Lagos',
       status: 'scheduled',
-      description: 'Plumber',
-      progress: 2,
+      email: 'Yema@gmail.com',
+      orders: 2,
+      created: '2021-10-10',
+      total: 'N, 3,000,000',
     },
   ],
 };
@@ -103,23 +111,25 @@ function UserTableComponent() {
 
   // refactor this
   const data = React.useMemo(() => {
-    if (!projects?.items) return [];
+    if (!usersList?.items) return [];
 
-    return projects.items.map((i: any) => ({
+    return usersList.items.map((i: any) => ({
       id: i?.id,
-      value: i?.value?.slice(0, 10),
-      title: i?.title,
-      invoiceDate: i?.invoiceDate,
+      number: i?.number?.slice(0, 10),
+      name: i?.name,
+      city: i?.city,
       status: i?.status,
-      description: i?.description,
-      progress: i?.progress,
+      email: i?.email,
+      orders: i?.orders,
+      created: i?.created,
+      total: i?.total,
     }));
-  }, [projects]);
+  }, [usersList]);
   const deletePage = async (id: string) => {
     setIsLoading(true);
     //     try {
-    //       const res = await API.delete(`/projects/${id}`);
-    //       toast.success('Page deleted successfully');
+    //       const res = await API.delete(`/usersList/${id}`);
+    //       toast.success('User deleted successfully');
     //       setTimeout(() => {
     //         refetch();
     //       }, 10);
@@ -128,38 +138,38 @@ function UserTableComponent() {
     //     }
     setIsLoading(false);
   };
-  const columns: ColumnDef<Page>[] = [
+  const columns: ColumnDef<User>[] = [
     {
-      accessorKey: 'title',
+      accessorKey: 'name',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0'
+            className='px-0 text-[0.71rem] font-semibold'
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Name of Project
+            Name
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-sm capitalize'>{row.getValue('title')}</div>
+        <div className='text-[0.71rem] capitalize'>{row.getValue('name')}</div>
         // </Link>
       ),
       enableHiding: false,
     },
     {
-      accessorKey: 'description',
+      accessorKey: 'email',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0 '
+            className='px-0 text-[0.71rem] font-semibold   '
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Description
+            Email
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
@@ -167,22 +177,44 @@ function UserTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-sm '>{row.getValue('description')}</p>
+          <p className='text-center text-[0.71rem]  '>{row.getValue('email')}</p>
+        </div>
+        // </Link>
+      ),
+    },
+    {
+      accessorKey: 'city',
+      header: ({ column }) => {
+        return (
+          <Button
+            className='px-0 text-[0.71rem]  font-semibold'
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            City
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className='flex w-fit items-center   gap-2 rounded-lg'>
+          <p className='text-center text-[0.71rem]  '>{row.getValue('city')}</p>
         </div>
         // </Link>
       ),
     },
 
     {
-      accessorKey: 'value',
+      accessorKey: 'number',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0 '
+            className='px-0 text-[0.71rem] font-semibold '
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Amount
+            Number
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
@@ -190,7 +222,29 @@ function UserTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-sm '>{row.getValue('value')}</p>
+          <p className='text-center text-[0.71rem] '>{row.getValue('number')}</p>
+        </div>
+        // </Link>
+      ),
+    },
+    {
+      accessorKey: 'orders',
+      header: ({ column }) => {
+        return (
+          <Button
+            className='px-0 text-[0.71rem]  font-semibold '
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Orders
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className='flex w-fit items-center   gap-2 rounded-lg  '>
+          <p className='text-center text-[0.71rem] '>{row.getValue('orders')}</p>
         </div>
         // </Link>
       ),
@@ -200,15 +254,15 @@ function UserTableComponent() {
       accessorKey: 'status',
       header: ({ column }) => {
         return (
-          <Button className='px-0' variant='ghost'>
-            Loan Status
+          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
+            Profile Status
           </Button>
         );
       },
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div
-          className={`flex w-fit items-center gap-2 rounded-2xl px-4  py-1 capitalize ${checkStatus(
+          className={`flex w-fit items-center  rounded-2xl    text-[0.71rem] capitalize ${checkStatus(
             row.getValue('status'),
           )}`}
         >
@@ -220,17 +274,43 @@ function UserTableComponent() {
       enableSorting: false,
     },
     {
-      id: 'invoiceDate',
-      accessorKey: 'invoiceDate',
-      header: 'Date requested',
+      id: 'created',
+      accessorKey: 'created',
+      header: ({ column }) => {
+        return (
+          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
+            Created
+          </Button>
+        );
+      },
+
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-sm capitalize'>
+        <div className='text-[0.71rem] capitalize'>
           {/* {Number(row.original.id) * 1245632} */}
-          {row.getValue('invoiceDate')}
+          {row.getValue('created')}
         </div>
         // </Link>
       ),
+    },
+    {
+      accessorKey: 'total',
+      header: ({ column }) => {
+        return (
+          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
+            Total
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
+        <div className={`w-fit  text-[0.71rem] capitalize`}>
+          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
+          {row.getValue('total')}
+        </div>
+        // </Link>
+      ),
+      enableSorting: false,
     },
 
     {
@@ -244,29 +324,32 @@ function UserTableComponent() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='ghost' className='h-8 w-8 p-0'>
+                  {/* <p>Action</p> */}
                   <span className='sr-only'>Open menu</span>
                   <MoreVertical className='h-4 w-4' />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end' className='px-4 py-2'>
-                {/* <MergePatientModal
-                  trigger={ */}
-                <Button
-                  variant='outline'
-                  className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2  capitalize  disabled:cursor-not-allowed disabled:opacity-50'
-                  onClick={() => {
-                    setTimeout(() => {
-                      console.log('delete');
-                    }, 500);
-                  }}
-                >
-                  <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
-                  <p>Edit </p>
-                </Button>
-                {/* }
-                ></MergePatientModal> */}
+                {
+                  <EditWalletBalance
+                    trigger={
+                      <Button
+                        variant='outline'
+                        className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem]   capitalize  disabled:cursor-not-allowed disabled:opacity-50'
+                        onClick={() => {
+                          setTimeout(() => {
+                            console.log('delete');
+                          }, 500);
+                        }}
+                      >
+                        <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
+                        <p>Edit </p>
+                      </Button>
+                    }
+                  ></EditWalletBalance>
+                }
                 <DropdownMenuSeparator />
-                <DeleteModal btnText='Delete Subcontractor' />
+                <DeleteModal btnText='Delete' />
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -300,19 +383,19 @@ function UserTableComponent() {
   });
 
   return (
-    <div className='flex w-full flex-col gap-2 rounded-xl bg-slate-50 px-6  py-6'>
+    <div className='flex w-full flex-col gap-2 rounded-xl   '>
       <div className='flex flex-col justify-between gap-4 md:flex-row md:items-center '>
-        <h3 className='font-semibold'>Financial Requests</h3>
+        <h3 className='font-semibold'>Users</h3>
         <div className='flex  items-center justify-between gap-3'>
-          <div className='flex  items-center rounded-lg border px-4'>
+          {/* <div className='flex  items-center rounded-lg border px-4'>
             <input
-              value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
+              value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
               onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
               className='form-input w-32 max-w-xs flex-grow border-0 bg-inherit py-2  placeholder:text-xs placeholder:font-semibold  placeholder:text-textColor-disabled focus:!ring-0 md:w-full md:max-w-xl'
               placeholder='Search Projects'
             />
             <Icon name='searchIcon' svgProp={{ className: 'text-primary-9 w-3' }} />
-          </div>
+          </div> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -367,12 +450,12 @@ function UserTableComponent() {
       </div>
 
       <Table className=''>
-        <TableHeader className='border-0  [&_tr]:border-b-0'>
+        <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className='border-0 '>
+            <TableRow key={headerGroup.id} className='border-0   '>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id} className='border-b border-b-black/30 px-0'>
+                  <TableHead key={header.id} className='border-b border-b-black/0 px-4  text-black'>
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -384,15 +467,15 @@ function UserTableComponent() {
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, index) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
-                className='border-0'
+                className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className='px-0 py-3 font-medium'>
-                    {/* <Link to={`/${CONSTANTS.ROUTES['view-projects']}/${cell.id}`}> */}
+                  <TableCell key={cell.id} className=' py-3 font-medium'>
+                    {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     {/* </Link> */}
                   </TableCell>
@@ -411,14 +494,15 @@ function UserTableComponent() {
         </TableBody>
       </Table>
 
-      <div className='flex items-center justify-end space-x-2 py-4'>
-        <div className='flex-1 text-sm text-muted-foreground'>
+      <div className='flex items-center justify-end space-x-2 p-4'>
+        <div className='flex-1 text-xs text-muted-foreground'>
           Showing {table.getRowModel().rows?.length ?? 0} of {data.length} results
         </div>
         <div className='space-x-2'>
           <Button
             variant='outline'
             size='sm'
+            className='text-[0.71rem] '
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -427,6 +511,7 @@ function UserTableComponent() {
           <Button
             variant='outline'
             size='sm'
+            className='text-[0.71rem] '
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -434,6 +519,9 @@ function UserTableComponent() {
           </Button>
         </div>
       </div>
+      <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
+        Export
+      </button>
     </div>
   );
 }

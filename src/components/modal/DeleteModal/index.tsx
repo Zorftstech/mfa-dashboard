@@ -37,7 +37,7 @@ export default function DeleteModal({
         </Button> */}
         <Button
           variant='outline'
-          className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 capitalize text-red-500 disabled:cursor-not-allowed disabled:opacity-50'
+          className='flex w-full items-center  justify-start gap-2 border-0 p-0 px-2 text-[0.71rem] capitalize text-red-500 disabled:cursor-not-allowed disabled:opacity-50'
           onClick={() => {
             setTimeout(() => {
               console.log('delete');

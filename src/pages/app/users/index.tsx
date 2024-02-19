@@ -49,7 +49,7 @@ const UserListPage = () => {
   // });
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col  overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex justify-between '>
         <h3 className=' mb-16 text-base font-semibold md:text-2xl'>User Accounts</h3>
         <div>
@@ -82,7 +82,9 @@ const UserListPage = () => {
           </div>
         </div>
       </div>
-      <div className='relative grid w-full'>{/* <UserTableComponent /> */}</div>
+      <div className='relative grid w-full'>
+        <UserTableComponent />
+      </div>
     </div>
   );
 };
