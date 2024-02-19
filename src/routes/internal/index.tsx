@@ -9,7 +9,7 @@ import Dashboard from 'pages/app/dashboard';
 import GeneralForumns from 'pages/app/general-forums';
 import ReportsPage from 'pages/app/master-classes';
 import OnlineTraining from 'pages/app/online-training';
-import ServiceAd from 'pages/app/service-ad';
+import ServiceAd from 'pages/app/coupons';
 import Profile from 'pages/app/user-profile';
 import AccountSettings from 'pages/app/account-settings';
 import SingleBlog from 'pages/inner-pages/single-blog';

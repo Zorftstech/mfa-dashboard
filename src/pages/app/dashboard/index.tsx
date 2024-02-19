@@ -133,7 +133,7 @@ const Dashboard = () => {
       </div> */}
       <section className=' grid gap-[4rem]  rounded-lg md:grid-cols-[2fr_1fr] '>
         <div>
-          <h3 className=' mb-16 text-2xl font-bold'>Welcome Edmund</h3>
+          <h3 className=' mb-16 text-base font-semibold md:text-2xl'>Welcome Edmund</h3>
           <div
             className={cn(
               `}   grid cursor-pointer grid-cols-[1fr_1fr] gap-[2rem] rounded-lg rounded-lg  transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr]`,

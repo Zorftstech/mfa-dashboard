@@ -136,6 +136,7 @@ import { ReactComponent as FlashSale } from 'assets/svg/flashSale.svg';
 import { ReactComponent as Products } from 'assets/svg/products.svg';
 import { ReactComponent as Categories } from 'assets/svg/categories.svg';
 import { ReactComponent as SubCat } from 'assets/svg/subCat.svg';
+import { ReactComponent as Users } from 'assets/svg/user.svg';
 
 export type iconTypes =
   | 'sort'
@@ -276,7 +277,8 @@ export type iconTypes =
   | 'FlashSale'
   | 'Products'
   | 'Categories'
-  | 'SubCat';
+  | 'SubCat'
+  | 'Users';
 
 interface IconInterface {
   name: iconTypes;
@@ -285,6 +287,7 @@ interface IconInterface {
 
 const Icon = ({ name, svgProp }: IconInterface) => {
   const icons: Record<iconTypes, JSX.Element> = {
+    Users: <Users {...svgProp} />,
     SubCat: <SubCat {...svgProp} />,
     Categories: <Categories {...svgProp} />,
     Products: <Products {...svgProp} />,

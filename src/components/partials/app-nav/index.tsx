@@ -63,7 +63,7 @@ const AppNav = () => {
   return (
     <>
       <nav
-        className={` container sticky left-0 right-0  z-40 h-max w-full  border-b border-b-extraColor-borderBottom-3 transition-all duration-300 ease-in-out  md:border-0 md:px-container-base md:pt-[0.75rem]`}
+        className={` container sticky left-0 right-0 z-40  h-max w-full max-w-[180.75rem]  border-b border-b-extraColor-borderBottom-3 transition-all duration-300 ease-in-out  md:border-0 md:px-container-base md:pt-[0.75rem]`}
       >
         <div className=' hidden h-full w-full items-center justify-between bg-white  pt-2       md:flex md:px-container-base'>
           <div className='h-[3rem] '>

@@ -60,11 +60,11 @@ export const sideNavLinks: extendedRouteInterface[] = [
     icons: (
       <Icon
         svgProp={{
-          width: 22.75,
-          height: 22.75,
+          width: 17.75,
+          height: 17.75,
           className: 'text-current',
         }}
-        name='fileIcon'
+        name='Users'
       />
     ),
   },

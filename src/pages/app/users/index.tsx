@@ -13,6 +13,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { useQuery } from '@tanstack/react-query';
@@ -24,36 +29,12 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import CONSTANTS from 'constant';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import PatientsRecords from './Records';
-import PatientsReports from './Reports';
-
-type filterTypes = 'visits records' | 'visits reports';
-
-interface Filter {
-  name: filterTypes;
-  icon: JSX.Element;
-}
-const PatientsFilter: Filter[] = [
-  { name: 'visits records', icon: <Icon name='profileIcon' /> },
-  { name: 'visits reports', icon: <Icon name='padLockV2' /> },
-];
-
-interface Tabs {
-  title: filterTypes;
-}
-
-const DisplayTab = ({ title }: Tabs) => {
-  const components: Record<filterTypes, JSX.Element> = {
-    'visits records': <PatientsRecords />,
-    'visits reports': <PatientsReports />,
-  };
-
-  return components[title];
-};
+import { ChevronDown, Filter } from 'lucide-react';
+import { Button } from 'components/shadcn/ui/button';
 
 const UserListPage = () => {
   const navigate = useNavigate();
-  const [currFilter, setCurrFilter] = useState<filterTypes>('visits records');
+  const [position, setPosition] = useState('bottom');
 
   // const { data, isLoading } = useQuery<any, any, apiInterface<contentApiItemInterface[]>>({
   //   queryKey: ['get-blogs'],
@@ -68,41 +49,38 @@ const UserListPage = () => {
   // });
 
   return (
-    <div className='container flex h-full w-full max-w-[150.75rem]  flex-col overflow-auto px-container-base py-[2.1rem]'>
-      {/* to be refactored */}
+    <div className='container flex h-full w-full max-w-[180.75rem]  flex-col overflow-auto px-container-md py-[0.1rem]'>
       <div className='flex justify-between '>
-        <p className='text-base font-semibold text-primary-1'>Visits</p>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={`focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}
-          >
-            <Icon name='menu' />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className='mr-[1.5rem] bg-white   shadow-5'>
-            {PatientsFilter?.map((i, idx) => (
-              <DropdownMenuItem key={idx} className=''>
-                <button
-                  key={idx}
-                  className={`${
-                    i?.name === currFilter
-                      ? `bg-primary-1  text-white`
-                      : `bg-transparent text-secondary-2 hover:text-primary-1`
-                  } flex h-full  w-max items-center rounded-[5px] px-[1.5rem]  py-3 text-start transition-all ease-in-out `}
-                  onClick={() => setCurrFilter(i?.name)}
+        <h3 className=' mb-16 text-base font-semibold md:text-2xl'>User Accounts</h3>
+        <div>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
+            Today: 10:23am, 30th Oct 2023
+          </p>
+          <div className='flex   gap-3'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='group flex w-6/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
                 >
-                  <span className='mt-[3px] whitespace-nowrap text-start text-[13px] font-semibold capitalize leading-3 tracking-[0.15px] md:mt-0 lg:text-[13px]'>
-                    {i?.name}
-                  </span>
-                </button>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className='relative grid w-full'>
-        {/* ... */}
-
-        <div className='mt-7'>{/* <DisplayTab title={currFilter} /> */}</div>
+                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-56 text-[0.65rem]'>
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <SearchComboBox />
+          </div>
+        </div>
       </div>
     </div>
   );
