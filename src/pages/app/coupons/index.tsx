@@ -1,4 +1,4 @@
-import BlogCard from 'components/general/Card';
+import BlogCard from 'components/general/ProductCard';
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import LinksFilter from 'components/general/LinksFilter';
 import SearchComboBox from 'components/general/SearchComboBox';

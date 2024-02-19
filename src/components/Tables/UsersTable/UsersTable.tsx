@@ -52,7 +52,7 @@ import { cn, checkStatus } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import EditWalletBalance from 'components/modal/Patients/EditWalletBalanceModal';
+import EditWalletBalance from 'components/modal/EditWalletBalanceModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
 export type User = {

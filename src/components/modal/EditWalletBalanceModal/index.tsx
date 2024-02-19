@@ -12,7 +12,7 @@ interface Iprop {
   title?: string;
 }
 
-const MergePatientModal = ({ trigger, triggerClassName, title }: Iprop) => {
+const EditWalletBalanceModal = ({ trigger, triggerClassName, title }: Iprop) => {
   const [modalOpen, setModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -75,4 +75,4 @@ const MergePatientModal = ({ trigger, triggerClassName, title }: Iprop) => {
   );
 };
 
-export default MergePatientModal;
+export default EditWalletBalanceModal;

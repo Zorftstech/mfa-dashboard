@@ -52,7 +52,7 @@ const generalFilters: filterTypes[] = [
   'Starred',
 ];
 
-const AppointmentPage = () => {
+const OrdersPage = () => {
   const [position, setPosition] = useState('bottom');
 
   // const [currFilter, setCurrFilter] = useState<filterTypes>('All');
@@ -94,7 +94,7 @@ const AppointmentPage = () => {
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col  overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex justify-between '>
-        <h3 className=' mb-16 text-base font-semibold md:text-2xl'>Track orders</h3>
+        <h3 className='  text-base font-semibold md:text-2xl'>Track orders</h3>
         <div>
           <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
             Today: 10:23am, 30th Oct 2023
@@ -132,4 +132,4 @@ const AppointmentPage = () => {
   );
 };
 
-export default AppointmentPage;
+export default OrdersPage;

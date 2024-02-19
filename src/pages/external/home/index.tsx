@@ -9,7 +9,7 @@ import questionImageSmall from 'assets/image/questionImg.png?format=webp&w=380&h
 import Balancer from 'react-wrap-balancer';
 import Icon from 'utils/Icon';
 import CONSTANTS from 'constant';
-import BlogCard from 'components/general/Card';
+import BlogCard from 'components/general/ProductCard';
 import BtsCard from 'components/general/BtsCard';
 import BgTransitionSpan from 'components/animation/bg-transitions-span';
 import { useNavigate } from 'react-router-dom';

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import demoAd from 'assets/image/dashboardAdSample.png';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import Icon from 'utils/Icon';
-import BlogCard from 'components/general/Card';
+import BlogCard from 'components/general/ProductCard';
 import blogImg from 'assets/image/blogImg.png?format=webp&w=330&h=280&imagetools';
 import dpIcon from 'assets/image/demoDp.jpg?format=webp&imagetools';
 import BtsCard from 'components/general/BtsCard';

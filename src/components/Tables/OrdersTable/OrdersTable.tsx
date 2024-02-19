@@ -52,7 +52,7 @@ import { cn, checkStatus } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import EditWalletBalance from 'components/modal/Patients/EditWalletBalanceModal';
+import EditWalletBalanceModal from 'components/modal/EditWalletBalanceModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
 export type User = {
@@ -331,7 +331,7 @@ function OrdersTableComponent() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end' className='px-4 py-2'>
                 {
-                  <EditWalletBalance
+                  <EditWalletBalanceModal
                     trigger={
                       <Button
                         variant='outline'
@@ -346,7 +346,7 @@ function OrdersTableComponent() {
                         <p>Edit </p>
                       </Button>
                     }
-                  ></EditWalletBalance>
+                  ></EditWalletBalanceModal>
                 }
                 <DropdownMenuSeparator />
                 <DeleteModal btnText='Delete' />

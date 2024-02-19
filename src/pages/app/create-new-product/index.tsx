@@ -292,7 +292,7 @@ const CreateNewProduct = () => {
               <Spinner />
             ) : (
               <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Patient
+                Create Product
               </span>
             )}
           </button>
@@ -301,7 +301,7 @@ const CreateNewProduct = () => {
             trigger={
               <button className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
                 <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                  Create Patient
+                  Create Product
                 </span>
               </button>
             }
@@ -316,22 +316,6 @@ const CreateNewProduct = () => {
       </div>
       <div className='flex items-end justify-between'>
         <UploadImageForm />
-        <LinkPatientsModal
-          trigger={
-            <button className='group flex  items-center justify-center gap-2  rounded-[5px] px-4  text-base font-semibold text-primary-1  transition-all duration-300 ease-in-out hover:opacity-90'>
-              <Icon
-                name='linkIcon'
-                svgProp={{
-                  className:
-                    'text-primary-1 cursor-pointer hover:opacity-95 transition-opacity duration-300 ease-in-out active:opacity-100',
-                }}
-              />
-              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-primary-1 md:text-base'>
-                Link Patient
-              </span>
-            </button>
-          }
-        ></LinkPatientsModal>
       </div>
       <Form {...form}>
         <form
