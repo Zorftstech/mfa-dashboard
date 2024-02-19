@@ -83,9 +83,7 @@ const UserListPage = () => {
           </div>
         </div>
       </div>
-      <div className='relative grid w-full'>
-        <UserTableComponent />
-      </div>
+      <div className='relative grid w-full'>{/* <UserTableComponent /> */}</div>
     </div>
   );
 };

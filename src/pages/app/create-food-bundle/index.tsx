@@ -247,10 +247,6 @@ const CreateNewProduct = () => {
 
       const res = await API.post(`/auth/create-patients`, formData);
       toast.success('Patient Created Successfully');
-
-      setTimeout(() => {
-        navigate(`/app/${CONSTANTS.ROUTES.patients}`);
-      }, 1000);
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {
@@ -259,6 +255,7 @@ const CreateNewProduct = () => {
     }
     setFormIsLoading(false);
   }
+
   useEffect(() => {
     form.setValue('phone_number', location?.country_calling_code);
     form.setValue('currency_code', location?.currency);
@@ -267,7 +264,7 @@ const CreateNewProduct = () => {
   }, [location?.country_calling_code, location?.currency]);
 
   return (
-    <div className=' container     flex h-full w-full  max-w-[150rem]   flex-col gap-8  px-container-base  py-[1.875rem] '>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex w-full  items-center justify-between gap-4 md:flex-row'>
         <div
           onClick={() => navigate(-1)}

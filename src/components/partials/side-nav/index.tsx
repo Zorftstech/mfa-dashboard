@@ -22,14 +22,15 @@ type ISideNavTitles =
   | 'Bi-annual Bootcamps'
   | 'Dashboard'
   | 'Users'
-  | 'Patients'
-  | 'Appointment'
-  | 'Consultation'
-  | 'Billing'
-  | 'Inventory'
-  | 'Laboratory'
+  | 'Orders'
+  | 'Products'
+  | 'Categories'
+  | 'Flash Sales'
+  | 'Coupons'
+  | 'Settings'
   | 'Reports'
-  | 'Settings';
+  | 'Settings'
+  | 'Food Bundles';
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
   icons: JSX.Element;
@@ -60,8 +61,8 @@ export const sideNavLinks: extendedRouteInterface[] = [
     icons: (
       <Icon
         svgProp={{
-          width: 17.75,
-          height: 17.75,
+          width: 22.75,
+          height: 22.75,
           className: 'text-current',
         }}
         name='Users'
@@ -70,36 +71,36 @@ export const sideNavLinks: extendedRouteInterface[] = [
   },
 
   {
-    link: 'patients',
-    title: 'Patients',
+    link: 'orders',
+    title: 'Orders',
     icons: (
       <Icon
         svgProp={{
           width: 22.75,
-          height: 22.75,
+          height: 20.75,
           className: 'text-current',
         }}
-        name='patients'
+        name='OrderIcon'
       />
     ),
   },
   {
-    link: 'appointment',
-    title: 'Appointment',
+    link: 'products',
+    title: 'Products',
     icons: (
       <Icon
         svgProp={{
           width: 22.75,
-          height: 22.75,
+          height: 17.75,
           className: 'text-current',
         }}
-        name='appointment'
+        name='ProductIcon'
       />
     ),
   },
   {
-    link: 'consultation',
-    title: 'Consultation',
+    link: 'categories',
+    title: 'Categories',
     icons: (
       <Icon
         svgProp={{
@@ -107,63 +108,50 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 22.75,
           className: 'text-current',
         }}
-        name='consult'
+        name='CategoryIcon'
       />
     ),
   },
   {
-    link: 'billing',
-    title: 'Billing',
+    link: 'flash-sales',
+    title: 'Flash Sales',
     icons: (
       <Icon
         svgProp={{
           width: 22.75,
-          height: 22.75,
+          height: 20.75,
           className: 'text-current',
         }}
-        name='billing'
+        name='FlashSaleIcon'
       />
     ),
   },
   {
-    link: 'inventory',
-    title: 'Inventory',
+    link: 'food-bundles',
+    title: 'Food Bundles',
+
     icons: (
       <Icon
         svgProp={{
           width: 22.75,
-          height: 22.75,
+          height: 20.75,
           className: 'text-current',
         }}
-        name='inventory'
+        name='FoodBundleIcon'
       />
     ),
   },
   {
-    link: 'laboratory',
-    title: 'Laboratory',
+    link: 'coupons',
+    title: 'Coupons',
     icons: (
       <Icon
         svgProp={{
           width: 22.75,
-          height: 22.75,
+          height: 20.75,
           className: 'text-current',
         }}
-        name='lab'
-      />
-    ),
-  },
-  {
-    link: 'reports',
-    title: 'Reports',
-    icons: (
-      <Icon
-        svgProp={{
-          width: 22.75,
-          height: 22.75,
-          className: 'text-current',
-        }}
-        name='reports'
+        name='CouponsIcon'
       />
     ),
   },
@@ -174,10 +162,10 @@ export const sideNavLinks: extendedRouteInterface[] = [
       <Icon
         svgProp={{
           width: 22.75,
-          height: 22.75,
+          height: 20.75,
           className: 'text-current',
         }}
-        name='settingIcon'
+        name='SettingWhite'
       />
     ),
   },
@@ -259,13 +247,13 @@ const SideNav = () => {
               transition-all duration-300 ease-in-out`}
       >
         <button>
-          <div className='flex items-center gap-4 text-primary-1'>
+          <div className='flex items-center gap-4 text-white'>
             <Icon
               svgProp={{
                 width: 22.75,
                 height: 22.75,
               }}
-              name='BookmarkIcon'
+              name='LogOut'
             />
             <h6
               className={`whitespace-nowrap text-[13px] font-[600] leading-[24px] tracking-[0.15px]  text-white

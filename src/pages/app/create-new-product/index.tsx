@@ -267,7 +267,7 @@ const CreateNewProduct = () => {
   }, [location?.country_calling_code, location?.currency]);
 
   return (
-    <div className=' container     flex h-full w-full  max-w-[150rem]   flex-col gap-8  px-container-base  py-[1.875rem] '>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex w-full  items-center justify-between gap-4 md:flex-row'>
         <div
           onClick={() => navigate(-1)}

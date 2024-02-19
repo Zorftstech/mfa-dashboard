@@ -19,7 +19,7 @@ const GeneralForumns = () => {
   const [currFilter, setCurrFilter] = useState<filterTypes>('Trending');
 
   return (
-    <div className='container flex w-full flex-col px-container-base py-[1.875rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
       <FunkyPagesHero
         description='As the community questions you need answers to by creating a thread'
         title='General Forums'

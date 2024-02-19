@@ -1,23 +1,22 @@
 import CONSTANTS from 'constant';
-import AppointmentPage from 'pages/app/orders';
+import Orders from 'pages/app/orders';
 import Users from 'pages/app/users';
-import BillingPage from 'pages/app/products';
-import InventoryPage from 'pages/app/create-coupon';
-import Laboratory from 'pages/app/food-bundles';
-import Consultation from 'pages/app/flash-sales';
+import Products from 'pages/app/products';
+import CreateCoupon from 'pages/app/create-coupon';
+import FoodBundles from 'pages/app/food-bundles';
+import FlashSales from 'pages/app/flash-sales';
 import Dashboard from 'pages/app/dashboard';
-import GeneralForumns from 'pages/app/notifications';
-import ReportsPage from 'pages/app/master-classes';
-import ServiceAd from 'pages/app/coupons';
-import Profile from 'pages/app/user-profile';
-import AccountSettings from 'pages/app/settings';
+import Categories from 'pages/app/categories';
+import Notifications from 'pages/app/notifications';
+import MasterClasses from 'pages/app/master-classes';
+import Coupons from 'pages/app/coupons';
+import UserProfile from 'pages/app/user-profile';
+import Settings from 'pages/app/settings';
 import SingleBlog from 'pages/inner-pages/single-blog';
-import SingleBts from 'pages/inner-pages/single-bts';
 import SinglePatient from 'pages/inner-pages/single-patient';
 import { routeTypes, routesInterface } from 'types';
-import PatientsPage from 'pages/app/categories';
-import CreatePatientPage from 'pages/app/create-category';
-import CreateVisitPage from 'pages/app/create-subCategory';
+import CreateCategory from 'pages/app/create-category';
+import CreateSubCategory from 'pages/app/create-subCategory';
 import CreateNewProduct from 'pages/app/create-new-product';
 
 const internalRoute: routeTypes = [
@@ -26,63 +25,63 @@ const internalRoute: routeTypes = [
     path: 'dashboard',
   },
   {
-    element: <CreatePatientPage />,
-    path: 'create-patient',
+    element: <CreateNewProduct />,
+    path: 'create-new-product',
   },
   {
-    element: <CreateVisitPage />,
-    path: 'create-visit',
+    element: <CreateSubCategory />,
+    path: 'create-category',
   },
   {
-    element: <PatientsPage />,
-    path: 'patients',
+    element: <Categories />,
+    path: 'categories',
   },
   {
     element: <Users />,
     path: 'users',
   },
   {
-    element: <Profile />,
+    element: <UserProfile />,
     path: 'profile',
   },
 
   {
-    element: <AppointmentPage />,
-    path: 'appointment',
+    element: <Orders />,
+    path: 'orders',
   },
   {
-    element: <Consultation />,
-    path: 'consultation',
+    element: <FlashSales />,
+    path: 'flash-sales',
   },
   {
-    element: <BillingPage />,
-    path: 'billing',
+    element: <Products />,
+    path: 'products',
   },
   {
-    element: <InventoryPage />,
-    path: 'inventory',
+    element: <CreateCoupon />,
+    path: 'create-coupon',
   },
   {
-    element: <Laboratory />,
-    path: 'laboratory',
+    element: <FoodBundles />,
+    path: 'food-bundles',
   },
   {
-    element: <AccountSettings />,
+    element: <Settings />,
     path: 'settings',
   },
+  // {
+  //   element: <MasterClasses />,
+  //   path: 'reports',
+  // },
+
   {
-    element: <ReportsPage />,
-    path: 'reports',
+    element: <Notifications />,
+    path: 'notifications',
   },
 
   {
-    element: <GeneralForumns />,
-    path: 'general-forums',
-  },
-
-  {
-    element: <ServiceAd />,
-    path: 'service-ad',
+    element: <Coupons />,
+    path: 'coupons',
   },
   {
     element: <CreateNewProduct />,

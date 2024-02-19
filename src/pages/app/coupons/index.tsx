@@ -68,9 +68,13 @@ const UserListPage = () => {
   // });
 
   return (
-    <div className='container flex h-full w-full max-w-[150.75rem]  flex-col overflow-auto px-container-base py-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
+      <FunkyPagesHero
+        // description='Access bi-annual bootcamps and register!'
+        title='Coupons'
+      />
       {/* to be refactored */}
-      <div className='flex justify-between '>
+      {/* <div className='flex justify-between '>
         <p className='text-base font-semibold text-primary-1'>Coupons</p>
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -98,7 +102,7 @@ const UserListPage = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
       <div className='relative grid w-full'>
         {/* ... */}
 

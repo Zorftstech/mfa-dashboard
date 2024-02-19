@@ -29,7 +29,7 @@ const InventoryPage = () => {
   // });
 
   return (
-    <div className='container flex w-full flex-col px-container-base py-[1.875rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
       <FunkyPagesHero
         // description='Find out what goes on behind the scenes of blockbuster movies'
         title='Inventory'

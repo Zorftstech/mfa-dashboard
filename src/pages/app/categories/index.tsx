@@ -15,6 +15,7 @@ import {
 import UserTableComponent from 'components/Tables/UsersTable/UsersTable';
 import { Link } from 'react-router-dom';
 import CONSTANTS from 'constant';
+import FunkyPagesHero from 'components/general/FunkyPagesHero';
 
 type filterTypes = 'patients records' | 'patients reports';
 
@@ -40,11 +41,11 @@ const DisplayTab = ({ title }: Tabs) => {
   return components[title];
 };
 
-const PatientsPage = () => {
+const Categories = () => {
   const [currFilter, setCurrFilter] = useState<filterTypes>('patients records');
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem]  flex-col  px-container-base py-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
       {/* to be refactored */}
       {/* <div className='flex justify-between '>
         <p className='text-base font-semibold text-primary-1'>Patients</p>
@@ -75,8 +76,12 @@ const PatientsPage = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div> */}
-      <Link
-        to={`/app/${CONSTANTS.ROUTES['create-patient']}`}
+      <FunkyPagesHero
+        // description='Access bi-annual bootcamps and register!'
+        title='Categories'
+      />
+      {/* <Link
+        to={`/app/${CONSTANTS.ROUTES['create-new-product']}`}
         className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1  px-4 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
       >
         <Icon
@@ -89,12 +94,10 @@ const PatientsPage = () => {
         <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
           New Patient
         </span>
-      </Link>
-      <div className='relative grid w-full'>
-        <UserTableComponent />
-      </div>
+      </Link> */}
+      <div className='relative grid w-full'>{/* <UserTableComponent /> */}</div>
     </div>
   );
 };
 
-export default PatientsPage;
+export default Categories;

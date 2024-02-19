@@ -10,12 +10,12 @@ import ResumeSectionCvProfile from 'components/general/Cv-profile/Resume';
 import FreeRangeSectionCvProfile from 'components/general/Cv-profile/FreeRange';
 import MainUserAddInfoModal from 'components/modal/CvProfileModals/MainUserInfoModal';
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
-const Consultation = () => {
+const FlashSales = () => {
   return (
-    <div className='container flex w-full flex-col px-container-base py-[1.875rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
       <FunkyPagesHero
         // description='Ask Professionals and Masters  questions you need answers to by creating a thread'
-        title='Consultation'
+        title='Flash Sales'
       />
 
       {/* <div className='relative mx-auto my-[1.5rem] w-full max-w-[800px] md:-top-[1.5rem] md:my-0 md:mb-[1rem]'>
@@ -67,4 +67,4 @@ const Consultation = () => {
   );
 };
 
-export default Consultation;
+export default FlashSales;

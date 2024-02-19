@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
+import FunkyPagesHero from 'components/general/FunkyPagesHero';
 
 type filterTypes =
   | 'user settings'
@@ -55,9 +56,13 @@ const AccountSettings = () => {
   const [currFilter, setCurrFilter] = useState<filterTypes>('user settings');
 
   return (
-    <div className='container flex h-full w-full max-w-[150.75rem]  flex-col overflow-auto px-container-base py-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
+      <FunkyPagesHero
+        // description='Access bi-annual bootcamps and register!'
+        title='Settings'
+      />
       {/* to be refactored */}
-      <div className='flex justify-between '>
+      {/* <div className='flex justify-between '>
         <p className='text-base font-semibold text-primary-1'>Settings</p>{' '}
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -88,13 +93,11 @@ const AccountSettings = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
       <div className='relative grid w-full'>
         {/* ... */}
 
-        <div className='mt-7'>
-          <DisplayTab title={currFilter} />
-        </div>
+        <div className='mt-7'>{/* <DisplayTab title={currFilter} /> */}</div>
       </div>
     </div>
   );

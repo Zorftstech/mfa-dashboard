@@ -142,9 +142,9 @@ import { ReactComponent as FlashSaleIcon } from 'assets/svg/flashSalesIcon.svg';
 import { ReactComponent as FoodBundleIcon } from 'assets/svg/foodBuddlesIcon.svg';
 import { ReactComponent as LogOut } from 'assets/svg/logout.svg';
 import { ReactComponent as OrderIcon } from 'assets/svg/ordersIcon.svg';
-import { ReactComponent as ProductIcon } from 'assets/svg/profileIcon.svg';
-import { ReactComponent as SettingWhite } from 'assets/svg/settingIcon.svg';
-import { ReactComponent as Users } from 'assets/svg/user.svg';
+import { ReactComponent as ProductIcon } from 'assets/svg/products.svg';
+import { ReactComponent as SettingWhite } from 'assets/svg/settingsIcon1.svg';
+import { ReactComponent as Users } from 'assets/svg/profileIcon.svg';
 
 export type iconTypes =
   | 'sort'
