@@ -169,9 +169,8 @@ const AppointmentPage = () => {
           // description='Find and download fimmaking assets you need'
           title='Appointment'
         />
-        <PlanGuard page='appointment'>
-          <>
-            {/* <div className='relative mx-auto my-[1.5rem] w-full max-w-[800px] md:-top-[1.5rem] md:my-0 md:mb-[1.75rem]'>
+
+        {/* <div className='relative mx-auto my-[1.5rem] w-full max-w-[800px] md:-top-[1.5rem] md:my-0 md:mb-[1.75rem]'>
               <SearchComboBox />
             </div>
             <div className='mb-[1.5rem] flex w-full justify-center'>
@@ -208,8 +207,6 @@ const AppointmentPage = () => {
                 ))}
               </div>
             </ContentLoader> */}
-          </>
-        </PlanGuard>
       </div>
     </>
   );

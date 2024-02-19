@@ -17,9 +17,8 @@ const Consultation = () => {
         // description='Ask Professionals and Masters  questions you need answers to by creating a thread'
         title='Consultation'
       />
-      <PlanGuard page='patients'>
-        <>
-          {/* <div className='relative mx-auto my-[1.5rem] w-full max-w-[800px] md:-top-[1.5rem] md:my-0 md:mb-[1rem]'>
+
+      {/* <div className='relative mx-auto my-[1.5rem] w-full max-w-[800px] md:-top-[1.5rem] md:my-0 md:mb-[1rem]'>
             <InputAddComboBox placeholder='Add a new thread...' />
           </div>
           <div className='mb-[1.5rem] flex w-full justify-center'>
@@ -64,8 +63,6 @@ const Consultation = () => {
             />
           </div>
           <CommentThreadCard /> */}
-        </>
-      </PlanGuard>
     </div>
   );
 };

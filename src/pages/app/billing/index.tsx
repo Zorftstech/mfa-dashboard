@@ -8,9 +8,8 @@ const BillingPage = () => {
         // description='Access bi-annual bootcamps and register!'
         title='Billing'
       />
-      <PlanGuard page='billing'>
-        <div></div>
-      </PlanGuard>
+
+      <div></div>
     </div>
   );
 };

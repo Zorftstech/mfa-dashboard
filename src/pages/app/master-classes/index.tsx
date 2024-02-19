@@ -21,9 +21,8 @@ const ReportsPage = () => {
         // description='Find and register for masterclasses organized by Anthill studios'
         title='Reports'
       />
-      <PlanGuard page='reports'>
-        <>
-          {/* <div className='w-full max-w-[800px] relative mx-auto my-[1.5rem] md:my-0 md:mb-[1.75rem] md:-top-[1.5rem]'>
+
+      {/* <div className='w-full max-w-[800px] relative mx-auto my-[1.5rem] md:my-0 md:mb-[1.75rem] md:-top-[1.5rem]'>
             <SearchComboBox />
           </div>
           <div className='flex justify-center w-full mb-[1.5rem]'>
@@ -47,8 +46,6 @@ const ReportsPage = () => {
               </div>
             ))}
           </div> */}
-        </>
-      </PlanGuard>
     </div>
   );
 };

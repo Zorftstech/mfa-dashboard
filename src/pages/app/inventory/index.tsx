@@ -34,9 +34,6 @@ const InventoryPage = () => {
         // description='Find out what goes on behind the scenes of blockbuster movies'
         title='Inventory'
       />
-      <PlanGuard page='inventory'>
-        <div></div>
-      </PlanGuard>
     </div>
   );
 };

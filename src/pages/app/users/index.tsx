@@ -51,7 +51,7 @@ const DisplayTab = ({ title }: Tabs) => {
   return components[title];
 };
 
-const VisitsPage = () => {
+const UserListPage = () => {
   const navigate = useNavigate();
   const [currFilter, setCurrFilter] = useState<filterTypes>('visits records');
 
@@ -102,12 +102,10 @@ const VisitsPage = () => {
       <div className='relative grid w-full'>
         {/* ... */}
 
-        <div className='mt-7'>
-          <DisplayTab title={currFilter} />
-        </div>
+        <div className='mt-7'>{/* <DisplayTab title={currFilter} /> */}</div>
       </div>
     </div>
   );
 };
 
-export default VisitsPage;
+export default UserListPage;

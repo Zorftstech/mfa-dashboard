@@ -8,9 +8,6 @@ const Laboratory = () => {
         // description='Would you like to consult with Anthill Studios for a Project?!'
         title='Laboratory'
       />
-      <PlanGuard page='laboratory'>
-        <div></div>
-      </PlanGuard>
     </div>
   );
 };

@@ -1,6 +1,5 @@
-import ManageSubscriptions from 'components/modal/ManageSubscriptions';
 import { IDropNavTitles, menuLinks } from 'components/partials/app-nav';
-import { planTokens, sideNavLinks } from 'components/partials/side-nav';
+import { sideNavLinks } from 'components/partials/side-nav';
 import { DropdownMenuSeparator } from 'components/shadcn/dropdown-menu';
 import CONSTANTS from 'constant';
 import usePlan from 'hooks/business-logic/usePlan';
@@ -11,13 +10,11 @@ import Icon from 'utils/Icon';
 
 const AuthMenu = ({ close }: { close: () => void }) => {
   const nav = useNavigate();
-  const currentUserPlan = useStore((state) => state.plan);
 
   const navigate = (i: string) => {
     close();
     nav(i);
   };
-  const { isAllowed } = usePlan({ currUserPlan: currentUserPlan });
 
   const tags = useMemo(() => {
     const chatCount = 2;
@@ -39,21 +36,9 @@ const AuthMenu = ({ close }: { close: () => void }) => {
           <div
             key={idx}
             onClick={() => navigate(`/app/${i?.link}`)}
-            className={`group flex items-center gap-[0.625rem]  rounded-[8px] p-4 hover:bg-primary-6  ${
-              isAllowed(i?.plan) ? `text-secondary-9` : `text-secondary-13`
-            } cursor-pointer transition-all hover:text-primary-1`}
+            className={`group flex cursor-pointer items-center  gap-[0.625rem] rounded-[8px] p-4 transition-all hover:bg-primary-6 hover:text-primary-1`}
           >
-            {!isAllowed(i?.plan) ? (
-              <Icon
-                svgProp={{
-                  width: 20,
-                  height: 20,
-                }}
-                name='padLock'
-              />
-            ) : (
-              i?.icons
-            )}
+            {i?.icons}
             <span className='text-[16px] font-[400] leading-[20px]'>{i?.title}</span>
           </div>
         ))}
@@ -117,23 +102,6 @@ const AuthMenu = ({ close }: { close: () => void }) => {
           </div>
         ))}
       </div>
-      {/*     
-      <div className='w-full px-4'>
-        <ManageSubscriptions
-          trigger={
-            <button
-              className={`group flex h-[60px] w-full cursor-pointer items-center gap-[0.8rem] rounded-[8px] bg-primary-1 px-3 text-white transition duration-300`}
-            >
-              <div className='flex items-center'>{planTokens[currentUserPlan]?.icon}</div>
-              <h6
-                className={`whitespace-nowrap text-[16px] font-[600] leading-[24px] tracking-[0.15px] duration-300`}
-              >
-                {planTokens[currentUserPlan]?.name}
-              </h6>
-            </button>
-          }
-        />
-      </div> */}
     </div>
   );
 };

@@ -31,7 +31,7 @@ export type routePathTypes =
   | 'privacy-policy'
   | 'dashboard'
   | 'profile'
-  | 'visits'
+  | 'users'
   | 'patients'
   | 'appointment'
   | 'settings'
@@ -47,7 +47,6 @@ export type routePathTypes =
 export interface routesInterface<T> {
   path: T;
   element: JSX.Element;
-  plan: planTypes;
 }
 
 export type routeTypes = routesInterface<routePathTypes>[];

@@ -1,6 +1,6 @@
 import CONSTANTS from 'constant';
 import AppointmentPage from 'pages/app/appointment';
-import Visits from 'pages/app/visits';
+import Users from 'pages/app/users';
 import BillingPage from 'pages/app/billing';
 import InventoryPage from 'pages/app/inventory';
 import Laboratory from 'pages/app/laboratory';
@@ -25,102 +25,79 @@ const internalRoute: routeTypes = [
   {
     element: <Dashboard />,
     path: 'dashboard',
-    plan: 'student',
   },
   {
     element: <CreatePatientPage />,
     path: 'create-patient',
-    plan: 'starter',
   },
   {
     element: <CreateVisitPage />,
     path: 'create-visit',
-    plan: 'starter',
   },
   {
     element: <PatientsPage />,
     path: 'patients',
-    plan: 'starter',
   },
   {
-    element: <Visits />,
-    path: 'visits',
-    plan: 'starter',
+    element: <Users />,
+    path: 'users',
   },
   {
     element: <Profile />,
     path: 'profile',
-    plan: 'starter',
   },
 
   {
     element: <AppointmentPage />,
     path: 'appointment',
-    plan: 'starter',
   },
   {
     element: <Consultation />,
     path: 'consultation',
-    plan: 'student',
   },
   {
     element: <BillingPage />,
     path: 'billing',
-    plan: 'student',
   },
   {
     element: <InventoryPage />,
     path: 'inventory',
-    plan: 'student',
   },
   {
     element: <Laboratory />,
     path: 'laboratory',
-    plan: 'student',
   },
   {
     element: <AccountSettings />,
     path: 'settings',
-    plan: 'student',
   },
   {
     element: <ReportsPage />,
     path: 'reports',
-    plan: 'student',
   },
 
   {
     element: <GeneralForumns />,
     path: 'general-forums',
-    plan: 'student',
   },
 
   {
     element: <OnlineTraining />,
     path: 'online-training',
-    plan: 'student',
   },
 
   {
     element: <ServiceAd />,
     path: 'service-ad',
-    plan: 'professional',
   },
   {
     element: <CreateNewProduct />,
     path: 'create-new-product',
-    plan: 'starter',
   },
 ];
 
 export const innerInternalRoutes: routesInterface<string>[] = [
-  { element: <SingleBlog />, path: `${CONSTANTS.ROUTES.blogs}/:id`, plan: `starter` },
-  { element: <SingleBts />, path: `${CONSTANTS.ROUTES.bts}/:id`, plan: `starter` },
-  {
-    element: <SinglePatient />,
-    path: `${CONSTANTS.ROUTES.patients}/:id`,
-    plan: `starter`,
-  },
+  { element: <SingleBlog />, path: `${CONSTANTS.ROUTES.blogs}/:id` },
 ];
 
 export default internalRoute;

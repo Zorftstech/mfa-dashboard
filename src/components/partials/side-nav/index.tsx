@@ -1,4 +1,3 @@
-import ManageSubscriptions from 'components/modal/ManageSubscriptions';
 import CONSTANTS from 'constant';
 import usePlan from 'hooks/business-logic/usePlan';
 import { useState } from 'react';
@@ -22,7 +21,7 @@ type ISideNavTitles =
   | 'Master Classes'
   | 'Bi-annual Bootcamps'
   | 'Dashboard'
-  | 'Visits'
+  | 'Users'
   | 'Patients'
   | 'Appointment'
   | 'Consultation'
@@ -34,7 +33,6 @@ type ISideNavTitles =
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
   icons: JSX.Element;
-  plan: planTypes;
 }
 
 interface ISideNavLinks {
@@ -55,11 +53,10 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='dashboardIcon'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.dashboard,
   },
   {
-    link: 'visits',
-    title: 'Visits',
+    link: 'users',
+    title: 'Users',
     icons: (
       <Icon
         svgProp={{
@@ -70,7 +67,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='fileIcon'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS['visits'],
   },
 
   {
@@ -86,7 +82,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='patients'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.patients,
   },
   {
     link: 'appointment',
@@ -101,7 +96,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='appointment'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.appointment,
   },
   {
     link: 'consultation',
@@ -116,7 +110,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='consult'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.consultation,
   },
   {
     link: 'billing',
@@ -131,7 +124,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='billing'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.billing,
   },
   {
     link: 'inventory',
@@ -146,7 +138,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='inventory'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.inventory,
   },
   {
     link: 'laboratory',
@@ -161,7 +152,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='lab'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.laboratory,
   },
   {
     link: 'reports',
@@ -176,7 +166,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='reports'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.reports,
   },
   {
     link: 'settings',
@@ -191,35 +180,13 @@ export const sideNavLinks: extendedRouteInterface[] = [
         name='settingIcon'
       />
     ),
-    plan: CONSTANTS.PLAN_PERMISSIONS.settings,
   },
 ];
-
-export const planTokens: Record<planTypes, { name: string; icon: JSX.Element }> = {
-  starter: {
-    icon: <Icon svgProp={{ width: 32, height: 32 }} name='studentIcon' />,
-    name: 'Nollywood Starter',
-  },
-  master: {
-    icon: <Icon svgProp={{ width: 32, height: 32 }} name='masterCrown' />,
-    name: 'Nollywood Master',
-  },
-  professional: {
-    icon: <Icon svgProp={{ width: 32, height: 32 }} name='masterCrown' />,
-    name: 'Nollywood Pro',
-  },
-  student: {
-    icon: <Icon svgProp={{ width: 32, height: 32 }} name='studentIcon' />,
-    name: 'Nollywood Student',
-  },
-};
 
 const SideNav = () => {
   const [navOpen, setNavOpen] = useState(true);
   const currentUserPlan = useStore((state) => state.plan);
   const navigate = useNavigate();
-
-  const { isAllowed } = usePlan({ currUserPlan: currentUserPlan });
 
   const location = useLocation();
 
@@ -264,7 +231,7 @@ const SideNav = () => {
               <div
                 onClick={() => navigate(`/app/${i?.link}`)}
                 className={`flex cursor-pointer items-center  gap-[0.625rem] px-4 py-[0.8rem] text-white  hover:bg-primary-light  2xl:py-2
-                ${isAllowed(i?.plan) ? `text-secondary-9` : `text-secondary-13`} 
+              
                 ${
                   location?.pathname === `/app/${i?.link}`
                     ? `bg-white font-semibold !text-black shadow-md`
@@ -273,19 +240,7 @@ const SideNav = () => {
                 group
                 transition duration-300`}
               >
-                <div className='flex items-center'>
-                  {!isAllowed(i?.plan) ? (
-                    <Icon
-                      svgProp={{
-                        width: 22.75,
-                        height: 22.75,
-                      }}
-                      name='padLock'
-                    />
-                  ) : (
-                    i?.icons
-                  )}
-                </div>
+                <div className='flex items-center'>{i?.icons}</div>
                 <h6
                   className={`whitespace-nowrap text-[13px] font-[600] leading-[24px]  tracking-[0.15px]
               ${navOpen ? `opacity-100` : `scale-0 opacity-0`}
