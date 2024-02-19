@@ -92,11 +92,6 @@ const PatientsPage = () => {
       </Link>
       <div className='relative grid w-full'>
         <UserTableComponent />
-        {/* ... */}
-
-        {/* <div className='mt-7'>
-          <DisplayTab title={currFilter} />
-        </div> */}
       </div>
     </div>
   );

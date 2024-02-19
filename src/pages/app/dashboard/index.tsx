@@ -103,7 +103,7 @@ const Dashboard = () => {
   // });
 
   return (
-    <div className='container flex h-full w-full flex-col overflow-auto px-container-md py-[1rem]'>
+    <div className='container flex h-full w-full flex-col overflow-auto px-container-md py-[1rem] pb-10'>
       {/* <div className='flex items-center justify-between'>
         <h3 className='text-2xl font-bold'>Welcome Edmund</h3>
         <div className='flex  gap-3'>

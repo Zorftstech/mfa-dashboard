@@ -1,4 +1,4 @@
-import UserSettings from 'pages/app/account-settings/UserSettings';
+import UserSettings from 'pages/app/settings/UserSettings';
 import BillingAndPlan from './BillingAndPlan';
 import Connections from './Connections';
 import Notification from './Notification';

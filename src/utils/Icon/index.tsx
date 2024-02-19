@@ -136,6 +136,14 @@ import { ReactComponent as FlashSale } from 'assets/svg/flashSale.svg';
 import { ReactComponent as Products } from 'assets/svg/products.svg';
 import { ReactComponent as Categories } from 'assets/svg/categories.svg';
 import { ReactComponent as SubCat } from 'assets/svg/subCat.svg';
+import { ReactComponent as CategoryIcon } from 'assets/svg/categoryIcon.svg';
+import { ReactComponent as CouponsIcon } from 'assets/svg/couponsIcon.svg';
+import { ReactComponent as FlashSaleIcon } from 'assets/svg/flashSalesIcon.svg';
+import { ReactComponent as FoodBundleIcon } from 'assets/svg/foodBuddlesIcon.svg';
+import { ReactComponent as LogOut } from 'assets/svg/logout.svg';
+import { ReactComponent as OrderIcon } from 'assets/svg/ordersIcon.svg';
+import { ReactComponent as ProductIcon } from 'assets/svg/profileIcon.svg';
+import { ReactComponent as SettingWhite } from 'assets/svg/settingIcon.svg';
 import { ReactComponent as Users } from 'assets/svg/user.svg';
 
 export type iconTypes =
@@ -278,7 +286,15 @@ export type iconTypes =
   | 'Products'
   | 'Categories'
   | 'SubCat'
-  | 'Users';
+  | 'Users'
+  | 'CategoryIcon'
+  | 'CouponsIcon'
+  | 'FlashSaleIcon'
+  | 'FoodBundleIcon'
+  | 'LogOut'
+  | 'OrderIcon'
+  | 'ProductIcon'
+  | 'SettingWhite';
 
 interface IconInterface {
   name: iconTypes;
@@ -287,6 +303,15 @@ interface IconInterface {
 
 const Icon = ({ name, svgProp }: IconInterface) => {
   const icons: Record<iconTypes, JSX.Element> = {
+    SettingWhite: <SettingWhite {...svgProp} />,
+    ProductIcon: <ProductIcon {...svgProp} />,
+    OrderIcon: <OrderIcon {...svgProp} />,
+    LogOut: <LogOut {...svgProp} />,
+    FoodBundleIcon: <FoodBundleIcon {...svgProp} />,
+    FlashSaleIcon: <FlashSaleIcon {...svgProp} />,
+    CouponsIcon: <CouponsIcon {...svgProp} />,
+    CategoryIcon: <CategoryIcon {...svgProp} />,
+
     Users: <Users {...svgProp} />,
     SubCat: <SubCat {...svgProp} />,
     Categories: <Categories {...svgProp} />,

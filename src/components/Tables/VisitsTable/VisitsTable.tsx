@@ -48,7 +48,7 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import sections from 'pages/app/patients/tempData';
+import sections from 'pages/app/categories/tempData';
 import { cn } from 'lib/utils';
 import DeletePatient from 'components/modal/Patients/DeletePatient';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
