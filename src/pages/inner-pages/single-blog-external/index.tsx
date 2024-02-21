@@ -180,7 +180,7 @@ const SingleBlogExternal = () => {
         >
           <ContentLoader isLoading={similarLoading}>
             <div className='mb-[6.94rem] grid grid-cols-1 gap-x-[1.5rem] gap-y-[2.5rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-              {similar?.items
+              {/* {similar?.items
                 ?.filter((i) => i?.id !== id)
                 ?.map((i, idx) => (
                   <div key={idx} className='h-full w-full'>
@@ -196,7 +196,7 @@ const SingleBlogExternal = () => {
                       link={`/blogs/${i?.id}`}
                     />
                   </div>
-                ))}
+                ))} */}
             </div>
           </ContentLoader>
         </EmptyContentWrapper>
