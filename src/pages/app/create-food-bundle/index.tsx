@@ -82,7 +82,7 @@ const FormSchema = z.object({
   }),
   nameYourPrice: z.boolean().default(false).optional(),
 });
-const CreateNewProduct = () => {
+const CreateFoodBundle = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
 
@@ -129,8 +129,8 @@ const CreateNewProduct = () => {
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Add Product</h3>
-              <p className='text-[0.75rem] '>This will add a new product to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>Add Food bundle</h3>
+              <p className='text-[0.75rem] '>This will add a new food bundle to your catalogue</p>
             </div>
           </InlineLoader>
         </div>
@@ -146,7 +146,7 @@ const CreateNewProduct = () => {
               <Spinner />
             ) : (
               <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Product
+                Create Food bundle
               </span>
             )}
           </button>
@@ -404,4 +404,4 @@ const CreateNewProduct = () => {
   );
 };
 
-export default CreateNewProduct;
+export default CreateFoodBundle;

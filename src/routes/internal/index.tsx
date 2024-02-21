@@ -18,6 +18,7 @@ import { routeTypes, routesInterface } from 'types';
 import CreateCategory from 'pages/app/create-category';
 import CreateSubCategory from 'pages/app/create-subCategory';
 import CreateNewProduct from 'pages/app/create-new-product';
+import CreateFoodBundle from 'pages/app/create-food-bundle';
 
 const internalRoute: routeTypes = [
   {
@@ -68,6 +69,11 @@ const internalRoute: routeTypes = [
   {
     element: <Settings />,
     path: 'settings',
+  },
+
+  {
+    element: <CreateFoodBundle />,
+    path: 'create-food-bundle',
   },
   // {
   //   element: <MasterClasses />,
