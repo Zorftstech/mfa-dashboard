@@ -27,7 +27,7 @@ export type routePathTypes =
   | 'create-category'
   | 'create-coupons'
   | 'create-food-bundle'
-  | 'create-subCategory'
+  | 'create-sub-category'
   | 'categories';
 
 export interface routesInterface<T> {

@@ -25,12 +25,12 @@ const internalRoute: routeTypes = [
     path: 'dashboard',
   },
   {
-    element: <CreateNewProduct />,
-    path: 'create-new-product',
+    element: <CreateCategory />,
+    path: 'create-category',
   },
   {
     element: <CreateSubCategory />,
-    path: 'create-category',
+    path: 'create-sub-category',
   },
   {
     element: <Categories />,

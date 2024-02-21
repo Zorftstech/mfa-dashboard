@@ -5,7 +5,6 @@ import * as z from 'zod';
 
 import { Form, FormField } from 'components/shadcn/ui/form';
 import { toast } from 'components/shadcn/ui/use-toast';
-import FileDropzone from './Filedropzone';
 import { useDropzone } from 'react-dropzone';
 import Icon from 'utils/Icon';
 import { processError } from 'helper/error';

@@ -26,7 +26,7 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'create-category': 'create-category',
   'create-coupons': 'create-coupons',
   'create-food-bundle': 'create-food-bundle',
-  'create-subCategory': 'create-subCategory',
+  'create-sub-category': 'create-sub-category',
 
   'create-new-product': 'create-new-product',
 };
