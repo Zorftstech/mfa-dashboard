@@ -150,23 +150,6 @@ const ProductsPage = () => {
       <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
         {[...Array(15)]?.map((_, idx) => (
           <div key={idx} className='h-full w-full'>
-            {/* <MasterClassCard
-              adImage={filmImg}
-              description={`Filmmaking is an art form that requires a combination of technical skills and...`}
-              location='Landmark, Lokoja'
-              price='11/04/22023'
-              title='"From Script to Screen: The Filmmaking Process"'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-            {/* <AdvertCard
-              adImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              price='11/04/22023'
-              location='Landmark, Lokoja'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-
             <ProductCard
               img={filmImg}
               name='Yam Food'
@@ -174,13 +157,6 @@ const ProductsPage = () => {
               link='a7f1477dc36041aabd2c40d5c8598e3f'
               rating={4.5}
             />
-            {/* <BtsCard
-              btsImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              category='Food'
-              link='a7f1477dc36041aabd2c40d5c8598e3f'
-            /> */}
           </div>
         ))}
       </div>

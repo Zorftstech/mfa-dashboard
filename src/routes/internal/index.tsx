@@ -19,6 +19,7 @@ import CreateCategory from 'pages/app/create-category';
 import CreateSubCategory from 'pages/app/create-subCategory';
 import CreateNewProduct from 'pages/app/create-new-product';
 import CreateFoodBundle from 'pages/app/create-food-bundle';
+import CreateFlashSale from 'pages/app/create-flash-sale';
 
 const internalRoute: routeTypes = [
   {
@@ -74,6 +75,10 @@ const internalRoute: routeTypes = [
   {
     element: <CreateFoodBundle />,
     path: 'create-food-bundle',
+  },
+  {
+    element: <CreateFlashSale />,
+    path: 'create-flash-sale',
   },
   // {
   //   element: <MasterClasses />,

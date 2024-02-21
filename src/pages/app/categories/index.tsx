@@ -2,7 +2,8 @@ import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import PillTabs from 'components/general/PillTabs';
 import SearchComboBox from 'components/general/SearchComboBox';
 import { useEffect, useState } from 'react';
-import filmImg from 'assets/image/foodImg.jpeg';
+import CatImg from 'assets/image/catImg.jpeg';
+import Potatoes from 'assets/image/potatoes.jpeg';
 import {
   Dialog,
   DialogContent,
@@ -36,16 +37,10 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
-import OrdersTableComponent from 'components/Tables/OrdersTable/OrdersTable';
-import BtsCard from 'components/general/BtsCard';
-import AssetCard from 'components/general/AssetCard';
-import AdvertCard from 'components/general/AdvertCard';
-import ProductCard from 'components/general/ProductCard';
-
-import MasterClassCard from 'components/general/MasterClassCard';
-
+import CategoryModal from 'components/modal/CategoryModal';
 import contentService from 'services/content';
 import Icon from 'utils/Icon';
+import CategoryCard from 'components/general/CategoryCard';
 
 type filterTypes =
   | 'All'
@@ -101,7 +96,7 @@ const Categories = () => {
   // }, [searchparams, data]);
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[5.1rem]'>
       <div className='flex justify-between '>
         <div>
           <h3 className='mb-4 text-base font-semibold md:text-2xl'>Categories</h3>
@@ -154,39 +149,20 @@ const Categories = () => {
 
         <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
           {[...Array(5)]?.map((_, idx) => (
-            <div key={idx} className='h-full w-full'>
-              {/* <MasterClassCard
-              adImage={filmImg}
-              description={`Filmmaking is an art form that requires a combination of technical skills and...`}
-              location='Landmark, Lokoja'
-              price='11/04/22023'
-              title='"From Script to Screen: The Filmmaking Process"'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-              {/* <AdvertCard
-              adImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              price='11/04/22023'
-              location='Landmark, Lokoja'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-
-              <ProductCard
-                img={filmImg}
-                name='Yam Food'
-                price=''
-                link='a7f1477dc36041aabd2c40d5c8598e3f'
-                rating={''}
-              />
-              {/* <BtsCard
-              btsImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              category='Food'
-              link='a7f1477dc36041aabd2c40d5c8598e3f'
-            /> */}
-            </div>
+            <CategoryModal
+              trigger={
+                <div key={idx} className='h-full w-full'>
+                  <CategoryCard
+                    img={CatImg}
+                    name='Nigerian soups & stews'
+                    link='a7f1477dc36041aabd2c40d5c8598e3f'
+                  />
+                </div>
+              }
+              title='Nigerian soups & stews'
+              img={CatImg}
+              desc='Nigerian soups & stews are local delicacies that are enjoyed by many. They are rich in nutrients and are a great source of energy.'
+            ></CategoryModal>
           ))}
         </div>
       </section>
@@ -208,37 +184,12 @@ const Categories = () => {
         <div className=' grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
           {[...Array(5)]?.map((_, idx) => (
             <div key={idx} className='h-full w-full'>
-              {/* <MasterClassCard
-              adImage={filmImg}
-              description={`Filmmaking is an art form that requires a combination of technical skills and...`}
-              location='Landmark, Lokoja'
-              price='11/04/22023'
-              title='"From Script to Screen: The Filmmaking Process"'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-              {/* <AdvertCard
-              adImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              price='11/04/22023'
-              location='Landmark, Lokoja'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-
-              <ProductCard
-                img={filmImg}
-                name='Yam Food'
-                price='dkdkj'
+              <CategoryCard
+                img={Potatoes}
+                name='Potatoes'
+                mainCategory='Nigerian soups & stews'
                 link='a7f1477dc36041aabd2c40d5c8598e3f'
-                rating={''}
               />
-              {/* <BtsCard
-              btsImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              category='Food'
-              link='a7f1477dc36041aabd2c40d5c8598e3f'
-            /> */}
             </div>
           ))}
         </div>

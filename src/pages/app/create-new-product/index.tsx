@@ -77,9 +77,12 @@ const FormSchema = z.object({
     required_error: 'quantity is required.',
   }),
 
-  minimumPrice: z.string().min(2, {
-    message: 'Please enter a valid minimum price',
-  }),
+  minimumPrice: z
+    .string()
+    .min(2, {
+      message: 'Please enter a valid minimum price',
+    })
+    .optional(),
   nameYourPrice: z.boolean().default(false).optional(),
 });
 const CreateNewProduct = () => {
@@ -136,8 +139,8 @@ const CreateNewProduct = () => {
         </div>
 
         <div className='flex  gap-4'>
-          <button
-            // onClick={() => form.trigger()}
+          {/* <button
+            onClick={() => form.trigger()}
             disabled={formIsLoading}
             onClick={() => form.handleSubmit(onSubmit)()}
             className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
@@ -149,7 +152,7 @@ const CreateNewProduct = () => {
                 Create Product
               </span>
             )}
-          </button>
+          </button> */}
 
           {/* <SavePatientModal
             trigger={
@@ -161,7 +164,10 @@ const CreateNewProduct = () => {
             }
           ></SavePatientModal> */}
 
-          <button className='group flex  items-center justify-center gap-2  rounded-[5px] border   px-5 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'>
+          <button
+            onClick={() => navigate(-1)}
+            className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
+          >
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
               Cancel
             </span>
@@ -367,37 +373,33 @@ const CreateNewProduct = () => {
             />
           </section>
 
+          <button
+            type='submit'
+            className={cn(
+              `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
+                form.formState.isSubmitting
+                  ? 'cursor-not-allowed bg-gray-500 font-[700]'
+                  : 'cursor-pointer'
+              } `,
+            )}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <div className='px-5 py-1'>
+                <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
+              </div>
+            ) : (
+              <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
+                Create Product
+              </span>
+            )}
+          </button>
           <p className='invisible'>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo
             dolore? Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores
             unde, corrupti iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores,
             eos!
           </p>
-
-          {/* <div className='flex  w-full items-center justify-center gap-4'>
-            <button
-              type='submit'
-              
-              className={cn(
-                `group mt-9 flex items-center justify-center gap-2 rounded-full bg-primary-1 px-8 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-12 xm:py-4 ${
-                  form.formState.isSubmitting
-                    ? 'cursor-not-allowed bg-gray-500 font-[700]'
-                    : 'cursor-pointer'
-                } `,
-              )}
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <div className='px-5 py-1'>
-                  <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
-                </div>
-              ) : (
-                <span className='text-sm font-[600] leading-[24px]  tracking-[0.4px] text-white xm:text-base'>
-                  Continue to shipping
-                </span>
-              )}
-            </button>
-          </div> */}
         </form>
       </Form>
     </div>

@@ -28,6 +28,7 @@ export type routePathTypes =
   | 'create-coupons'
   | 'create-food-bundle'
   | 'create-sub-category'
+  | 'create-flash-sale'
   | 'categories';
 
 export interface routesInterface<T> {

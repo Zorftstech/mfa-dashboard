@@ -57,7 +57,7 @@ interface ErrorMessages {
 }
 
 const FormSchema = z.object({
-  subCategoryName: z.string().min(2, {
+  productName: z.string().min(2, {
     message: 'Please enter a valid name',
   }),
 
@@ -77,12 +77,15 @@ const FormSchema = z.object({
     required_error: 'quantity is required.',
   }),
 
-  minimumPrice: z.string().min(2, {
-    message: 'Please enter a valid minimum price',
-  }),
+  minimumPrice: z
+    .string()
+    .min(2, {
+      message: 'Please enter a valid minimum price',
+    })
+    .optional(),
   nameYourPrice: z.boolean().default(false).optional(),
 });
-const CreateSubCategory = () => {
+const CreateFlashSale = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
 
@@ -129,8 +132,8 @@ const CreateSubCategory = () => {
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Add Sub-category</h3>
-              <p className='text-[0.75rem] '>This will add a new sub-category to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>Add Flash Sale</h3>
+              <p className='text-[0.75rem] '>This will add a new flash sale to your catalogue</p>
             </div>
           </InlineLoader>
         </div>
@@ -146,7 +149,7 @@ const CreateSubCategory = () => {
               <Spinner />
             ) : (
               <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Sub-category
+                Create Product
               </span>
             )}
           </button> */}
@@ -185,19 +188,19 @@ const CreateSubCategory = () => {
           <section className=' grid grid-cols-1 gap-8 md:max-w-[80%] md:gap-6 xm:grid-cols-[1fr_1fr]  '>
             <FormField
               control={form.control}
-              name='subCategoryName'
+              name='productName'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Sub-category Name
+                      Product Name
                     </label>
                     <FormControl>
                       <Input
                         className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
                         {...field}
                         type='text'
-                        placeholder='Enter sub-category name'
+                        placeholder='Enter product name'
                       />
                     </FormControl>
                   </div>
@@ -208,17 +211,39 @@ const CreateSubCategory = () => {
 
             <FormField
               control={form.control}
+              name='price'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Price (NGN)
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        type='text'
+                        placeholder='3000'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name='category'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Main Category
+                      Category
                     </label>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='Select a main category' />
+                          <SelectValue placeholder='Select product categories' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className='bg-primary-1'>
@@ -243,14 +268,102 @@ const CreateSubCategory = () => {
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Sub-category Description
+                      Description
                     </label>
                     <FormControl>
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
                         type='text'
-                        placeholder='Enter sub-category description'
+                        placeholder='Enter product description'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='unit'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Unit
+                    </label>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
+                          <SelectValue placeholder='Select a unit of measurement' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className='bg-primary-1'>
+                        <SelectItem value='kg' className='py-3 text-sm text-white'>
+                          kg
+                        </SelectItem>
+                        <SelectItem value='g' className='py-3 text-sm text-white'>
+                          g
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <FormMessage className='mt-1 text-xs' />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='quantity'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Quantity
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
+                        {...field}
+                        type='text'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='nameYourPrice'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg  p-3 shadow-sm'>
+                  <div className=''>
+                    <FormLabel className='font-semibold text-black'>Name your price</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='minimumPrice'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Minimum Price (NGN)
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        type='text'
+                        placeholder='Set minimum price'
                       />
                     </FormControl>
                   </div>
@@ -259,6 +372,7 @@ const CreateSubCategory = () => {
               )}
             />
           </section>
+
           <button
             type='submit'
             className={cn(
@@ -276,11 +390,10 @@ const CreateSubCategory = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                Create Sub-category
+                Create Flash Sale
               </span>
             )}
           </button>
-
           <p className='invisible'>
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo
             dolore? Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores
@@ -293,4 +406,4 @@ const CreateSubCategory = () => {
   );
 };
 
-export default CreateSubCategory;
+export default CreateFlashSale;
