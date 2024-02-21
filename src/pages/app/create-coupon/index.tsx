@@ -21,7 +21,7 @@ import {
 } from 'components/shadcn/ui/select';
 import { Input } from 'components/shadcn/input';
 import axiosInstance from 'services';
-import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRightIcon, CalendarIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
 import { cn } from 'lib/utils';
@@ -42,6 +42,9 @@ import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
+import { Popover, PopoverContent, PopoverTrigger } from 'components/shadcn/popover';
+import { Calendar } from 'components/shadcn/ui/calendar';
+import { format } from 'date-fns';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -57,30 +60,20 @@ interface ErrorMessages {
 }
 
 const FormSchema = z.object({
-  productName: z.string().min(2, {
+  couponName: z.string().min(2, {
     message: 'Please enter a valid name',
   }),
 
-  price: z.string().min(2, {
-    message: 'Please enter a valid price',
+  purpose: z.string().min(2, {
+    message: 'Please enter a valid purpose',
   }),
-  category: z.string().min(2, {
-    message: 'Please enter a valid category',
-  }),
-  description: z.string().min(1, {
-    message: 'Please enter a valid description',
-  }),
-  unit: z.string({
-    required_error: 'unit is required.',
-  }),
-  quantity: z.string({
-    required_error: 'quantity is required.',
+  dateToExpire: z.date({
+    required_error: 'A date of birth is required.',
   }),
 
-  minimumPrice: z.string().min(2, {
-    message: 'Please enter a valid minimum price',
+  discount: z.string().min(1, {
+    message: 'Please enter a valid discount',
   }),
-  nameYourPrice: z.boolean().default(false).optional(),
 });
 const CreateCoupon = () => {
   const { location } = useUserLocation();
@@ -158,19 +151,19 @@ const CreateCoupon = () => {
           <section className=' grid grid-cols-1 gap-8 md:max-w-[80%] md:gap-6 xm:grid-cols-[1fr_1fr]  '>
             <FormField
               control={form.control}
-              name='productName'
+              name='couponName'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Product Name
+                      Coupon Name
                     </label>
                     <FormControl>
                       <Input
                         className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
                         {...field}
                         type='text'
-                        placeholder='Enter product name'
+                        placeholder='Enter coupon name'
                       />
                     </FormControl>
                   </div>
@@ -181,19 +174,19 @@ const CreateCoupon = () => {
 
             <FormField
               control={form.control}
-              name='price'
+              name='purpose'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Price (NGN)
+                      Coupon purpose
                     </label>
                     <FormControl>
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
                         type='text'
-                        placeholder='3000'
+                        placeholder='Reason for coupon creation'
                       />
                     </FormControl>
                   </div>
@@ -203,49 +196,58 @@ const CreateCoupon = () => {
             />
             <FormField
               control={form.control}
-              name='category'
+              name='dateToExpire'
               render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Category
-                    </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormItem className='flex flex-col'>
+                  <FormLabel className=' inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                    Expiry date
+                  </FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
                       <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='Select product categories' />
-                        </SelectTrigger>
+                        <Button
+                          variant={'outline'}
+                          className={cn(
+                            'w-full py-6 pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value ? format(field.value, 'PPP') : <span>Set a date</span>}
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                        </Button>
                       </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        <SelectItem value='grains' className='py-3 text-sm text-white'>
-                          Grains
-                        </SelectItem>
-                        <SelectItem value='vegetables' className='py-3 text-sm text-white'>
-                          Vegetables
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage className='mt-1 text-xs' />
+                    </PopoverTrigger>
+                    <PopoverContent className='w-full p-0' align='start'>
+                      <Calendar
+                        mode='single'
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        // disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
             <FormField
               control={form.control}
-              name='description'
+              name='discount'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Description
+                      Coupon discount (%)
                     </label>
                     <FormControl>
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
                         type='text'
-                        placeholder='Enter product description'
+                        placeholder='3'
                       />
                     </FormControl>
                   </div>

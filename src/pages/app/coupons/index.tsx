@@ -133,15 +133,15 @@ const CouponPage = () => {
         </span>
       </Link>
 
-      <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
+      <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4'>
         {[...Array(5)]?.map((_, idx) => (
           <div key={idx} className='h-full w-full'>
             <CouponCard
-              img={filmImg}
-              name='Yam Food'
-              price='₦ 500'
+              purpose='Christmas Voucher'
+              discount='3'
+              name='Christmas24'
               link='a7f1477dc36041aabd2c40d5c8598e3f'
-              rating={4.5}
+              date='2nd Jan, 2025'
             />
           </div>
         ))}
