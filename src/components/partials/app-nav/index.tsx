@@ -16,6 +16,7 @@ import Logo from 'assets/svg/nfmLogo.svg';
 import Menu from '../Menu';
 import useStore from 'store';
 import { firstCharsOfWords } from 'helper';
+import CONSTANTS from 'constant';
 
 export type IDropNavTitles = 'Profile' | 'Chat' | 'Settings' | 'Subscription' | 'FAQ' | 'Logout';
 
@@ -82,8 +83,20 @@ const AppNav = () => {
             </div>
           </div>
           <div className='flex  items-center gap-[1.125rem]'>
-            <Icon name='notificationIcon' />
-            <Icon name='settingIcon' />
+            <button
+              onClick={() => {
+                navigate(`/app/${CONSTANTS.ROUTES.notifications}`);
+              }}
+            >
+              <Icon name='notificationIcon' />
+            </button>
+            <button
+              onClick={() => {
+                navigate(`/app/${CONSTANTS.ROUTES.settings}`);
+              }}
+            >
+              <Icon name='settingIcon' />
+            </button>
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}

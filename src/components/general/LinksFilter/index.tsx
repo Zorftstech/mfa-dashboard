@@ -6,15 +6,12 @@ interface ILinksFilter {
 
 const LinksFilter = ({ tabs }: ILinksFilter) => {
   return (
-    <div className='flex text-[14px] md:text-base flex-col gap-1 h-max w-full  rounded-[12px] overflow-hidden shadow-3'>
+    <div className='flex h-max w-full flex-col gap-1 overflow-hidden rounded-[12px]  text-[14px] shadow-3 md:text-base'>
       {tabs?.map((i, idx) => (
-        <div
-          key={idx}
-          className='px-[1.5rem] py-[1.125rem] flex flex-wrap items-center gap-2 shadow-3 bg-white'
-        >
+        <div key={idx} className='flex flex-col gap-2 bg-white px-[1.5rem] py-[1.125rem] shadow-3'>
           <div className='flex items-center gap-2'>
             <Icon name='linkFilterIcon' />
-            <span className='text-primary-9 leading-[24px] tracking-[0.15px] cursor-pointer hover:underline hover:text-primary-1 transition-all duration-100 ease-in-out'>
+            <span className='h over:text-primary-1 cursor-pointer leading-[24px] tracking-[0.15px] text-primary-9 transition-all duration-100 ease-in-out hover:underline'>
               {i?.title}
               {i?.sublinks?.length ? `:` : ``}
             </span>
@@ -23,7 +20,7 @@ const LinksFilter = ({ tabs }: ILinksFilter) => {
             {i?.sublinks?.map((j, idx) => (
               <span
                 key={idx}
-                className='text-primary-9  leading-[24px] tracking-[0.15px] cursor-pointer hover:underline hover:text-primary-1 transition-all duration-100 ease-in-ou'
+                className='ease-in-ou  cursor-pointer leading-[24px] tracking-[0.15px] text-primary-9 transition-all duration-100 hover:text-primary-1 hover:underline'
               >
                 {j?.title}
                 {idx !== i?.sublinks?.length - 1 ? `,` : ``}

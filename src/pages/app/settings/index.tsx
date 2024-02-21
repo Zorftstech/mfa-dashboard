@@ -56,20 +56,37 @@ interface ErrorMessages {
   [key: string]: string[];
 }
 
-const FormSchema = z.object({
-  fullName: z.string().min(2, {
-    message: 'Please enter a valid name',
-  }),
-
-  email: z
-    .string()
-    .min(1, {
-      message: 'Please enter a valid email',
-    })
-    .email({
-      message: 'Please enter a valid email',
+const FormSchema = z
+  .object({
+    fullName: z.string().min(2, {
+      message: 'Please enter a valid name',
     }),
-});
+
+    email: z
+      .string()
+      .min(1, {
+        message: 'Please enter a valid email',
+      })
+      .email({
+        message: 'Please enter a valid email',
+      }),
+    oldPassword: z
+      .string()
+      .min(8, {
+        message: 'Password must be at least 8 characters long',
+      })
+      .optional(),
+    newPassword: z
+      .string()
+      .min(8, {
+        message: 'Password must be at least 8 characters long',
+      })
+      .optional(),
+  })
+  .refine((data) => data.newPassword !== '', {
+    message: 'please enter your old password',
+    path: ['newPassword'],
+  });
 const AccountSettingPage = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
@@ -113,7 +130,7 @@ const AccountSettingPage = () => {
         <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Settings</h3>
+              <h3 className=' text-base font-semibold lg:text-2xl'>Settings</h3>
               {/* <p className='text-[0.75rem] '>This is your user profile</p> */}
             </div>
           </InlineLoader>
@@ -178,6 +195,52 @@ const AccountSettingPage = () => {
                         {...field}
                         type='text'
                         placeholder='sample@email.com'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+            <p className='text-lg font-semibold'>Password changes</p>
+            <FormField
+              control={form.control}
+              name='oldPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Old Password
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
+                        {...field}
+                        type='text'
+                        placeholder='Enter your old password'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='newPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      New Password
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        type='text'
+                        placeholder='Enter your new password'
                       />
                     </FormControl>
                   </div>
