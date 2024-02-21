@@ -47,24 +47,9 @@ import MasterClassCard from 'components/general/MasterClassCard';
 import contentService from 'services/content';
 import Icon from 'utils/Icon';
 
-type filterTypes =
-  | 'All'
-  | 'Pre-Production'
-  | 'Post-production'
-  | 'Distribution and Marketing'
-  | 'Starred';
-
-const generalFilters: filterTypes[] = [
-  'All',
-  'Pre-Production',
-  'Distribution and Marketing',
-  'Starred',
-];
-
 const ProductsPage = () => {
   const [position, setPosition] = useState('bottom');
 
-  const [currFilter, setCurrFilter] = useState<filterTypes>('All');
   // const [templateExpanded, setTemplateExpanded] = useState(false);
   // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
   //   null,

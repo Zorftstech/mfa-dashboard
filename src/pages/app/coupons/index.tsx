@@ -1,114 +1,153 @@
-import BlogCard from 'components/general/ProductCard';
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
-import LinksFilter from 'components/general/LinksFilter';
+import PillTabs from 'components/general/PillTabs';
 import SearchComboBox from 'components/general/SearchComboBox';
-import blogImg from 'assets/image/blogImg.png?format=webp&w=330&h=280&imagetools';
-import dpIcon from 'assets/image/demoDp.jpg?format=webp&imagetools';
+import { useEffect, useState } from 'react';
+import filmImg from 'assets/image/foodImg.jpeg';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from 'components/shadcn/dialog';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
-import demoAd from 'assets/image/blogImg.png';
-import Icon from 'utils/Icon';
+import { Button } from 'components/shadcn/ui/button';
+import productService from 'services/product';
+import { processError } from 'helper/error';
+import { useQuery } from '@tanstack/react-query';
+import { apiInterface, productInterface } from 'types';
+import ContentLoader from 'components/general/ContentLoader';
+import assetImg from 'assets/image/assetFilmImg.png';
+import CONSTANTS from 'constant';
+import { filterStringsContainingDoc, filterStringsContainingImageExtensions } from 'helper';
+import FileSaver from 'file-saver';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
-import { useQuery } from '@tanstack/react-query';
+import { ChevronDown, Filter } from 'lucide-react';
+import OrdersTableComponent from 'components/Tables/OrdersTable/OrdersTable';
+import BtsCard from 'components/general/BtsCard';
+import AssetCard from 'components/general/AssetCard';
+import AdvertCard from 'components/general/AdvertCard';
+import ProductCard from 'components/general/ProductCard';
+
+import MasterClassCard from 'components/general/MasterClassCard';
+
 import contentService from 'services/content';
-import { processError } from 'helper/error';
-import ContentLoader from 'components/general/ContentLoader';
-import { apiInterface, contentApiItemInterface } from 'types';
-import FeaturedLoader from 'components/Loaders/FeaturedLoader';
-import CONSTANTS from 'constant';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import PatientsRecords from './Records';
-import PatientsReports from './Reports';
+import Icon from 'utils/Icon';
+import CouponCard from 'components/general/CouponCard';
 
-type filterTypes = 'visits records' | 'visits reports';
+const CouponPage = () => {
+  const [position, setPosition] = useState('bottom');
 
-interface Filter {
-  name: filterTypes;
-  icon: JSX.Element;
-}
-const PatientsFilter: Filter[] = [
-  { name: 'visits records', icon: <Icon name='profileIcon' /> },
-  { name: 'visits reports', icon: <Icon name='padLockV2' /> },
-];
+  // const [templateExpanded, setTemplateExpanded] = useState(false);
+  // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
+  //   null,
+  // );
+  // const [downloadConfirmationOpen, setDownloadConfirmationOpen] = useState(false);
+  // const [stagedFile, setStagedFile] = useState('');
+  // const [searchparams] = useSearchParams();
 
-interface Tabs {
-  title: filterTypes;
-}
-
-const DisplayTab = ({ title }: Tabs) => {
-  const components: Record<filterTypes, JSX.Element> = {
-    'visits records': <PatientsRecords />,
-    'visits reports': <PatientsReports />,
-  };
-
-  return components[title];
-};
-
-const UserListPage = () => {
-  const navigate = useNavigate();
-  const [currFilter, setCurrFilter] = useState<filterTypes>('visits records');
-
-  // const { data, isLoading } = useQuery<any, any, apiInterface<contentApiItemInterface[]>>({
-  //   queryKey: ['get-blogs'],
+  // const { data, isLoading } = useQuery<apiInterface<productInterface[]>>({
+  //   queryKey: ['get-assets-templates'],
   //   queryFn: () =>
-  //     contentService.getContent({
+  //     productService.getProduct({
   //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-  //       category: CONSTANTS.TIMBU_KEYS.BLOG_ID,
   //     }),
   //   onError: (err) => {
   //     processError(err);
   //   },
   // });
 
-  return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
-      <FunkyPagesHero
-        // description='Access bi-annual bootcamps and register!'
-        title='Coupons'
-      />
-      {/* to be refactored */}
-      {/* <div className='flex justify-between '>
-        <p className='text-base font-semibold text-primary-1'>Coupons</p>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={`focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}
-          >
-            <Icon name='menu' />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className='mr-[1.5rem] bg-white   shadow-5'>
-            {PatientsFilter?.map((i, idx) => (
-              <DropdownMenuItem key={idx} className=''>
-                <button
-                  key={idx}
-                  className={`${
-                    i?.name === currFilter
-                      ? `bg-primary-1  text-white`
-                      : `bg-transparent text-secondary-2 hover:text-primary-1`
-                  } flex h-full  w-max items-center rounded-[5px] px-[1.5rem]  py-3 text-start transition-all ease-in-out `}
-                  onClick={() => setCurrFilter(i?.name)}
-                >
-                  <span className='mt-[3px] whitespace-nowrap text-start text-[13px] font-semibold capitalize leading-3 tracking-[0.15px] md:mt-0 lg:text-[13px]'>
-                    {i?.name}
-                  </span>
-                </button>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div> */}
-      <div className='relative grid w-full'>
-        {/* ... */}
+  // const doFileDownLoad = () => {
+  //   setDownloadConfirmationOpen(false);
+  //   FileSaver.saveAs(stagedFile);
+  // };
 
-        <div className='mt-7'>{/* <DisplayTab title={currFilter} /> */}</div>
+  // useEffect(() => {
+  //   const targetedId = searchparams.get('open');
+  //   if (targetedId) {
+  //     const item = data?.items?.find((i) => i?.id === targetedId);
+  //     if (item) {
+  //       setCurrentFocusedTemplate(item);
+  //       setTemplateExpanded(true);
+  //     }
+  //   }
+  // }, [searchparams, data]);
+
+  return (
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
+      <div className='flex justify-between '>
+        <div>
+          <h3 className='mb-4 text-base font-semibold md:text-2xl'>Coupon creation</h3>
+          <p className='text-[0.85rem] '>All coupons you have added will appear here</p>
+        </div>
+        <div>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
+            Today: 10:23am, 30th Oct 2023
+          </p>
+          <div className='flex   gap-3'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='group flex w-6/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
+                >
+                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-56 text-[0.65rem]'>
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <SearchComboBox />
+          </div>
+        </div>
+      </div>
+      <Link
+        to={`/app/${CONSTANTS.ROUTES['create-coupon']}`}
+        className='group flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
+      >
+        <Icon name='addIcon' />
+        <span className='text-xs font-[400] leading-[24px] tracking-[0.4px] text-white '>
+          Add Coupon
+        </span>
+      </Link>
+
+      <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
+        {[...Array(5)]?.map((_, idx) => (
+          <div key={idx} className='h-full w-full'>
+            <CouponCard
+              img={filmImg}
+              name='Yam Food'
+              price='₦ 500'
+              link='a7f1477dc36041aabd2c40d5c8598e3f'
+              rating={4.5}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default UserListPage;
+export default CouponPage;
