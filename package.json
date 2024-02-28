@@ -36,6 +36,7 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "file-saver": "^2.0.5",
+    "firebase": "^10.8.0",
     "keen-slider": "^6.8.6",
     "lucide-react": "^0.224.0",
     "moment": "^2.29.4",

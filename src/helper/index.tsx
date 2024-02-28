@@ -73,3 +73,23 @@ export function filterStringsContainingDoc(strings: string[]): string[] {
 export function filterStringsContainingImageExtensions(strings: string[]): string[] {
   return strings?.filter((str) => str?.includes('.png') || str.includes('.jpg'));
 }
+function getCurrentDateTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const day = now.getDate();
+  const month = now.toLocaleString('default', { month: 'short' }); // Get month name in short form
+  const year = now.getFullYear();
+
+  // Format hours for AM/PM
+  const formattedHours = hours % 12 || 12; // Convert 0 to 12 for 12AM
+  const ampm = hours < 12 ? 'am' : 'pm';
+
+  // Format minutes to always be two digits
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+  // Construct the formatted date string
+  const formattedDate = `${formattedHours}:${formattedMinutes}${ampm}, ${day}th ${month} ${year}`;
+
+  return formattedDate;
+}
