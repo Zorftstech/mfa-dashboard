@@ -17,7 +17,7 @@ function App() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(authFirebase, (user) => {
-      setCurrentUser(user);
+      // setCurrentUser(user);
       console.log(user);
     });
 

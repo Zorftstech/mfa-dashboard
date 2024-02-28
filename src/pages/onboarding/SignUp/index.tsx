@@ -18,11 +18,19 @@ import customerService from 'services/customer';
 import BtnLoader from 'components/Hocs/BtnLoader';
 import { customerLoginInterface } from '../Login/login.model';
 import { authDetailsInterface } from 'types';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
+import { authFirebase, db, storage } from 'firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc } from 'firebase/firestore';
 import useStore from 'store';
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { setAuthDetails, setLoggedIn } = useStore((store) => store);
+  const { setAuthDetails, setLoggedIn, setCurrentUser } = useStore((store) => store);
 
   const {
     register,
@@ -35,51 +43,65 @@ const SignUp = () => {
     mode: 'all',
   });
 
-  const { mutate, isLoading } = useMutation<authDetailsInterface, any, SignUpFormInterface>({
-    mutationFn: ({ first_name, last_name, email, password }) =>
-      customerService.createCustomer({
-        first_name,
-        last_name,
-        email,
-        organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-        contact_infos: [
-          {
-            contact_data: `${email}`,
-            contact_type: 'email',
-          },
-        ],
-        password,
-      }),
-    onSuccess: (_, variables) => {
-      doLoginAttempt({
-        email: `${variables?.email}`,
-        app_url: `${import.meta.env.VITE_BASE_URL}/login?email=${variables?.email}`,
-        organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-        password: `${variables?.password}`,
-      });
+  const { mutate, isLoading } = useMutation<any, any, SignUpFormInterface>({
+    mutationFn: async ({ first_name, last_name, email, password }) => {
+      try {
+        //Create user
+        const res = await createUserWithEmailAndPassword(authFirebase, email, password);
+
+        await updateProfile(res.user, {
+          displayName: `${first_name} ${last_name}`,
+        });
+        //create user on firestore
+        await setDoc(doc(db, 'users', res.user.uid), {
+          uid: res.user.uid,
+          displayName: `${first_name} ${last_name}`,
+          email,
+          photoURL: '',
+          role: 'admin',
+        });
+
+        //create admin on firestore
+        await setDoc(doc(db, 'adminUsers', res.user.uid), {
+          uid: res.user.uid,
+          displayName: `${first_name} ${last_name}`,
+          email,
+          photoURL: '',
+          role: 'admin',
+        });
+      } catch (err) {
+        console.log(err);
+        throw err;
+      }
+    },
+    onSuccess: (data, variables) => {
+      doLoginAttempt({ email: variables.email, password: variables.password });
     },
     onError: (err) => {
       processError(err);
     },
   });
 
-  const { mutate: doLoginAttempt } = useMutation<any, any, customerLoginInterface>({
-    mutationFn: (params) =>
-      customerService.customerLogin({
-        ...params,
-      }),
+  const { mutate: doLoginAttempt } = useMutation<any, any, any>({
+    mutationFn: async (params) => {
+      const user = await signInWithEmailAndPassword(authFirebase, params.email, params.password);
+      return user;
+    },
     onSuccess: (data) => {
-      setAuthDetails(data);
+      // setAuthDetails(data);
+      setCurrentUser(data);
       setLoggedIn(true);
+      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
     },
     onError: (err) => {
+      console.log(err);
       processError(err);
     },
   });
 
   const onSubmit: SubmitHandler<SignUpFormInterface> = (data) => {
-    console.log(data);
-    // mutate(data);
+    // console.log(data);
+    mutate(data);
   };
 
   return (
@@ -136,7 +158,8 @@ const SignUp = () => {
             <button
               onClick={() => trigger()}
               type='submit'
-              className=' w-full rounded-[8px] bg-primary-1 py-2 text-xs font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90'
+              disabled={isLoading}
+              className=' w-full rounded-[8px] bg-primary-1 py-2 text-xs font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-50 disabled:hover:no-underline'
             >
               <BtnLoader isLoading={isLoading}>
                 <span className='leading-[0.46px]'>Sign Up</span>

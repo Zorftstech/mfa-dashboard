@@ -19,7 +19,7 @@ export type AuthStateType = {
 const authSlice: StateCreator<AuthStateType, [['zustand/devtools', never]], []> = (set) => ({
   authLoading: true,
   resetEmail: '',
-  loggedIn: true,
+  loggedIn: false,
   plan: 'master',
   currentUser: {},
   setCurrentUser: (arg) => {

@@ -39,7 +39,9 @@ export const menuLinks: IDropNavLinks = {
 const AppNav = () => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState('');
-  const { authDetails, loggedIn, setAuthDetails, setLoggedIn } = useStore((store) => store);
+  const { authDetails, loggedIn, setAuthDetails, setLoggedIn, setCurrentUser } = useStore(
+    (store) => store,
+  );
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
@@ -157,6 +159,7 @@ const AppNav = () => {
                   <DropdownMenuItem
                     onClick={() => {
                       setAuthDetails({});
+                      setCurrentUser({});
                       setLoggedIn(false);
                     }}
                     key={idx}

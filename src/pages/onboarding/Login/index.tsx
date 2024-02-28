@@ -35,7 +35,7 @@ import { authFirebase } from 'firebase';
 const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
-  const { setAuthDetails, setLoggedIn } = useStore((store) => store);
+  const { setAuthDetails, setLoggedIn, setCurrentUser } = useStore((store) => store);
   const [showPassword, setShowPassword] = useState(true);
   const [params] = useSearchParams();
   const [checked, setChecked] = useState(false);
@@ -53,16 +53,16 @@ const Login = () => {
     mode: 'all',
   });
 
-  const { mutate, isLoading } = useMutation<authDetailsInterface, any, customerLoginFormInterface>({
-    mutationFn: async ({ email, password }) =>
-      customerService.customerLogin({
-        email,
-        password,
-      }),
+  const { mutate, isLoading } = useMutation<any, any, customerLoginFormInterface>({
+    mutationFn: async ({ email, password }) => {
+      const user = await signInWithEmailAndPassword(authFirebase, email, password);
+      return user;
+    },
     onSuccess: (data) => {
       // setAuthDetails(data);
-      // setLoggedIn(true);
-      // navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+      setLoggedIn(true);
+      setCurrentUser(data);
+      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
     },
     onError: (err) => {
       processError(err);
@@ -70,12 +70,7 @@ const Login = () => {
   });
 
   const onSubmit: SubmitHandler<customerLoginFormInterface> = async (data) => {
-    try {
-      const user = await signInWithEmailAndPassword(authFirebase, data.email, data.password);
-      console.log(user);
-    } catch (err) {
-      console.log(err);
-    }
+    mutate(data);
   };
 
   useEffect(() => {
@@ -184,7 +179,7 @@ const Login = () => {
                   disabled={isLoading}
                   type='button'
                   onClick={() => navigate(`/${CONSTANTS.ROUTES['forgot-password']}`)}
-                  className='cursor-pointe  text-[12px] leading-[21px] tracking-[0.15px] text-primary-3  hover:underline'
+                  className='cursor-pointe  text-[12px] leading-[21px] tracking-[0.15px] text-primary-3  transition-all duration-300 ease-in-out hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-50 disabled:hover:no-underline'
                 >
                   Forgot Password?
                 </button>
