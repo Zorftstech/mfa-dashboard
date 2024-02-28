@@ -52,7 +52,6 @@ import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 const ProductsPage = () => {
   const [position, setPosition] = useState('bottom');
-  const { setLoading, loggedIn } = useStore((state) => state);
 
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'products');

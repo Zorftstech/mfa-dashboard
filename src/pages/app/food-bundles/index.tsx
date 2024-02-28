@@ -36,76 +36,45 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
-import OrdersTableComponent from 'components/Tables/OrdersTable/OrdersTable';
-import BtsCard from 'components/general/BtsCard';
-import AssetCard from 'components/general/AssetCard';
-import AdvertCard from 'components/general/AdvertCard';
+
 import ProductCard from 'components/general/ProductCard';
 
-import MasterClassCard from 'components/general/MasterClassCard';
-
-import contentService from 'services/content';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from 'firebase';
+import useStore from 'store';
+import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import Icon from 'utils/Icon';
-
-type filterTypes =
-  | 'All'
-  | 'Pre-Production'
-  | 'Post-production'
-  | 'Distribution and Marketing'
-  | 'Starred';
-
-const generalFilters: filterTypes[] = [
-  'All',
-  'Pre-Production',
-  'Distribution and Marketing',
-  'Starred',
-];
 
 const FoodBundles = () => {
   const [position, setPosition] = useState('bottom');
+  async function fetchProducts() {
+    const productsCollectionRef = collection(db, 'foodbundle');
 
-  const [currFilter, setCurrFilter] = useState<filterTypes>('All');
-  // const [templateExpanded, setTemplateExpanded] = useState(false);
-  // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
-  //   null,
-  // );
-  // const [downloadConfirmationOpen, setDownloadConfirmationOpen] = useState(false);
-  // const [stagedFile, setStagedFile] = useState('');
-  // const [searchparams] = useSearchParams();
+    const querySnapshot = await getDocs(productsCollectionRef);
 
-  // const { data, isLoading } = useQuery<apiInterface<productInterface[]>>({
-  //   queryKey: ['get-assets-templates'],
-  //   queryFn: () =>
-  //     productService.getProduct({
-  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-  //     }),
-  //   onError: (err) => {
-  //     processError(err);
-  //   },
-  // });
+    const products: any = [];
 
-  // const doFileDownLoad = () => {
-  //   setDownloadConfirmationOpen(false);
-  //   FileSaver.saveAs(stagedFile);
-  // };
+    querySnapshot.forEach((doc) => {
+      products.push({ id: doc.id, ...doc.data() });
+    });
 
-  // useEffect(() => {
-  //   const targetedId = searchparams.get('open');
-  //   if (targetedId) {
-  //     const item = data?.items?.find((i) => i?.id === targetedId);
-  //     if (item) {
-  //       setCurrentFocusedTemplate(item);
-  //       setTemplateExpanded(true);
-  //     }
-  //   }
-  // }, [searchparams, data]);
+    return products;
+  }
+  const { data, isLoading } = useQuery({
+    queryKey: ['get-foodbundles'],
+    queryFn: () => fetchProducts(),
+
+    onError: (err) => {
+      processError(err);
+    },
+  });
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex justify-between '>
         <div>
-          <h3 className='mb-4 text-base font-semibold md:text-2xl'>Products</h3>
-          <p className='text-[0.85rem] '>All products you have added will appear here</p>
+          <h3 className='mb-4 text-base font-semibold md:text-2xl'>Food Bundles</h3>
+          <p className='text-[0.85rem] '>All food bundles you have added will appear here</p>
         </div>
         <div>
           <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
@@ -146,44 +115,21 @@ const FoodBundles = () => {
           Add Food Bundle
         </span>
       </Link>
-
-      <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-        {[...Array(8)]?.map((_, idx) => (
-          <div key={idx} className='h-full w-full'>
-            {/* <MasterClassCard
-              adImage={filmImg}
-              description={`Filmmaking is an art form that requires a combination of technical skills and...`}
-              location='Landmark, Lokoja'
-              price='11/04/22023'
-              title='"From Script to Screen: The Filmmaking Process"'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-            {/* <AdvertCard
-              adImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              price='11/04/22023'
-              location='Landmark, Lokoja'
-              link={`a7f1477dc36041aabd2c40d5c8598e3f`}
-            /> */}
-
-            <ProductCard
-              img={filmImg}
-              name='Yam Food'
-              price='₦ 500'
-              link='a7f1477dc36041aabd2c40d5c8598e3f'
-              rating={4.5}
-            />
-            {/* <BtsCard
-              btsImage={filmImg}
-              title='Food'
-              description='Filmmaking is an art form that requires a combination of technical skills and...'
-              category='Food'
-              link='a7f1477dc36041aabd2c40d5c8598e3f'
-            /> */}
-          </div>
-        ))}
-      </div>
+      <FeaturedLoader isLoading={isLoading}>
+        <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
+          {data?.map((item: any, idx: number) => (
+            <div key={idx} className='h-full w-full'>
+              <ProductCard
+                img={item?.image || filmImg}
+                name={item?.name}
+                price={item?.price}
+                link={`/${item?.id}`}
+                rating={4.5}
+              />
+            </div>
+          ))}
+        </div>
+      </FeaturedLoader>
     </div>
   );
 };

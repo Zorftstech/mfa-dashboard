@@ -42,7 +42,10 @@ import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
-
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection } from 'firebase/firestore';
+import { db } from 'firebase';
+import { useDropzone } from 'react-dropzone';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -64,9 +67,7 @@ const FormSchema = z.object({
   price: z.string().min(2, {
     message: 'Please enter a valid price',
   }),
-  category: z.string().min(2, {
-    message: 'Please enter a valid category',
-  }),
+
   description: z.string().min(1, {
     message: 'Please enter a valid description',
   }),
@@ -77,20 +78,50 @@ const FormSchema = z.object({
     required_error: 'quantity is required.',
   }),
 
-  minimumPrice: z
-    .string()
-    .min(2, {
-      message: 'Please enter a valid minimum price',
-    })
-    .optional(),
-  nameYourPrice: z.boolean().default(false).optional(),
+  prevPrice: z.string().min(2, {
+    message: 'Please enter a valid previous price',
+  }),
 });
 const CreateFlashSale = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
 
   const [formIsLoading, setFormIsLoading] = useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [file, setFile] = React.useState<any>(null);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
 
+  const handleFileDrop = async (files: any) => {
+    setUploading(true);
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+
+    const formdata = new FormData();
+    formdata.append('file', files);
+
+    try {
+      console.log('====================================');
+      console.log('file', files);
+      console.log('====================================');
+    } catch (error) {
+      processError(error);
+    }
+
+    setUploading(false);
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
+  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -107,12 +138,62 @@ const CreateFlashSale = () => {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     // switchTab(tabData[3]);
 
-    console.log(data);
-
+    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
+    const storage = getStorage();
+    const storageRef = ref(storage, 'products/' + file?.name);
+
     try {
-      toast.success('Patient Created Successfully');
+      // Upload the file to Firebase Storage
+      await uploadBytes(storageRef, file)
+        .then((snapshot) => {
+          console.log('Uploaded a blob or file!', snapshot);
+
+          // Get the URL of the uploaded file
+          getDownloadURL(snapshot.ref)
+            .then((downloadURL) => {
+              console.log('File available at', downloadURL);
+
+              // Now you can proceed to create a Firestore document with this URL
+              const productsCollectionRef = collection(db, 'flashsales');
+              const newProductRef = doc(productsCollectionRef);
+
+              const productData = {
+                name: data.productName,
+                desc: data.description,
+                image: downloadURL,
+
+                category: {
+                  id: 'flash-sales',
+                  name: 'Flash Sales',
+                },
+                price: data.price,
+                unit: data.unit,
+                quantity: data.quantity,
+                prevPrice: data.prevPrice,
+              };
+
+              // Add a new document in collection "categories"
+              setDoc(newProductRef, productData)
+                .then(() => {
+                  console.log(`New product document created with ID: ${newProductRef.id}`);
+                  toast.success('Flash Sale Created Successfully');
+                })
+                .catch((error) => {
+                  console.error('Error creating product document:', error);
+                });
+            })
+            .catch((error) => {
+              console.error('Error getting download URL:', error);
+            });
+        })
+        .catch((error) => {
+          console.error('Error uploading image:', error);
+        });
+      form.reset();
+      setImageUrl(null);
+      setFile(null);
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {
@@ -150,7 +231,30 @@ const CreateFlashSale = () => {
         </div>
       </div>
       <div className='flex items-end justify-between'>
-        <UploadImageForm />
+        <section className=' rounded-xl    '>
+          <section {...getRootProps()}>
+            <input {...getInputProps()} />
+            {imageUrl ? (
+              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+                <img
+                  src={imageUrl}
+                  alt='Selected'
+                  className=' h-full w-full rounded-full object-cover object-center '
+                />{' '}
+                {/* Display the selected image */}
+                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+                </div>
+              </div>
+            ) : isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+              </div>
+            )}
+          </section>
+        </section>
       </div>
       <Form {...form}>
         <form
@@ -203,35 +307,6 @@ const CreateFlashSale = () => {
                     </FormControl>
                   </div>
                   <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='category'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Category
-                    </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='Select product categories' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        <SelectItem value='grains' className='py-3 text-sm text-white'>
-                          Grains
-                        </SelectItem>
-                        <SelectItem value='vegetables' className='py-3 text-sm text-white'>
-                          Vegetables
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage className='mt-1 text-xs' />
                 </FormItem>
               )}
             />
@@ -311,34 +386,19 @@ const CreateFlashSale = () => {
 
             <FormField
               control={form.control}
-              name='nameYourPrice'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg  p-3 shadow-sm'>
-                  <div className=''>
-                    <FormLabel className='font-semibold text-black'>Name your price</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='minimumPrice'
+              name='prevPrice'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Minimum Price (NGN)
+                      Previous Price (NGN)
                     </label>
                     <FormControl>
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
                         type='text'
-                        placeholder='Set minimum price'
+                        placeholder='previous price'
                       />
                     </FormControl>
                   </div>
