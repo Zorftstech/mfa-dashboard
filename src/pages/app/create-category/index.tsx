@@ -3,6 +3,7 @@ import { Button } from 'components/shadcn/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+
 import {
   Form,
   FormControl,
@@ -42,7 +43,10 @@ import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
-
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection } from 'firebase/firestore';
+import { db } from 'firebase';
+import { useDropzone } from 'react-dropzone';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -70,7 +74,41 @@ const CreateCategory = () => {
   const navigate = useNavigate();
 
   const [formIsLoading, setFormIsLoading] = useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [file, setFile] = React.useState<any>(null);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
 
+  const handleFileDrop = async (files: any) => {
+    setUploading(true);
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+
+    const formdata = new FormData();
+    formdata.append('file', files);
+
+    try {
+      console.log('====================================');
+      console.log('file', files);
+      console.log('====================================');
+    } catch (error) {
+      processError(error);
+    }
+
+    setUploading(false);
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
+  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -87,12 +125,53 @@ const CreateCategory = () => {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     // switchTab(tabData[3]);
 
-    console.log(data);
-
     setFormIsLoading(true);
 
+    const storage = getStorage();
+    const storageRef = ref(storage, 'categories/' + file?.name);
+
     try {
-      toast.success('Patient Created Successfully');
+      // Upload the file to Firebase Storage
+      await uploadBytes(storageRef, file)
+        .then((snapshot) => {
+          console.log('Uploaded a blob or file!', snapshot);
+
+          // Get the URL of the uploaded file
+          getDownloadURL(snapshot.ref)
+            .then((downloadURL) => {
+              console.log('File available at', downloadURL);
+
+              // Now you can proceed to create a Firestore document with this URL
+              const categoriesCollectionRef = collection(db, 'categories');
+              const newCategoryDocRef = doc(categoriesCollectionRef);
+
+              const categoryData = {
+                name: data.categoryName,
+                desc: data.description,
+                image: downloadURL,
+                subcategories: [],
+              };
+
+              // Add a new document in collection "categories"
+              setDoc(newCategoryDocRef, categoryData)
+                .then(() => {
+                  console.log(`New category document created with ID: ${newCategoryDocRef.id}`);
+                })
+                .catch((error) => {
+                  console.error('Error creating category document:', error);
+                });
+            })
+            .catch((error) => {
+              console.error('Error getting download URL:', error);
+            });
+        })
+        .catch((error) => {
+          console.error('Error uploading image:', error);
+        });
+      toast.success('Category Created Successfully');
+      form.reset();
+      setImageUrl(null);
+      setFile(null);
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {
@@ -119,31 +198,6 @@ const CreateCategory = () => {
         </div>
 
         <div className='flex  gap-4'>
-          {/* <button
-            onClick={() => form.trigger()}
-            disabled={formIsLoading}
-            onClick={() => form.handleSubmit(onSubmit)()}
-            className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
-          >
-            {formIsLoading ? (
-              <Spinner />
-            ) : (
-              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Category
-              </span>
-            )}
-          </button> */}
-
-          {/* <SavePatientModal
-            trigger={
-              <button className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                  Create Product
-                </span>
-              </button>
-            }
-          ></SavePatientModal> */}
-
           <button
             onClick={() => navigate(-1)}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
@@ -155,7 +209,30 @@ const CreateCategory = () => {
         </div>
       </div>
       <div className='flex items-end justify-between'>
-        <UploadImageForm />
+        <section className=' rounded-xl    '>
+          <section {...getRootProps()}>
+            <input {...getInputProps()} />
+            {imageUrl ? (
+              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+                <img
+                  src={imageUrl}
+                  alt='Selected'
+                  className=' h-full w-full rounded-full object-cover object-center '
+                />{' '}
+                {/* Display the selected image */}
+                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+                </div>
+              </div>
+            ) : isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+              </div>
+            )}
+          </section>
+        </section>
       </div>
       <Form {...form}>
         <form

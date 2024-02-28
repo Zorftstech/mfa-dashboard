@@ -38,7 +38,7 @@ import { set } from 'date-fns';
 const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
-  const { setAuthDetails, setLoggedIn, setCurrentUser } = useStore((store) => store);
+  const { setAuthDetails, setLoggedIn, setCurrentUser, currentUser } = useStore((store) => store);
   const [showPassword, setShowPassword] = useState(true);
   const [params] = useSearchParams();
   const [checked, setChecked] = useState(false);
@@ -71,7 +71,6 @@ const Login = () => {
 
       // Retrieve the document
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         // Document exists, use the data
         setAuthDetails({

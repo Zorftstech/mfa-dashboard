@@ -41,7 +41,10 @@ import CategoryModal from 'components/modal/CategoryModal';
 import contentService from 'services/content';
 import Icon from 'utils/Icon';
 import CategoryCard from 'components/general/CategoryCard';
-
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from 'firebase';
+import FeaturedLoader from 'components/Loaders/FeaturedLoader';
+import useStore from 'store';
 type filterTypes =
   | 'All'
   | 'Pre-Production'
@@ -58,42 +61,39 @@ const generalFilters: filterTypes[] = [
 
 const Categories = () => {
   const [position, setPosition] = useState('bottom');
+  const [loading, setLoading] = useState(false);
+  const { setCategories, categories, subcategories, setSubcategories } = useStore((state) => state);
+  async function fetchCategories() {
+    setLoading(true);
+    // Create a reference to the 'users' collection
+    const categoriesCollectionRef = collection(db, 'categories');
+    const subCategoriesCollectionRef = collection(db, 'subcategories');
 
-  const [currFilter, setCurrFilter] = useState<filterTypes>('All');
-  // const [templateExpanded, setTemplateExpanded] = useState(false);
-  // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
-  //   null,
-  // );
-  // const [downloadConfirmationOpen, setDownloadConfirmationOpen] = useState(false);
-  // const [stagedFile, setStagedFile] = useState('');
-  // const [searchparams] = useSearchParams();
+    try {
+      const querySnapshot = await getDocs(categoriesCollectionRef);
+      const querySnapshotSub = await getDocs(subCategoriesCollectionRef);
 
-  // const { data, isLoading } = useQuery<apiInterface<productInterface[]>>({
-  //   queryKey: ['get-assets-templates'],
-  //   queryFn: () =>
-  //     productService.getProduct({
-  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-  //     }),
-  //   onError: (err) => {
-  //     processError(err);
-  //   },
-  // });
+      const categories: any = [];
+      const subCategories: any = [];
 
-  // const doFileDownLoad = () => {
-  //   setDownloadConfirmationOpen(false);
-  //   FileSaver.saveAs(stagedFile);
-  // };
-
-  // useEffect(() => {
-  //   const targetedId = searchparams.get('open');
-  //   if (targetedId) {
-  //     const item = data?.items?.find((i) => i?.id === targetedId);
-  //     if (item) {
-  //       setCurrentFocusedTemplate(item);
-  //       setTemplateExpanded(true);
-  //     }
-  //   }
-  // }, [searchparams, data]);
+      querySnapshot.forEach((doc) => {
+        categories.push({ id: doc.id, ...doc.data() });
+      });
+      querySnapshotSub.forEach((doc) => {
+        subCategories.push({ id: doc.id, ...doc.data() });
+      });
+      setCategories(categories);
+      setSubcategories(subCategories);
+    } catch (error) {
+      processError(error);
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
+    setLoading(false);
+  }
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[5.1rem]'>
@@ -147,24 +147,23 @@ const Categories = () => {
           </Link>
         </div>
 
-        <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
-          {[...Array(5)]?.map((_, idx) => (
-            <CategoryModal
-              trigger={
-                <div key={idx} className='h-full w-full'>
-                  <CategoryCard
-                    img={CatImg}
-                    name='Nigerian soups & stews'
-                    link='a7f1477dc36041aabd2c40d5c8598e3f'
-                  />
-                </div>
-              }
-              title='Nigerian soups & stews'
-              img={CatImg}
-              desc='Nigerian soups & stews are local delicacies that are enjoyed by many. They are rich in nutrients and are a great source of energy.'
-            ></CategoryModal>
-          ))}
-        </div>
+        <FeaturedLoader isLoading={loading}>
+          <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
+            {categories?.map((item: any, idx: number) => (
+              <CategoryModal
+                trigger={
+                  <div key={idx} className='h-full w-full'>
+                    <CategoryCard img={item?.image} name={item?.name} link={item?.id} />
+                  </div>
+                }
+                title={item?.name}
+                img={item?.image}
+                desc={item?.desc}
+                subcategories={item?.subcategories}
+              ></CategoryModal>
+            ))}
+          </div>
+        </FeaturedLoader>
       </section>
       {/* subCategories */}
       <section className='mt-16 flex flex-col gap-6'>
@@ -181,18 +180,23 @@ const Categories = () => {
           </Link>
         </div>
 
-        <div className=' grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
-          {[...Array(5)]?.map((_, idx) => (
-            <div key={idx} className='h-full w-full'>
-              <CategoryCard
-                img={Potatoes}
-                name='Potatoes'
-                mainCategory='Nigerian soups & stews'
-                link='a7f1477dc36041aabd2c40d5c8598e3f'
-              />
-            </div>
-          ))}
-        </div>
+        <FeaturedLoader isLoading={loading}>
+          <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
+            {subcategories?.map((item: any, idx: number) => (
+              <div key={idx} className='h-full w-full'>
+                <CategoryCard img={item?.image} name={item?.name} link={item?.id} />
+              </div>
+              // <CategoryModal
+              //   trigger={
+
+              //   }
+              //   title={item?.name}
+              //   img={item?.image}
+              //   desc={item?.desc}
+              // ></CategoryModal>
+            ))}
+          </div>
+        </FeaturedLoader>
       </section>
     </div>
   );

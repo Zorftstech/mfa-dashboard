@@ -1,4 +1,5 @@
 import { TabsContent } from 'components/shadcn/ui/tabs';
+import useStore from 'store';
 import { Button } from 'components/shadcn/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -42,9 +43,10 @@ import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
-
-// fix for phone input build error
-const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from 'firebase';
+import { useDropzone } from 'react-dropzone';
 interface Iprops {
   switchTab: (tab: string) => void;
   handleComplete: (tab: string) => void;
@@ -61,33 +63,54 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  price: z.string().min(2, {
-    message: 'Please enter a valid price',
-  }),
   category: z.string().min(2, {
     message: 'Please enter a valid category',
   }),
   description: z.string().min(1, {
     message: 'Please enter a valid description',
   }),
-  unit: z.string({
-    required_error: 'unit is required.',
-  }),
-  quantity: z.string({
-    required_error: 'quantity is required.',
-  }),
-
-  minimumPrice: z.string().min(2, {
-    message: 'Please enter a valid minimum price',
-  }),
-  nameYourPrice: z.boolean().default(false).optional(),
 });
 const CreateSubCategory = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { categories } = useStore((state) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [file, setFile] = React.useState<any>(null);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
 
+  const handleFileDrop = async (files: any) => {
+    setUploading(true);
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+
+    const formdata = new FormData();
+    formdata.append('file', files);
+
+    try {
+      console.log('====================================');
+      console.log('file', files);
+      console.log('====================================');
+    } catch (error) {
+      processError(error);
+    }
+
+    setUploading(false);
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
+  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -102,15 +125,55 @@ const CreateSubCategory = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    console.log(data);
-
     setFormIsLoading(true);
 
+    const storage = getStorage();
+    const storageRef = ref(storage, 'categories/' + file?.name);
+
     try {
-      toast.success('Patient Created Successfully');
+      const snapshot = await uploadBytes(storageRef, file);
+      console.log('Uploaded a blob or file!', snapshot);
+
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('File available at', downloadURL);
+
+      const subCategoriesCollectionRef = collection(db, 'subcategories');
+      const newSubCategoryRef = doc(subCategoriesCollectionRef);
+
+      const subCategoryData = {
+        name: data.subCategoryName,
+        desc: data.description,
+        image: downloadURL,
+        category: {
+          id: data.category,
+          name: categories?.find((category: any) => category.id === data.category)?.name,
+        },
+      };
+
+      await setDoc(newSubCategoryRef, subCategoryData);
+      console.log(`New subcategory document created with ID: ${newSubCategoryRef.id}`);
+
+      // Retrieve the parent category document
+      const categoryDocRef = doc(db, 'categories', data.category);
+      const categoryDoc = await getDoc(categoryDocRef);
+
+      if (categoryDoc.exists()) {
+        // Update the parent category with the new subcategory
+        const updatedSubcategories = [
+          ...(categoryDoc.data().subcategories || []),
+          { ...subCategoryData, id: newSubCategoryRef.id },
+        ];
+        await updateDoc(categoryDocRef, { subcategories: updatedSubcategories });
+        console.log(`Updated category document with new subcategory ID: ${newSubCategoryRef.id}`);
+      }
+
+      toast.success('Subcategory Created Successfully');
+      form.reset();
+      setImageUrl(null);
+      setFile(null);
     } catch (error: any) {
+      console.error('Error:', error);
+      // Handle errors (showing toast notifications)
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {
         toast.error(err);
@@ -136,31 +199,6 @@ const CreateSubCategory = () => {
         </div>
 
         <div className='flex  gap-4'>
-          {/* <button
-            onClick={() => form.trigger()}
-            disabled={formIsLoading}
-            onClick={() => form.handleSubmit(onSubmit)()}
-            className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
-          >
-            {formIsLoading ? (
-              <Spinner />
-            ) : (
-              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Sub-category
-              </span>
-            )}
-          </button> */}
-
-          {/* <SavePatientModal
-            trigger={
-              <button className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                  Create Product
-                </span>
-              </button>
-            }
-          ></SavePatientModal> */}
-
           <button
             onClick={() => navigate(-1)}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
@@ -172,7 +210,30 @@ const CreateSubCategory = () => {
         </div>
       </div>
       <div className='flex items-end justify-between'>
-        <UploadImageForm />
+        <section className=' rounded-xl    '>
+          <section {...getRootProps()}>
+            <input {...getInputProps()} />
+            {imageUrl ? (
+              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+                <img
+                  src={imageUrl}
+                  alt='Selected'
+                  className=' h-full w-full rounded-full object-cover object-center '
+                />{' '}
+                {/* Display the selected image */}
+                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+                </div>
+              </div>
+            ) : isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+              </div>
+            )}
+          </section>
+        </section>
       </div>
       <Form {...form}>
         <form
@@ -222,12 +283,15 @@ const CreateSubCategory = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className='bg-primary-1'>
-                        <SelectItem value='grains' className='py-3 text-sm text-white'>
-                          Grains
-                        </SelectItem>
-                        <SelectItem value='vegetables' className='py-3 text-sm text-white'>
-                          Vegetables
-                        </SelectItem>
+                        {categories?.map((category: any, index: number) => (
+                          <SelectItem
+                            value={category?.id}
+                            className='py-3 text-sm text-white'
+                            key={index}
+                          >
+                            {category?.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

@@ -10,11 +10,13 @@ interface Iprop {
   title?: string;
   img?: string;
   desc?: string;
+  subcategories?: any[];
 }
 
-const CategoryModal = ({ trigger, triggerClassName, title, img, desc }: Iprop) => {
+const CategoryModal = ({ trigger, triggerClassName, title, img, desc, subcategories }: Iprop) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+  console.log('subcategories', subcategories);
 
   return (
     <Dialog onOpenChange={(i: boolean) => setModalOpen(i)} open={modalOpen}>
@@ -34,7 +36,8 @@ const CategoryModal = ({ trigger, triggerClassName, title, img, desc }: Iprop) =
 
           <h2 className=' text-[0.7rem] font-[400] leading-[1.2rem] '>{desc}</h2>
           <p className='text-[0.65rem]'>
-            <span className='font-bold'>Sub-categories:</span> meat, poultry, fish, seafood
+            <span className='font-bold'>Sub-categories:</span>{' '}
+            {subcategories?.map((item: any) => item?.name).join(', ')}
           </p>
 
           <button

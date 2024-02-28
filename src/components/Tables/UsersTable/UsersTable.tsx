@@ -110,6 +110,7 @@ function UserTableComponent() {
 
       return users;
     } catch (error) {
+      processError(error);
       // Handle any errors that occur during the fetch operation
       console.error('Error fetching users:', error);
       throw error; // or handle it as needed
