@@ -38,7 +38,7 @@ const CategoryCard = ({
           />
         </div>
         <div className='flex  w-full flex-col gap-1  '>
-          <h5 className=' text-center text-[0.9rem] font-medium leading-[22px] text-primary-8'>
+          <h5 className=' text-center text-[0.9rem] font-medium capitalize leading-[22px] text-primary-8'>
             {name}
           </h5>
 

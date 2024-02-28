@@ -58,6 +58,8 @@ import { de } from 'date-fns/locale';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from 'firebase';
 import { set } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 export type User = {
   id: string;
   number: string;
@@ -71,13 +73,12 @@ export type User = {
 };
 
 function UserTableComponent() {
-  const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
   const [users, setUsers] = React.useState<any[]>([]);
 
   // refactor this
   const deletePage = async (id: string) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     //     try {
     //       const res = await API.delete(`/usersList/${id}`);
     //       toast.success('User deleted successfully');
@@ -87,34 +88,26 @@ function UserTableComponent() {
     //     } catch (error) {
     //       processError(error);
     //     }
-    setIsLoading(false);
+    // setIsLoading(false);
   };
 
   async function fetchAllUsers() {
     // Create a reference to the 'users' collection
     const usersCollectionRef = collection(db, 'users');
 
-    try {
-      // Await the completion of the getDocs call
-      const querySnapshot = await getDocs(usersCollectionRef);
+    // Await the completion of the getDocs call
+    const querySnapshot = await getDocs(usersCollectionRef);
 
-      // Initialize an array to hold user data
-      const users: any = [];
+    // Initialize an array to hold user data
+    const users: any = [];
 
-      // Iterate over each document in the querySnapshot
-      querySnapshot.forEach((doc) => {
-        // Add the document data (and potentially the document ID) to the users array
-        users.push({ id: doc.id, ...doc.data() });
-      });
-      setUsers(users);
+    // Iterate over each document in the querySnapshot
+    querySnapshot.forEach((doc) => {
+      // Add the document data (and potentially the document ID) to the users array
+      users.push({ id: doc.id, ...doc.data() });
+    });
 
-      return users;
-    } catch (error) {
-      processError(error);
-      // Handle any errors that occur during the fetch operation
-      console.error('Error fetching users:', error);
-      throw error; // or handle it as needed
-    }
+    return users;
   }
   const columns: ColumnDef<any>[] = [
     {
@@ -359,11 +352,18 @@ function UserTableComponent() {
       rowSelection,
     },
   });
-  React.useEffect(() => {
-    fetchAllUsers();
-  }, []);
-  // Log or return the users array
-  console.log(users);
+
+  const { isLoading, data } = useQuery({
+    queryKey: ['get-users'],
+    queryFn: () => fetchAllUsers(),
+    onSuccess: (data) => {
+      setUsers(data);
+    },
+
+    onError: (err) => {
+      processError(err);
+    },
+  });
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>
@@ -432,50 +432,55 @@ function UserTableComponent() {
         </div>
       </div>
 
-      <Table className=''>
-        <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className='border-0   '>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} className='border-b border-b-black/0 px-4  text-black'>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row, index) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className=' py-3 font-medium'>
-                    {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    {/* </Link> */}
-                  </TableCell>
-                ))}
+      <FeaturedLoader isLoading={isLoading}>
+        <Table className=''>
+          <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className='border-0   '>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className='border-b border-b-black/0 px-4  text-black'
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className='h-[400px] text-center'>
-                <div>
-                  <p className='text-base font-semibold text-gray-500'>No Project Records</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row, index) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className=' py-3 font-medium'>
+                      {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* </Link> */}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className='h-[400px] text-center'>
+                  <div>
+                    <p className='text-base font-semibold text-gray-500'>No Users Records</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </FeaturedLoader>
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>

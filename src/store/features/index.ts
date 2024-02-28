@@ -5,6 +5,8 @@ export type FeaturesStateType = {
   setCategories: (arg: any) => void;
   subcategories: any;
   setSubcategories: (arg: any) => void;
+  isLoading: boolean;
+  setLoading: (arg: boolean) => void;
 };
 
 const featuresSlice: StateCreator<FeaturesStateType, [['zustand/devtools', never]], []> = (
@@ -12,6 +14,10 @@ const featuresSlice: StateCreator<FeaturesStateType, [['zustand/devtools', never
 ) => ({
   categories: [],
   subcategories: [],
+  isLoading: false,
+  setLoading: (arg) => {
+    set({ isLoading: arg });
+  },
   setSubcategories: (arg) => {
     set({ subcategories: arg });
   },

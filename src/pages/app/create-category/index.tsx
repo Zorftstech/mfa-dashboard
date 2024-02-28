@@ -125,6 +125,7 @@ const CreateCategory = () => {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     // switchTab(tabData[3]);
 
+    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
     const storage = getStorage();

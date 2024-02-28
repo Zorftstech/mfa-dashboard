@@ -125,6 +125,7 @@ const CreateSubCategory = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
     const storage = getStorage();

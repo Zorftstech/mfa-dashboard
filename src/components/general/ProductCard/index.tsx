@@ -39,7 +39,9 @@ const ProductCard = ({
           />
         </div>
         <div className='flex  w-full flex-col gap-1  '>
-          <h5 className='  text-[0.9rem] font-medium leading-[27px] text-primary-8'>{name}</h5>
+          <h5 className='  text-[0.9rem] font-medium capitalize leading-[27px] text-primary-8'>
+            {name}
+          </h5>
           <div className='flex'>
             <Star size={13} className='fill-primary-7  text-primary-7' />
             <Star size={13} className='fill-primary-7  text-primary-7' />

@@ -7,7 +7,7 @@ import Icon from 'utils/Icon';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { useState } from 'react';
 import BlogCard from 'components/general/ProductCard';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import contentService from 'services/content';
 import { processError } from 'helper/error';
 import { apiInterface, apiInterfaceV2, contentApiItemInterface } from 'types';

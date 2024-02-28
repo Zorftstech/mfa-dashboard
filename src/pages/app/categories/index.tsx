@@ -39,10 +39,10 @@ import {
 import { ChevronDown, Filter } from 'lucide-react';
 import CategoryModal from 'components/modal/CategoryModal';
 import contentService from 'services/content';
-import Icon from 'utils/Icon';
 import CategoryCard from 'components/general/CategoryCard';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from 'firebase';
+
+import Icon from 'utils/Icon';
+
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import useStore from 'store';
 type filterTypes =
@@ -61,39 +61,7 @@ const generalFilters: filterTypes[] = [
 
 const Categories = () => {
   const [position, setPosition] = useState('bottom');
-  const [loading, setLoading] = useState(false);
-  const { setCategories, categories, subcategories, setSubcategories } = useStore((state) => state);
-  async function fetchCategories() {
-    setLoading(true);
-    // Create a reference to the 'users' collection
-    const categoriesCollectionRef = collection(db, 'categories');
-    const subCategoriesCollectionRef = collection(db, 'subcategories');
-
-    try {
-      const querySnapshot = await getDocs(categoriesCollectionRef);
-      const querySnapshotSub = await getDocs(subCategoriesCollectionRef);
-
-      const categories: any = [];
-      const subCategories: any = [];
-
-      querySnapshot.forEach((doc) => {
-        categories.push({ id: doc.id, ...doc.data() });
-      });
-      querySnapshotSub.forEach((doc) => {
-        subCategories.push({ id: doc.id, ...doc.data() });
-      });
-      setCategories(categories);
-      setSubcategories(subCategories);
-    } catch (error) {
-      processError(error);
-      console.error('Error fetching categories:', error);
-      throw error;
-    }
-    setLoading(false);
-  }
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const { isLoading: loading, categories, subcategories } = useStore((state) => state);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[5.1rem]'>

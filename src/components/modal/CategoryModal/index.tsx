@@ -39,7 +39,7 @@ const CategoryModal = ({
             className='w-full rounded-md object-cover object-center md:h-[10rem]'
             alt=''
           />
-          <h4 className='  text-[0.7rem] font-[600]  tracking-[0.02rem] transition-all duration-500 ease-in-out md:text-[1rem]  md:tracking-[0.0225rem]'>
+          <h4 className='text-[0.7rem]  font-[600] capitalize  tracking-[0.02rem] transition-all duration-500 ease-in-out md:text-[1rem]  md:tracking-[0.0225rem]'>
             {title}
           </h4>
 

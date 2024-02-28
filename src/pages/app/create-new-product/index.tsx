@@ -42,7 +42,11 @@ import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
-
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection } from 'firebase/firestore';
+import { db } from 'firebase';
+import { useDropzone } from 'react-dropzone';
+import useStore from 'store';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -67,6 +71,9 @@ const FormSchema = z.object({
   category: z.string().min(2, {
     message: 'Please enter a valid category',
   }),
+  subcategory: z.string().min(2, {
+    message: 'Please enter a valid subcategory',
+  }),
   description: z.string().min(1, {
     message: 'Please enter a valid description',
   }),
@@ -88,11 +95,47 @@ const FormSchema = z.object({
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { categories, subcategories } = useStore((state) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [file, setFile] = React.useState<any>(null);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
 
+  const handleFileDrop = async (files: any) => {
+    setUploading(true);
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+
+    const formdata = new FormData();
+    formdata.append('file', files);
+
+    try {
+      console.log('====================================');
+      console.log('file', files);
+      console.log('====================================');
+    } catch (error) {
+      processError(error);
+    }
+
+    setUploading(false);
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
+  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: { nameYourPrice: false },
   });
 
   function extractErrorMessages(errors: ErrorMessages): string[] {
@@ -107,12 +150,68 @@ const CreateNewProduct = () => {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     // switchTab(tabData[3]);
 
-    console.log(data);
-
+    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
+    const storage = getStorage();
+    const storageRef = ref(storage, 'products/' + file?.name);
+
     try {
-      toast.success('Patient Created Successfully');
+      // Upload the file to Firebase Storage
+      await uploadBytes(storageRef, file)
+        .then((snapshot) => {
+          console.log('Uploaded a blob or file!', snapshot);
+
+          // Get the URL of the uploaded file
+          getDownloadURL(snapshot.ref)
+            .then((downloadURL) => {
+              console.log('File available at', downloadURL);
+
+              // Now you can proceed to create a Firestore document with this URL
+              const productsCollectionRef = collection(db, 'products');
+              const newProductRef = doc(productsCollectionRef);
+
+              const productData = {
+                name: data.productName,
+                desc: data.description,
+                image: downloadURL,
+                subcategory: {
+                  id: data.subcategory,
+                  name: subcategories.find(
+                    (subcategory: any) => subcategory.id === data.subcategory,
+                  )?.name,
+                },
+                category: {
+                  id: data.category,
+                  name: categories.find((category: any) => category.id === data.category)?.name,
+                },
+                price: data.price,
+                quantity: data.quantity,
+                unit: data.unit,
+                minimumPrice: data.minimumPrice,
+                nameYourPrice: data.nameYourPrice ? true : false,
+              };
+
+              // Add a new document in collection "categories"
+              setDoc(newProductRef, productData)
+                .then(() => {
+                  console.log(`New product document created with ID: ${newProductRef.id}`);
+                  toast.success('Product Created Successfully');
+                })
+                .catch((error) => {
+                  console.error('Error creating product document:', error);
+                });
+            })
+            .catch((error) => {
+              console.error('Error getting download URL:', error);
+            });
+        })
+        .catch((error) => {
+          console.error('Error uploading image:', error);
+        });
+      form.reset();
+      setImageUrl(null);
+      setFile(null);
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {
@@ -139,31 +238,6 @@ const CreateNewProduct = () => {
         </div>
 
         <div className='flex  gap-4'>
-          {/* <button
-            onClick={() => form.trigger()}
-            disabled={formIsLoading}
-            onClick={() => form.handleSubmit(onSubmit)()}
-            className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
-          >
-            {formIsLoading ? (
-              <Spinner />
-            ) : (
-              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Product
-              </span>
-            )}
-          </button> */}
-
-          {/* <SavePatientModal
-            trigger={
-              <button className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                  Create Product
-                </span>
-              </button>
-            }
-          ></SavePatientModal> */}
-
           <button
             onClick={() => navigate(-1)}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
@@ -175,7 +249,30 @@ const CreateNewProduct = () => {
         </div>
       </div>
       <div className='flex items-end justify-between'>
-        <UploadImageForm />
+        <section className=' rounded-xl    '>
+          <section {...getRootProps()}>
+            <input {...getInputProps()} />
+            {imageUrl ? (
+              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+                <img
+                  src={imageUrl}
+                  alt='Selected'
+                  className=' h-full w-full rounded-full object-cover object-center '
+                />{' '}
+                {/* Display the selected image */}
+                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+                </div>
+              </div>
+            ) : isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+              </div>
+            )}
+          </section>
+        </section>
       </div>
       <Form {...form}>
         <form
@@ -247,12 +344,39 @@ const CreateNewProduct = () => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className='bg-primary-1'>
-                        <SelectItem value='grains' className='py-3 text-sm text-white'>
-                          Grains
-                        </SelectItem>
-                        <SelectItem value='vegetables' className='py-3 text-sm text-white'>
-                          Vegetables
-                        </SelectItem>
+                        {categories?.map((category: any) => (
+                          <SelectItem value={category.id} className='py-3 text-sm text-white'>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <FormMessage className='mt-1 text-xs' />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='subcategory'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Subcategory
+                    </label>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
+                          <SelectValue placeholder='Select product subcategory' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className='bg-primary-1'>
+                        {subcategories?.map((subcategory: any) => (
+                          <SelectItem value={subcategory.id} className='py-3 text-sm text-white'>
+                            {subcategory.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
