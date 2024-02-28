@@ -31,6 +31,9 @@ import {
 import { EyeOff, Eye } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { authFirebase } from 'firebase';
+import { db } from 'firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { set } from 'date-fns';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -58,11 +61,30 @@ const Login = () => {
       const user = await signInWithEmailAndPassword(authFirebase, email, password);
       return user;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // setAuthDetails(data);
       setLoggedIn(true);
       setCurrentUser(data);
       navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+      // Create a reference to the document
+      const docRef = doc(db, 'users', data.user.uid);
+
+      // Retrieve the document
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        // Document exists, use the data
+        setAuthDetails({
+          ...docSnap.data(),
+          ...data['_tokenResponse'],
+          id: data.user.uid,
+        });
+        return docSnap.data(); // Return the document data
+      } else {
+        // Document does not exist
+        console.log('No such document!');
+        return null;
+      }
     },
     onError: (err) => {
       processError(err);

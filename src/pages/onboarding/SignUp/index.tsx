@@ -25,7 +25,7 @@ import {
 } from 'firebase/auth';
 import { authFirebase, db, storage } from 'firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import useStore from 'store';
 
 const SignUp = () => {
@@ -85,13 +85,33 @@ const SignUp = () => {
   const { mutate: doLoginAttempt } = useMutation<any, any, any>({
     mutationFn: async (params) => {
       const user = await signInWithEmailAndPassword(authFirebase, params.email, params.password);
+
       return user;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // setAuthDetails(data);
       setCurrentUser(data);
       setLoggedIn(true);
-      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+      // Create a reference to the document
+      const docRef = doc(db, 'users', data.user.uid);
+
+      // Retrieve the document
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        // Document exists, use the data
+        setAuthDetails({
+          ...docSnap.data(),
+          ...data['_tokenResponse'],
+          id: data.user.uid,
+        });
+        navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+        return docSnap.data(); // Return the document data
+      } else {
+        // Document does not exist
+        console.log('No such document!');
+        return null;
+      }
     },
     onError: (err) => {
       console.log(err);

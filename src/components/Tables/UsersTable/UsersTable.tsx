@@ -55,6 +55,9 @@ import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInf
 import EditWalletBalance from 'components/modal/EditWalletBalanceModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from 'firebase';
+import { set } from 'date-fns';
 export type User = {
   id: string;
   number: string;
@@ -67,64 +70,12 @@ export type User = {
   total: string;
 };
 
-const usersList = {
-  items: [
-    {
-      id: 1,
-      number: '+234 80234849',
-      name: 'Sadiq kepper',
-      city: 'Lagos',
-      status: 'scheduled',
-      email: 'sample@gmail.com',
-      orders: 5,
-      created: '2021-10-10',
-      total: 'N, 1,000,000',
-    },
-    {
-      id: 7,
-      number: '+234 80234849',
-      name: 'Sadiq kepper',
-      city: 'Lagos',
-      email: 'sample@gmail.com',
-      status: 'completed',
-      orders: 7,
-      created: '2021-10-10',
-      total: 'N, 2,000,000',
-    },
-    {
-      id: 3,
-      number: '+234 80234849',
-      name: 'Sadiq kepper',
-      city: 'Lagos',
-      status: 'scheduled',
-      email: 'Yema@gmail.com',
-      orders: 2,
-      created: '2021-10-10',
-      total: 'N, 3,000,000',
-    },
-  ],
-};
-
 function UserTableComponent() {
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  const [users, setUsers] = React.useState<any[]>([]);
 
   // refactor this
-  const data = React.useMemo(() => {
-    if (!usersList?.items) return [];
-
-    return usersList.items.map((i: any) => ({
-      id: i?.id,
-      number: i?.number?.slice(0, 10),
-      name: i?.name,
-      city: i?.city,
-      status: i?.status,
-      email: i?.email,
-      orders: i?.orders,
-      created: i?.created,
-      total: i?.total,
-    }));
-  }, [usersList]);
   const deletePage = async (id: string) => {
     setIsLoading(true);
     //     try {
@@ -138,9 +89,35 @@ function UserTableComponent() {
     //     }
     setIsLoading(false);
   };
-  const columns: ColumnDef<User>[] = [
+
+  async function fetchAllUsers() {
+    // Create a reference to the 'users' collection
+    const usersCollectionRef = collection(db, 'users');
+
+    try {
+      // Await the completion of the getDocs call
+      const querySnapshot = await getDocs(usersCollectionRef);
+
+      // Initialize an array to hold user data
+      const users: any = [];
+
+      // Iterate over each document in the querySnapshot
+      querySnapshot.forEach((doc) => {
+        // Add the document data (and potentially the document ID) to the users array
+        users.push({ id: doc.id, ...doc.data() });
+      });
+      setUsers(users);
+
+      return users;
+    } catch (error) {
+      // Handle any errors that occur during the fetch operation
+      console.error('Error fetching users:', error);
+      throw error; // or handle it as needed
+    }
+  }
+  const columns: ColumnDef<any>[] = [
     {
-      accessorKey: 'name',
+      accessorKey: 'displayName',
       header: ({ column }) => {
         return (
           <Button
@@ -155,7 +132,7 @@ function UserTableComponent() {
       },
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-[0.71rem] capitalize'>{row.getValue('name')}</div>
+        <div className='text-[0.71rem] capitalize'>{row.getValue('displayName')}</div>
         // </Link>
       ),
       enableHiding: false,
@@ -363,7 +340,7 @@ function UserTableComponent() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: users,
     columns,
 
     onSortingChange: setSorting,
@@ -381,6 +358,11 @@ function UserTableComponent() {
       rowSelection,
     },
   });
+  React.useEffect(() => {
+    fetchAllUsers();
+  }, []);
+  // Log or return the users array
+  console.log(users);
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>
@@ -496,7 +478,7 @@ function UserTableComponent() {
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>
-          Showing {table.getRowModel().rows?.length ?? 0} of {data.length} results
+          Showing {table.getRowModel().rows?.length ?? 0} of {users?.length} results
         </div>
         <div className='space-x-2'>
           <Button

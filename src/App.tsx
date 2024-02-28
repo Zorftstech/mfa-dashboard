@@ -13,12 +13,12 @@ import useStore from 'store';
 
 function App() {
   // TODO: refresh auth on reload
-  const { setCurrentUser } = useStore((state) => state);
+  const { setCurrentUser, authDetails } = useStore((state) => state);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(authFirebase, (user) => {
       // setCurrentUser(user);
-      console.log(user);
+      // console.log(user);
     });
 
     return () => {
