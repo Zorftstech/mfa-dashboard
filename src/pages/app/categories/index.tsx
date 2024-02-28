@@ -160,6 +160,7 @@ const Categories = () => {
                 img={item?.image}
                 desc={item?.desc}
                 subcategories={item?.subcategories}
+                isSubcategory={false}
               ></CategoryModal>
             ))}
           </div>
@@ -183,17 +184,17 @@ const Categories = () => {
         <FeaturedLoader isLoading={loading}>
           <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
             {subcategories?.map((item: any, idx: number) => (
-              <div key={idx} className='h-full w-full'>
-                <CategoryCard img={item?.image} name={item?.name} link={item?.id} />
-              </div>
-              // <CategoryModal
-              //   trigger={
-
-              //   }
-              //   title={item?.name}
-              //   img={item?.image}
-              //   desc={item?.desc}
-              // ></CategoryModal>
+              <CategoryModal
+                trigger={
+                  <div key={idx} className='h-full w-full'>
+                    <CategoryCard img={item?.image} name={item?.name} link={item?.id} />
+                  </div>
+                }
+                title={item?.name}
+                img={item?.image}
+                desc={item?.desc}
+                isSubcategory={true}
+              ></CategoryModal>
             ))}
           </div>
         </FeaturedLoader>

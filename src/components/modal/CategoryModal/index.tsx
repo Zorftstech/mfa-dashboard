@@ -11,9 +11,18 @@ interface Iprop {
   img?: string;
   desc?: string;
   subcategories?: any[];
+  isSubcategory?: boolean;
 }
 
-const CategoryModal = ({ trigger, triggerClassName, title, img, desc, subcategories }: Iprop) => {
+const CategoryModal = ({
+  trigger,
+  triggerClassName,
+  title,
+  img,
+  desc,
+  subcategories,
+  isSubcategory,
+}: Iprop) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   console.log('subcategories', subcategories);
@@ -35,10 +44,12 @@ const CategoryModal = ({ trigger, triggerClassName, title, img, desc, subcategor
           </h4>
 
           <h2 className=' text-[0.7rem] font-[400] leading-[1.2rem] '>{desc}</h2>
-          <p className='text-[0.65rem]'>
-            <span className='font-bold'>Sub-categories:</span>{' '}
-            {subcategories?.map((item: any) => item?.name).join(', ')}
-          </p>
+          {!isSubcategory && (
+            <p className='text-[0.65rem]'>
+              <span className='font-bold'>Sub-categories:</span>{' '}
+              {subcategories?.map((item: any) => item?.name).join(', ')}
+            </p>
+          )}
 
           <button
             onClick={() => {
@@ -47,7 +58,7 @@ const CategoryModal = ({ trigger, triggerClassName, title, img, desc, subcategor
             className='group flex items-center justify-center gap-2 rounded-[5px] border border-primary-1   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-primary-1  '>
-              Edit Category
+              Edit {isSubcategory ? 'Subcategory' : 'Category'}
             </span>
           </button>
         </section>
