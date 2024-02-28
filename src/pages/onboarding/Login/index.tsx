@@ -29,6 +29,8 @@ import {
   FormDescription,
 } from 'components/shadcn/ui/form';
 import { EyeOff, Eye } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { authFirebase } from 'firebase';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ const Login = () => {
 
   const {
     register,
+
     handleSubmit,
     trigger,
     formState: { errors },
@@ -51,23 +54,28 @@ const Login = () => {
   });
 
   const { mutate, isLoading } = useMutation<authDetailsInterface, any, customerLoginFormInterface>({
-    mutationFn: ({ email, password }) =>
+    mutationFn: async ({ email, password }) =>
       customerService.customerLogin({
         email,
         password,
       }),
     onSuccess: (data) => {
-      setAuthDetails(data);
-      setLoggedIn(true);
-      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+      // setAuthDetails(data);
+      // setLoggedIn(true);
+      // navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
     },
     onError: (err) => {
       processError(err);
     },
   });
 
-  const onSubmit: SubmitHandler<customerLoginFormInterface> = (data) => {
-    mutate(data);
+  const onSubmit: SubmitHandler<customerLoginFormInterface> = async (data) => {
+    try {
+      const user = await signInWithEmailAndPassword(authFirebase, data.email, data.password);
+      console.log(user);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
@@ -184,7 +192,8 @@ const Login = () => {
             </div>
 
             <button
-              onClick={() => navigate('/app/dashboard')}
+              onClick={() => trigger()}
+              type='submit'
               disabled={isLoading}
               className=' w-full rounded-[8px] bg-primary-1 py-2 text-xs font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
             >

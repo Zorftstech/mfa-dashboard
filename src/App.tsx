@@ -6,10 +6,25 @@ import ExternalLayout from 'layouts/external-layout';
 import AppLayout from 'layouts/app-layout';
 import checkOutRoutes from 'routes/checkout';
 import { Toaster, resolveValue } from 'react-hot-toast';
+import { createContext, useEffect, useState } from 'react';
+import { authFirebase } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import useStore from 'store';
 
 function App() {
   // TODO: refresh auth on reload
+  const { setCurrentUser } = useStore((state) => state);
 
+  useEffect(() => {
+    const unsub = onAuthStateChanged(authFirebase, (user) => {
+      setCurrentUser(user);
+      console.log(user);
+    });
+
+    return () => {
+      unsub();
+    };
+  }, []);
   return (
     <>
       <Toaster position='top-right'>

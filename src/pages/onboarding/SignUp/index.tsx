@@ -78,7 +78,8 @@ const SignUp = () => {
   });
 
   const onSubmit: SubmitHandler<SignUpFormInterface> = (data) => {
-    mutate(data);
+    console.log(data);
+    // mutate(data);
   };
 
   return (
