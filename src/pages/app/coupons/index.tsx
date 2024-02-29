@@ -36,55 +36,37 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
-import OrdersTableComponent from 'components/Tables/OrdersTable/OrdersTable';
-import BtsCard from 'components/general/BtsCard';
-import AssetCard from 'components/general/AssetCard';
-import AdvertCard from 'components/general/AdvertCard';
-import ProductCard from 'components/general/ProductCard';
 
-import MasterClassCard from 'components/general/MasterClassCard';
-
-import contentService from 'services/content';
 import Icon from 'utils/Icon';
 import CouponCard from 'components/general/CouponCard';
-
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from 'firebase';
+import FeaturedLoader from 'components/Loaders/FeaturedLoader';
+import { formatDate } from 'lib/utils';
 const CouponPage = () => {
   const [position, setPosition] = useState('bottom');
 
-  // const [templateExpanded, setTemplateExpanded] = useState(false);
-  // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
-  //   null,
-  // );
-  // const [downloadConfirmationOpen, setDownloadConfirmationOpen] = useState(false);
-  // const [stagedFile, setStagedFile] = useState('');
-  // const [searchparams] = useSearchParams();
+  async function fetchProducts() {
+    const couponCollectionsRef = collection(db, 'couponCodes');
 
-  // const { data, isLoading } = useQuery<apiInterface<productInterface[]>>({
-  //   queryKey: ['get-assets-templates'],
-  //   queryFn: () =>
-  //     productService.getProduct({
-  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-  //     }),
-  //   onError: (err) => {
-  //     processError(err);
-  //   },
-  // });
+    const querySnapshot = await getDocs(couponCollectionsRef);
 
-  // const doFileDownLoad = () => {
-  //   setDownloadConfirmationOpen(false);
-  //   FileSaver.saveAs(stagedFile);
-  // };
+    const coupons: any = [];
 
-  // useEffect(() => {
-  //   const targetedId = searchparams.get('open');
-  //   if (targetedId) {
-  //     const item = data?.items?.find((i) => i?.id === targetedId);
-  //     if (item) {
-  //       setCurrentFocusedTemplate(item);
-  //       setTemplateExpanded(true);
-  //     }
-  //   }
-  // }, [searchparams, data]);
+    querySnapshot.forEach((doc) => {
+      coupons.push({ id: doc.id, ...doc.data() });
+    });
+    return coupons;
+  }
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['getCoupons'],
+    queryFn: () => fetchProducts(),
+
+    onError: (err) => {
+      processError(err);
+    },
+  });
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
@@ -132,20 +114,21 @@ const CouponPage = () => {
           Add Coupon
         </span>
       </Link>
-
-      <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4'>
-        {[...Array(5)]?.map((_, idx) => (
-          <div key={idx} className='h-full w-full'>
-            <CouponCard
-              purpose='Christmas Voucher'
-              discount='3'
-              name='Christmas24'
-              link='a7f1477dc36041aabd2c40d5c8598e3f'
-              date='2nd Jan, 2025'
-            />
-          </div>
-        ))}
-      </div>
+      <FeaturedLoader isLoading={isLoading}>
+        <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4'>
+          {data?.map((item: any, idx: number) => (
+            <div key={idx} className='h-full w-full'>
+              <CouponCard
+                purpose={item?.purpose}
+                discount={item?.discountAmount}
+                name={item?.code.slice(0, 14)}
+                link={`/${item?.id}`}
+                date={formatDate(new Date(item?.expirationDate.seconds * 1000).toString())}
+              />
+            </div>
+          ))}
+        </div>
+      </FeaturedLoader>
     </div>
   );
 };

@@ -25,7 +25,7 @@ const CouponCard = ({
   return (
     <div className='group  flex h-max w-full cursor-pointer flex-col items-center justify-between gap-4 rounded-2xl bg-primary-10 px-4 py-4  shadow-md transition-all duration-300 ease-in-out'>
       <div>
-        <p className='text-center text-[0.9rem] leading-[27px] '>{purpose}</p>
+        <p className='text-center text-[0.9rem] capitalize leading-[27px]'>{purpose}</p>
         <p className='text-center text-[0.85rem] font-[300] leading-[27px] '>
           {`${discount}%`} discount
         </p>
@@ -35,7 +35,7 @@ const CouponCard = ({
           onClick={() => {
             copyToClipboard(name, 'Coupon code copied to clipboard');
           }}
-          className='flex gap-2 text-center text-[1.1rem] font-[600] leading-[27px] text-primary-1 '
+          className='flex gap-2 text-center text-[1.1rem] font-[600] capitalize leading-[27px] text-primary-1 '
         >
           {name}
           <span>

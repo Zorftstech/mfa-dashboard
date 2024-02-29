@@ -48,13 +48,18 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import { cn, checkStatus } from 'lib/utils';
+import { cn, checkStatus, formatDate } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import EditWalletBalanceModal from 'components/modal/EditWalletBalanceModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from 'firebase';
+import { set } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import FeaturedLoader from 'components/Loaders/FeaturedLoader';
+import EditWalletBalanceModal from 'components/modal/EditWalletBalanceModal';
 export type User = {
   id: string;
   number: string;
@@ -67,66 +72,13 @@ export type User = {
   total: string;
 };
 
-const usersList = {
-  items: [
-    {
-      id: 1,
-      number: '+234 80234849',
-      name: 'Sadiq kepper',
-      city: 'Lagos',
-      status: 'scheduled',
-      email: 'sample@gmail.com',
-      orders: 5,
-      created: '2021-10-10',
-      total: 'N, 1,000,000',
-    },
-    {
-      id: 7,
-      number: '+234 80234849',
-      name: 'Sadiq kepper',
-      city: 'Lagos',
-      email: 'sample@gmail.com',
-      status: 'completed',
-      orders: 7,
-      created: '2021-10-10',
-      total: 'N, 2,000,000',
-    },
-    {
-      id: 3,
-      number: '+234 80234849',
-      name: 'Sadiq kepper',
-      city: 'Lagos',
-      status: 'scheduled',
-      email: 'Yema@gmail.com',
-      orders: 2,
-      created: '2021-10-10',
-      total: 'N, 3,000,000',
-    },
-  ],
-};
-
-function OrdersTableComponent() {
-  const [isLoading, setIsLoading] = React.useState(false);
+function UserTableComponent() {
   const navigate = useNavigate();
+  const [users, setUsers] = React.useState<any[]>([]);
 
   // refactor this
-  const data = React.useMemo(() => {
-    if (!usersList?.items) return [];
-
-    return usersList.items.map((i: any) => ({
-      id: i?.id,
-      number: i?.number?.slice(0, 10),
-      name: i?.name,
-      city: i?.city,
-      status: i?.status,
-      email: i?.email,
-      orders: i?.orders,
-      created: i?.created,
-      total: i?.total,
-    }));
-  }, [usersList]);
   const deletePage = async (id: string) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     //     try {
     //       const res = await API.delete(`/usersList/${id}`);
     //       toast.success('User deleted successfully');
@@ -136,11 +88,30 @@ function OrdersTableComponent() {
     //     } catch (error) {
     //       processError(error);
     //     }
-    setIsLoading(false);
+    // setIsLoading(false);
   };
-  const columns: ColumnDef<User>[] = [
+
+  async function fetchAllUsers() {
+    // Create a reference to the 'users' collection
+    const usersCollectionRef = collection(db, 'userOrders');
+
+    // Await the completion of the getDocs call
+    const querySnapshot = await getDocs(usersCollectionRef);
+
+    // Initialize an array to hold user data
+    const users: any = [];
+
+    // Iterate over each document in the querySnapshot
+    querySnapshot.forEach((doc) => {
+      // Add the document data (and potentially the document ID) to the users array
+      users.push({ id: doc.id, ...doc.data() });
+    });
+
+    return users;
+  }
+  const columns: ColumnDef<any>[] = [
     {
-      accessorKey: 'name',
+      accessorKey: 'orderNumber',
       header: ({ column }) => {
         return (
           <Button
@@ -148,20 +119,22 @@ function OrdersTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Name
+            Order Number
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-[0.71rem] capitalize'>{row.getValue('name')}</div>
+        <div className='text-[0.71rem] capitalize text-green-600'>
+          {row.getValue('orderNumber')}
+        </div>
         // </Link>
       ),
       enableHiding: false,
     },
     {
-      accessorKey: 'email',
+      accessorKey: 'driver',
       header: ({ column }) => {
         return (
           <Button
@@ -169,7 +142,7 @@ function OrdersTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Email
+            Driver
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
@@ -177,13 +150,13 @@ function OrdersTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-[0.71rem]  '>{row.getValue('email')}</p>
+          <p className='text-center text-[0.71rem]  '>{row.getValue('driver')}</p>
         </div>
         // </Link>
       ),
     },
     {
-      accessorKey: 'city',
+      accessorKey: 'items',
       header: ({ column }) => {
         return (
           <Button
@@ -191,7 +164,7 @@ function OrdersTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            City
+            Items
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
@@ -199,14 +172,14 @@ function OrdersTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-[0.71rem]  '>{row.getValue('city')}</p>
+          <p className='text-center text-[0.71rem]  '>{row.getValue('items')}</p>
         </div>
         // </Link>
       ),
     },
 
     {
-      accessorKey: 'number',
+      accessorKey: 'user',
       header: ({ column }) => {
         return (
           <Button
@@ -214,7 +187,7 @@ function OrdersTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Number
+            Customer
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
@@ -222,29 +195,7 @@ function OrdersTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>{row.getValue('number')}</p>
-        </div>
-        // </Link>
-      ),
-    },
-    {
-      accessorKey: 'orders',
-      header: ({ column }) => {
-        return (
-          <Button
-            className='px-0 text-[0.71rem]  font-semibold '
-            variant='ghost'
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Orders
-            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>{row.getValue('orders')}</p>
+          <p className='text-center text-[0.71rem] '>{row.getValue('user')?.name}</p>
         </div>
         // </Link>
       ),
@@ -255,7 +206,7 @@ function OrdersTableComponent() {
       header: ({ column }) => {
         return (
           <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Profile Status
+            Status
           </Button>
         );
       },
@@ -274,12 +225,12 @@ function OrdersTableComponent() {
       enableSorting: false,
     },
     {
-      id: 'created',
-      accessorKey: 'created',
+      id: 'delivery',
+      accessorKey: 'delivery',
       header: ({ column }) => {
         return (
           <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Created
+            Time of Delivery
           </Button>
         );
       },
@@ -288,29 +239,11 @@ function OrdersTableComponent() {
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='text-[0.71rem] capitalize'>
           {/* {Number(row.original.id) * 1245632} */}
-          {row.getValue('created')}
+          {formatDate(new Date(row.getValue('delivery') * 1000).toString())}
+          {/* {row.getValue('delivery')} */}
         </div>
         // </Link>
       ),
-    },
-    {
-      accessorKey: 'total',
-      header: ({ column }) => {
-        return (
-          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Total
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className={`w-fit  text-[0.71rem] capitalize`}>
-          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
-          {row.getValue('total')}
-        </div>
-        // </Link>
-      ),
-      enableSorting: false,
     },
 
     {
@@ -363,7 +296,7 @@ function OrdersTableComponent() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: users,
     columns,
 
     onSortingChange: setSorting,
@@ -379,6 +312,18 @@ function OrdersTableComponent() {
       columnFilters,
       columnVisibility,
       rowSelection,
+    },
+  });
+
+  const { isLoading, data } = useQuery({
+    queryKey: ['get-users'],
+    queryFn: () => fetchAllUsers(),
+    onSuccess: (data) => {
+      setUsers(data);
+    },
+
+    onError: (err) => {
+      processError(err);
     },
   });
 
@@ -449,54 +394,59 @@ function OrdersTableComponent() {
         </div>
       </div>
 
-      <Table className=''>
-        <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className='border-0   '>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} className='border-b border-b-black/0 px-4  text-black'>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row, index) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className=' py-3 font-medium'>
-                    {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    {/* </Link> */}
-                  </TableCell>
-                ))}
+      <FeaturedLoader isLoading={isLoading}>
+        <Table className=''>
+          <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className='border-0   '>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className='border-b border-b-black/0 px-4  text-black'
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className='h-[400px] text-center'>
-                <div>
-                  <p className='text-base font-semibold text-gray-500'>No Project Records</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row, index) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className=' py-3 font-medium'>
+                      {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* </Link> */}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className='h-[400px] text-center'>
+                  <div>
+                    <p className='text-base font-semibold text-gray-500'>No Users Records</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </FeaturedLoader>
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>
-          Showing {table.getRowModel().rows?.length ?? 0} of {data.length} results
+          Showing {table.getRowModel().rows?.length ?? 0} of {users?.length} results
         </div>
         <div className='space-x-2'>
           <Button
@@ -526,4 +476,4 @@ function OrdersTableComponent() {
   );
 }
 
-export default OrdersTableComponent;
+export default UserTableComponent;

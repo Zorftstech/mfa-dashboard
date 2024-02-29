@@ -37,7 +37,7 @@ import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
 import API from 'services';
-import toast from 'helper';
+import toast, { generateCouponCode } from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
@@ -45,6 +45,8 @@ import { Switch } from 'components/shadcn/switch';
 import { Popover, PopoverContent, PopoverTrigger } from 'components/shadcn/popover';
 import { Calendar } from 'components/shadcn/ui/calendar';
 import { format } from 'date-fns';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from 'firebase';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -95,14 +97,38 @@ const CreateCoupon = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    console.log(data);
-
     setFormIsLoading(true);
 
     try {
-      toast.success('Patient Created Successfully');
+      // Example usage
+      const couponData = {
+        code: generateCouponCode(data.couponName).slice(0, 15),
+        discountType: 'percentage',
+        discountAmount: data.discount,
+        expirationDate: data.dateToExpire,
+        minSpend: 50,
+        applicableProducts: [],
+        applicableCategories: [],
+        oneTimeUse: true,
+        isActive: true,
+        purpose: data.purpose,
+        name: data.couponName,
+      };
+      const docRef = await addDoc(collection(db, 'couponCodes'), {
+        code: couponData.code,
+        discountType: couponData.discountType,
+        discountAmount: couponData.discountAmount,
+        expirationDate: couponData.expirationDate, // Make sure this is a Firestore Timestamp
+        minSpend: couponData.minSpend || null, // Optional field
+        applicableProducts: couponData.applicableProducts || [], // Optional field
+        applicableCategories: couponData.applicableCategories || [], // Optional field
+        oneTimeUse: couponData.oneTimeUse,
+        isActive: couponData.isActive,
+        name: couponData.name,
+        purpose: couponData.purpose,
+      });
+
+      toast.success('Coupon Created Successfully');
     } catch (error: any) {
       processError(error);
       extractErrorMessages(error?.response?.data).forEach((err) => {

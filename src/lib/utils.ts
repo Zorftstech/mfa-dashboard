@@ -12,7 +12,7 @@ export const formatDate = (i: string) => {
 export const checkStatus = (status: string) => {
   switch (status) {
     case 'completed':
-      return 'text-primary-1';
+      return 'text-green-600';
     case 'scheduled':
       return 'text-yellow-400';
     case 'in progress':

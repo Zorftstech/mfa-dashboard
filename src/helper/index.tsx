@@ -93,3 +93,15 @@ function getCurrentDateTime() {
 
   return formattedDate;
 }
+export function generateCouponCode(couponName: string): string {
+  // Remove non-alphanumeric characters and convert to uppercase
+  const sanitizedCouponName = couponName.replace(/\W/g, '').toUpperCase();
+
+  // Get current timestamp
+  const timestamp = Date.now();
+
+  // Combine sanitized coupon name and timestamp
+  const couponCode = `${sanitizedCouponName}_${timestamp}`;
+
+  return couponCode;
+}
