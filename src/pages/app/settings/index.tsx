@@ -56,37 +56,36 @@ interface ErrorMessages {
   [key: string]: string[];
 }
 
-const FormSchema = z
-  .object({
-    fullName: z.string().min(2, {
-      message: 'Please enter a valid name',
-    }),
+const FormSchema = z.object({
+  fullName: z.string().min(2, {
+    message: 'Please enter a valid name',
+  }),
 
-    email: z
-      .string()
-      .min(1, {
-        message: 'Please enter a valid email',
-      })
-      .email({
-        message: 'Please enter a valid email',
-      }),
-    oldPassword: z
-      .string()
-      .min(8, {
-        message: 'Password must be at least 8 characters long',
-      })
-      .optional(),
-    newPassword: z
-      .string()
-      .min(8, {
-        message: 'Password must be at least 8 characters long',
-      })
-      .optional(),
-  })
-  .refine((data) => data.newPassword !== '', {
-    message: 'please enter your old password',
-    path: ['newPassword'],
-  });
+  // email: z
+  //   .string()
+  //   .min(1, {
+  //     message: 'Please enter a valid email',
+  //   })
+  //   .email({
+  //     message: 'Please enter a valid email',
+  //   }),
+  // oldPassword: z
+  //   .string()
+  //   .min(8, {
+  //     message: 'Password must be at least 8 characters long',
+  //   })
+  //   .optional(),
+  // newPassword: z
+  //   .string()
+  //   .min(8, {
+  //     message: 'Password must be at least 8 characters long',
+  //   })
+  //   .optional(),
+});
+// .refine((data) => data.newPassword !== '', {
+//   message: 'please enter your old password',
+//   path: ['newPassword'],
+// });
 const AccountSettingPage = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
@@ -180,7 +179,7 @@ const AccountSettingPage = () => {
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name='email'
               render={({ field }) => (
@@ -201,9 +200,8 @@ const AccountSettingPage = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            />
-            <p className='text-lg font-semibold'>Password changes</p>
-            <FormField
+            /> */}
+            {/* <FormField
               control={form.control}
               name='oldPassword'
               render={({ field }) => (
@@ -247,7 +245,7 @@ const AccountSettingPage = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            />
+            /> */}
           </section>
 
           <button
@@ -271,15 +269,35 @@ const AccountSettingPage = () => {
               </span>
             )}
           </button>
-
-          <p className='invisible'>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo
-            dolore? Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores
-            unde, corrupti iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores,
-            eos!
-          </p>
         </form>
       </Form>
+      <p className='text-lg font-semibold'>Password changes</p>
+      <button
+        type='button'
+        className={cn(
+          `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
+            form.formState.isSubmitting
+              ? 'cursor-not-allowed bg-gray-500 font-[700]'
+              : 'cursor-pointer'
+          } `,
+        )}
+        disabled={form.formState.isSubmitting}
+      >
+        {form.formState.isSubmitting ? (
+          <div className='px-5 py-1'>
+            <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
+          </div>
+        ) : (
+          <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
+            Request Password Change Link
+          </span>
+        )}
+      </button>
+      <p className='invisible'>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo dolore?
+        Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores unde, corrupti
+        iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores, eos!
+      </p>
     </div>
   );
 };

@@ -61,14 +61,14 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  email: z
-    .string()
-    .min(1, {
-      message: 'Please enter a valid email',
-    })
-    .email({
-      message: 'Please enter a valid email',
-    }),
+  // email: z
+  //   .string()
+  //   .min(1, {
+  //     message: 'Please enter a valid email',
+  //   })
+  //   .email({
+  //     message: 'Please enter a valid email',
+  //   }),
 });
 const UserProfilePage = () => {
   const { location } = useUserLocation();
@@ -165,7 +165,7 @@ const UserProfilePage = () => {
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name='email'
               render={({ field }) => (
@@ -186,7 +186,7 @@ const UserProfilePage = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            />
+            /> */}
           </section>
 
           <button
