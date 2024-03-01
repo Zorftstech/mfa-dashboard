@@ -43,8 +43,11 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from 'firebase';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { formatDate } from 'lib/utils';
+import useStore from 'store';
+import { StoreType } from 'store';
 const CouponPage = () => {
   const [position, setPosition] = useState('bottom');
+  const { setEditData, setIsEditing } = useStore((state: StoreType) => state);
 
   async function fetchProducts() {
     const couponCollectionsRef = collection(db, 'couponCodes');
@@ -106,6 +109,10 @@ const CouponPage = () => {
         </div>
       </div>
       <Link
+        onClick={() => {
+          setIsEditing(false);
+          setEditData(null);
+        }}
         to={`/app/${CONSTANTS.ROUTES['create-coupon']}`}
         className='group flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
       >
@@ -119,6 +126,7 @@ const CouponPage = () => {
           {data?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <CouponCard
+                item={item}
                 purpose={item?.purpose}
                 discount={item?.discountAmount}
                 name={item?.code.slice(0, 14)}

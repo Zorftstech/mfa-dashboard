@@ -4,13 +4,15 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { useNavigate } from 'react-router-dom';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { copyToClipboard } from 'helper';
-
+import useStore from 'store';
+import { StoreType } from 'store';
 interface ICouponCard {
   purpose: string;
   date: string | number;
   name: string;
   link?: string;
   discount: string | number;
+  item?: any;
 }
 
 const CouponCard = ({
@@ -18,9 +20,11 @@ const CouponCard = ({
   discount,
   date,
   name,
+  item,
   link = `/${CONSTANTS.ROUTES.blogs}/test-blog`,
 }: ICouponCard) => {
   const navigate = useNavigate();
+  const { setEditData, setIsEditing } = useStore((state: StoreType) => state);
 
   return (
     <div className='group  flex h-max w-full cursor-pointer flex-col items-center justify-between gap-4 rounded-2xl bg-primary-10 px-4 py-4  shadow-md transition-all duration-300 ease-in-out'>
@@ -49,6 +53,9 @@ const CouponCard = ({
 
       <button
         onClick={() => {
+          setEditData(item);
+          setIsEditing(true);
+
           navigate(`/app/${CONSTANTS.ROUTES['create-coupon']}?edit=true&category=${name}`);
         }}
         className='group flex w-full items-center justify-center gap-2 rounded-[8px] border border-primary-1   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'

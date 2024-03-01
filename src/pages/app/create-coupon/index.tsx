@@ -45,8 +45,10 @@ import { Switch } from 'components/shadcn/switch';
 import { Popover, PopoverContent, PopoverTrigger } from 'components/shadcn/popover';
 import { Calendar } from 'components/shadcn/ui/calendar';
 import { format } from 'date-fns';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from 'firebase';
+import useStore from 'store';
+import { StoreType } from 'store';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -70,7 +72,7 @@ const FormSchema = z.object({
     message: 'Please enter a valid purpose',
   }),
   dateToExpire: z.date({
-    required_error: 'A date of birth is required.',
+    required_error: 'a date is required',
   }),
 
   discount: z.string().min(1, {
@@ -80,11 +82,18 @@ const FormSchema = z.object({
 const CreateCoupon = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { setEditData, setIsEditing, isEditing, editData } = useStore((state: StoreType) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      couponName: isEditing ? editData.name : '',
+      purpose: isEditing ? editData.purpose : '',
+      // dateToExpire: isEditing ? editData.expirationDate : '',
+      discount: isEditing ? editData.discountAmount : '',
+    },
   });
 
   function extractErrorMessages(errors: ErrorMessages): string[] {
@@ -96,11 +105,15 @@ const CreateCoupon = () => {
     }
     return messages;
   }
+
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
 
     try {
-      // Example usage
+      // Generate a unique coupon code based on the coupon name
+      const couponCode = generateCouponCode(data.couponName).slice(0, 15);
+
+      // Prepare the coupon data for Firestore
       const couponData = {
         code: generateCouponCode(data.couponName).slice(0, 15),
         discountType: 'percentage',
@@ -114,49 +127,68 @@ const CreateCoupon = () => {
         purpose: data.purpose,
         name: data.couponName,
       };
-      const docRef = await addDoc(collection(db, 'couponCodes'), {
-        code: couponData.code,
-        discountType: couponData.discountType,
-        discountAmount: couponData.discountAmount,
-        expirationDate: couponData.expirationDate, // Make sure this is a Firestore Timestamp
-        minSpend: couponData.minSpend || null, // Optional field
-        applicableProducts: couponData.applicableProducts || [], // Optional field
-        applicableCategories: couponData.applicableCategories || [], // Optional field
-        oneTimeUse: couponData.oneTimeUse,
-        isActive: couponData.isActive,
-        name: couponData.name,
-        purpose: couponData.purpose,
-      });
 
-      toast.success('Coupon Created Successfully');
-    } catch (error: any) {
-      processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      // Decide whether to create a new document or update an existing one
+      if (isEditing && editData?.id) {
+        // Update the existing document with new data
+        const docRef = doc(db, 'couponCodes', editData.id);
+        await updateDoc(docRef, couponData);
+        toast.success('Coupon updated successfully.');
+      } else {
+        // Create a new document in the 'coupons' collection
+        const collectionRef = collection(db, 'couponCodes');
+        await addDoc(collectionRef, couponData);
+        toast.success('Coupon created successfully.');
+      }
+
+      // Post-operation cleanup: reset form, loading state, etc.
+      form.reset();
+      setIsEditing(false); // Reset editing state if necessary
+      setEditData(null); // Clear any edit data
+      navigate(-1); // Optionally navigate away or to a success page
+    } catch (error) {
+      console.error('Error creating/updating coupon:', error);
+      toast.error('Failed to create/update coupon. Please try again.');
+      processError(error); // Handle error appropriately
+    } finally {
+      setFormIsLoading(false); // Ensure loading state is reset
     }
-    setFormIsLoading(false);
   }
-
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8  px-container-md pb-[2.1rem]'>
       <div className='mb-8 flex  w-full items-center justify-between gap-4 md:flex-row'>
         <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
-          <button onClick={() => navigate(-1)}>
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+              navigate(-1);
+            }}
+          >
             <ChevronLeft className='h-6 w-6 font-light' />
           </button>
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Coupon creation</h3>
-              <p className='text-[0.75rem] '>This will add a new coupon to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>
+                {isEditing ? 'Edit Coupon' : 'Coupon creation'}
+              </h3>
+              <p className='text-[0.75rem] '>
+                {isEditing
+                  ? 'Edit the coupon details'
+                  : 'This will add a new coupon to your catalogue'}
+              </p>
             </div>
           </InlineLoader>
         </div>
 
         <div className='flex  gap-4'>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+              navigate(-1);
+            }}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
@@ -299,7 +331,7 @@ const CreateCoupon = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                Generate coupon code
+                {isEditing ? 'Update Coupon' : ' Generate coupon code'}
               </span>
             )}
           </button>
