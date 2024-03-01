@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import CONSTANTS from 'constant';
+import { StoreType } from 'store';
+
+import useStore from 'store';
 interface Iprop {
   trigger: JSX.Element;
   triggerClassName?: string;
@@ -12,6 +15,7 @@ interface Iprop {
   desc?: string;
   subcategories?: any[];
   isSubcategory?: boolean;
+  item?: any;
 }
 
 const CategoryModal = ({
@@ -22,10 +26,12 @@ const CategoryModal = ({
   desc,
   subcategories,
   isSubcategory,
+  item,
 }: Iprop) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
-  console.log('subcategories', subcategories);
+  const { setEditData, setIsEditing } = useStore((state: StoreType) => state);
+  const editLink = isSubcategory ? 'create-sub-category' : 'create-category';
 
   return (
     <Dialog onOpenChange={(i: boolean) => setModalOpen(i)} open={modalOpen}>
@@ -53,7 +59,9 @@ const CategoryModal = ({
 
           <button
             onClick={() => {
-              navigate(`/app/${CONSTANTS.ROUTES['create-category']}?edit=true&category=${title}`);
+              setEditData(item);
+              setIsEditing(true);
+              navigate(`/app/${CONSTANTS.ROUTES[editLink]}?edit=true&category=${title}`);
             }}
             className='group flex items-center justify-center gap-2 rounded-[5px] border border-primary-1   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >

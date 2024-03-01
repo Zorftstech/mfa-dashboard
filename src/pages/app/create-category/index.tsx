@@ -44,9 +44,11 @@ import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
+import useStore from 'store';
+
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -72,11 +74,12 @@ const FormSchema = z.object({
 const CreateCategory = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { isEditing, editData, setEditData, setIsEditing } = useStore((state) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
+  const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
     setUploading(true);
@@ -111,6 +114,10 @@ const CreateCategory = () => {
   });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      categoryName: editData?.name || '',
+      description: editData?.desc || '',
+    },
   });
 
   function extractErrorMessages(errors: ErrorMessages): string[] {
@@ -123,63 +130,50 @@ const CreateCategory = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
+    let downloadURL = imageUrl;
 
-    const storage = getStorage();
-    const storageRef = ref(storage, 'categories/' + file?.name);
+    if (file) {
+      const storageRef = ref(getStorage(), `categories/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      downloadURL = await getDownloadURL(snapshot.ref);
+    }
+
+    if (!downloadURL) {
+      toast.error('Image is required.');
+      setFormIsLoading(false);
+      return;
+    }
 
     try {
-      // Upload the file to Firebase Storage
-      await uploadBytes(storageRef, file)
-        .then((snapshot) => {
-          console.log('Uploaded a blob or file!', snapshot);
+      const categoryData = {
+        name: data.categoryName,
+        desc: data.description,
+        image: downloadURL,
+      };
 
-          // Get the URL of the uploaded file
-          getDownloadURL(snapshot.ref)
-            .then((downloadURL) => {
-              console.log('File available at', downloadURL);
+      if (isEditing && editData?.id) {
+        const docRef = doc(db, 'categories', editData.id);
+        await updateDoc(docRef, categoryData);
+        toast.success('Category updated successfully');
+      } else {
+        const collectionRef = collection(db, 'categories');
+        const docRef = doc(collectionRef);
+        await setDoc(docRef, categoryData);
+        toast.success('Category created successfully');
+      }
 
-              // Now you can proceed to create a Firestore document with this URL
-              const categoriesCollectionRef = collection(db, 'categories');
-              const newCategoryDocRef = doc(categoriesCollectionRef);
-
-              const categoryData = {
-                name: data.categoryName,
-                desc: data.description,
-                image: downloadURL,
-                subcategories: [],
-              };
-
-              // Add a new document in collection "categories"
-              setDoc(newCategoryDocRef, categoryData)
-                .then(() => {
-                  console.log(`New category document created with ID: ${newCategoryDocRef.id}`);
-                })
-                .catch((error) => {
-                  console.error('Error creating category document:', error);
-                });
-            })
-            .catch((error) => {
-              console.error('Error getting download URL:', error);
-            });
-        })
-        .catch((error) => {
-          console.error('Error uploading image:', error);
-        });
-      toast.success('Category Created Successfully');
       form.reset();
       setImageUrl(null);
       setFile(null);
-    } catch (error: any) {
+      setIsEditing(false);
+      navigate(-1);
+    } catch (error) {
       processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      toast.error('An error occurred, please try again.');
+    } finally {
+      setFormIsLoading(false);
     }
-    setFormIsLoading(false);
   }
 
   return (
@@ -192,8 +186,14 @@ const CreateCategory = () => {
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Add Category</h3>
-              <p className='text-[0.75rem] '>This will add a new category to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>
+                {isEditing ? 'Edit Category' : 'Add Category'}
+              </h3>
+              <p className='text-[0.75rem] '>
+                {isEditing
+                  ? 'Edit the category details and click the save button to update the category'
+                  : 'This will add a new category to your catalogue'}
+              </p>
             </div>
           </InlineLoader>
         </div>
@@ -308,7 +308,7 @@ const CreateCategory = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                Create Category
+                {isEditing ? 'Update Category' : 'Create Category'}
               </span>
             )}
           </button>

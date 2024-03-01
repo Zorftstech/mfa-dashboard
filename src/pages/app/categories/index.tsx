@@ -61,7 +61,13 @@ const generalFilters: filterTypes[] = [
 
 const Categories = () => {
   const [position, setPosition] = useState('bottom');
-  const { isLoading: loading, categories, subcategories } = useStore((state) => state);
+  const {
+    isLoading: loading,
+    categories,
+    subcategories,
+    setIsEditing,
+    setEditData,
+  } = useStore((state) => state);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[5.1rem]'>
@@ -105,6 +111,10 @@ const Categories = () => {
         <div className='flex items-center justify-between'>
           <p className='text-lg font-medium'>Categories</p>
           <Link
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+            }}
             to={`/app/${CONSTANTS.ROUTES['create-category']}`}
             className='group flex w-fit items-center justify-center gap-2    rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
           >
@@ -127,6 +137,7 @@ const Categories = () => {
                 title={item?.name}
                 img={item?.image}
                 desc={item?.desc}
+                item={item}
                 subcategories={item?.subcategories}
                 isSubcategory={false}
               ></CategoryModal>
@@ -139,6 +150,10 @@ const Categories = () => {
         <div className='flex items-center justify-between'>
           <p className='text-lg font-medium'>Sub-categories</p>
           <Link
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+            }}
             to={`/app/${CONSTANTS.ROUTES['create-sub-category']}`}
             className='group flex w-fit items-center justify-center gap-2    rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
           >
@@ -161,6 +176,7 @@ const Categories = () => {
                 title={item?.name}
                 img={item?.image}
                 desc={item?.desc}
+                item={item}
                 isSubcategory={true}
               ></CategoryModal>
             ))}

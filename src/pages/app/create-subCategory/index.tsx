@@ -73,12 +73,12 @@ const FormSchema = z.object({
 const CreateSubCategory = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
-  const { categories } = useStore((state) => state);
+  const { categories, isEditing, editData, setIsEditing, setEditData } = useStore((state) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
+  const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
     setUploading(true);
@@ -113,6 +113,11 @@ const CreateSubCategory = () => {
   });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      subCategoryName: editData?.name ?? '',
+      category: editData?.category?.id ?? '',
+      description: editData?.desc ?? '',
+    },
   });
 
   function extractErrorMessages(errors: ErrorMessages): string[] {
@@ -125,61 +130,60 @@ const CreateSubCategory = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
-    const storage = getStorage();
-    const storageRef = ref(storage, 'categories/' + file?.name);
-
     try {
-      const snapshot = await uploadBytes(storageRef, file);
-      console.log('Uploaded a blob or file!', snapshot);
+      let downloadURL = imageUrl; // Use existing imageUrl if not editing or no new file selected
 
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log('File available at', downloadURL);
+      // Only attempt upload if a new file is selected
+      if (file) {
+        const storageRef = ref(getStorage(), 'categories/' + file.name);
+        const snapshot = await uploadBytes(storageRef, file);
+        downloadURL = await getDownloadURL(snapshot.ref); // Update downloadURL with new image URL
+        console.log('Uploaded a blob or file!', snapshot);
+        console.log('File available at', downloadURL);
+      }
 
-      const subCategoriesCollectionRef = collection(db, 'subcategories');
-      const newSubCategoryRef = doc(subCategoriesCollectionRef);
+      if (!downloadURL) {
+        throw new Error('Image is required.');
+      }
 
       const subCategoryData = {
         name: data.subCategoryName,
         desc: data.description,
-        image: downloadURL,
+        image: downloadURL, // Use the latest downloadURL
         category: {
           id: data.category,
-          name: categories?.find((category: any) => category.id === data.category)?.name,
+          name: categories.find((category: any) => category.id === data.category)?.name,
         },
       };
 
-      await setDoc(newSubCategoryRef, subCategoryData);
-      console.log(`New subcategory document created with ID: ${newSubCategoryRef.id}`);
-
-      // Retrieve the parent category document
-      const categoryDocRef = doc(db, 'categories', data.category);
-      const categoryDoc = await getDoc(categoryDocRef);
-
-      if (categoryDoc.exists()) {
-        // Update the parent category with the new subcategory
-        const updatedSubcategories = [
-          ...(categoryDoc.data().subcategories || []),
-          { ...subCategoryData, id: newSubCategoryRef.id },
-        ];
-        await updateDoc(categoryDocRef, { subcategories: updatedSubcategories });
-        console.log(`Updated category document with new subcategory ID: ${newSubCategoryRef.id}`);
+      // Determine if creating a new sub-category or updating an existing one
+      if (isEditing && editData?.id) {
+        // Logic to update the existing sub-category
+        const subCategoryRef = doc(db, 'subcategories', editData.id);
+        await updateDoc(subCategoryRef, subCategoryData);
+        console.log(`Updated subcategory document with ID: ${editData.id}`);
+        navigate(-1);
+      } else {
+        // Logic to create a new sub-category
+        const subCategoriesCollectionRef = collection(db, 'subcategories');
+        const newSubCategoryRef = doc(subCategoriesCollectionRef);
+        await setDoc(newSubCategoryRef, subCategoryData);
+        console.log(`New subcategory document created with ID: ${newSubCategoryRef.id}`);
       }
 
-      toast.success('Subcategory Created Successfully');
-      form.reset();
-      setImageUrl(null);
-      setFile(null);
+      toast.success('Subcategory ' + (isEditing ? 'updated' : 'created') + ' successfully');
+      form.reset(); // Reset form state
+      setFile(null); // Clear selected file
+      setImageUrl(null); // Reset image URL
+      setIsEditing(false); // Reset editing state
+      // Optionally navigate or perform additional cleanup
     } catch (error: any) {
       console.error('Error:', error);
-      // Handle errors (showing toast notifications)
-      processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      toast.error('An error occurred. Please try again.');
     }
+
     setFormIsLoading(false);
   }
 
@@ -187,21 +191,37 @@ const CreateSubCategory = () => {
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8  px-container-md pb-[2.1rem]'>
       <div className='mb-8 flex  w-full items-center justify-between gap-4 md:flex-row'>
         <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
-          <button onClick={() => navigate(-1)}>
+          <button
+            onClick={() => {
+              navigate(-1);
+              setIsEditing(false);
+              setEditData(null);
+            }}
+          >
             <ChevronLeft className='h-6 w-6 font-light' />
           </button>
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Add Sub-category</h3>
-              <p className='text-[0.75rem] '>This will add a new sub-category to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>
+                {isEditing ? 'Edit' : 'Create'} Sub-category
+              </h3>
+              <p className='text-[0.75rem] '>
+                {isEditing
+                  ? 'Edit the sub-category details'
+                  : 'This will add a new sub-category to your catalogue'}
+              </p>
             </div>
           </InlineLoader>
         </div>
 
         <div className='flex  gap-4'>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              navigate(-1);
+              setIsEditing(false);
+              setEditData(null);
+            }}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
@@ -341,7 +361,7 @@ const CreateSubCategory = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                Create Sub-category
+                {isEditing ? 'Update' : '  Create Sub-category'}
               </span>
             )}
           </button>

@@ -9,19 +9,18 @@ interface ICategoryCard {
   mainCategory?: string | number;
   name: string;
   link?: string;
+  item?: any;
 }
 
-const CategoryCard = ({
-  img,
-  mainCategory,
-  name,
-  link = `/${CONSTANTS.ROUTES.blogs}/test-blog`,
-}: ICategoryCard) => {
+const CategoryCard = ({ img, mainCategory, name, item, link }: ICategoryCard) => {
   const navigate = useNavigate();
 
   return (
     <div
-      // onClick={() => navigate(link)}
+      // onClick={() => {
+
+      //   navigate(`/app/${CONSTANTS.ROUTES['create-category']}?editId=${link}`);
+      // }}
       className='group flex h-max w-full cursor-pointer flex-col justify-between rounded-2xl bg-slate-50 px-4 py-4 shadow-md  transition-all duration-300 ease-in-out'
     >
       <div className='flex flex-col gap-2'>
