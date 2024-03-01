@@ -43,7 +43,7 @@ import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
@@ -95,31 +95,19 @@ const FormSchema = z.object({
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
-  const { categories, subcategories } = useStore((state) => state);
+  const { categories, subcategories, isEditing, editData, setEditData, setIsEditing } = useStore(
+    (state) => state,
+  );
 
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
+  const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
-    setUploading(true);
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
     setImageUrl(fileUrl); // Store the URL in state
-
-    const formdata = new FormData();
-    formdata.append('file', files);
-
-    try {
-      console.log('====================================');
-      console.log('file', files);
-      console.log('====================================');
-    } catch (error) {
-      processError(error);
-    }
-
-    setUploading(false);
   };
   const onDrop = (acceptedFiles: any) => {
     handleFileDrop(acceptedFiles[0]);
@@ -135,111 +123,124 @@ const CreateNewProduct = () => {
   });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: { nameYourPrice: false },
+    defaultValues: {
+      nameYourPrice: false,
+      category: editData?.category?.id || '',
+      subcategory: editData?.subcategory?.id || '',
+      productName: editData?.name || '',
+      price: editData?.price || '',
+      description: editData?.desc || '',
+      unit: editData?.unit || '',
+      quantity: editData?.quantity || '',
+      minimumPrice: editData?.minimumPrice || '',
+    },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
-    const storage = getStorage();
-    const storageRef = ref(storage, 'products/' + file?.name);
-
     try {
-      // Upload the file to Firebase Storage
-      await uploadBytes(storageRef, file)
-        .then((snapshot) => {
-          console.log('Uploaded a blob or file!', snapshot);
+      // Initialize productData with common fields
+      let productData = {
+        name: data.productName,
+        desc: data.description,
+        subcategory: {
+          id: data.subcategory,
+          name: subcategories.find((sc: any) => sc.id === data.subcategory)?.name,
+        },
+        category: {
+          id: data.category,
+          name: categories.find((c: any) => c.id === data.category)?.name,
+        },
+        price: data.price,
+        quantity: data.quantity,
+        unit: data.unit,
+        minimumPrice: data.minimumPrice,
+        nameYourPrice: data.nameYourPrice ? true : false,
+      };
 
-          // Get the URL of the uploaded file
-          getDownloadURL(snapshot.ref)
-            .then((downloadURL) => {
-              console.log('File available at', downloadURL);
+      // Check if editing and a new file is provided
+      if (isEditing && file) {
+        const storageRef = ref(getStorage(), `products/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-              // Now you can proceed to create a Firestore document with this URL
-              const productsCollectionRef = collection(db, 'products');
-              const newProductRef = doc(productsCollectionRef);
+        // Add or update the image URL in product data
+        productData = { ...productData, image: downloadURL } as typeof productData & {
+          image: string;
+        };
+      }
 
-              const productData = {
-                name: data.productName,
-                desc: data.description,
-                image: downloadURL,
-                subcategory: {
-                  id: data.subcategory,
-                  name: subcategories.find(
-                    (subcategory: any) => subcategory.id === data.subcategory,
-                  )?.name,
-                },
-                category: {
-                  id: data.category,
-                  name: categories.find((category: any) => category.id === data.category)?.name,
-                },
-                price: data.price,
-                quantity: data.quantity,
-                unit: data.unit,
-                minimumPrice: data.minimumPrice,
-                nameYourPrice: data.nameYourPrice ? true : false,
-              };
+      if (isEditing) {
+        // Assuming `editData` contains the ID of the product to be edited
+        const productRef = doc(db, 'products', editData.id);
+        await setDoc(productRef, productData, { merge: true });
+        toast.success('Product updated successfully');
+      } else {
+        if (!file) throw new Error('Please upload an image for the new product');
+        // Proceed with new product creation, including initial image upload
+        const storageRef = ref(getStorage(), `products/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        productData = { ...productData, image: downloadURL } as typeof productData & {
+          image: string;
+        };
 
-              // Add a new document in collection "categories"
-              setDoc(newProductRef, productData)
-                .then(() => {
-                  console.log(`New product document created with ID: ${newProductRef.id}`);
-                  toast.success('Product Created Successfully');
-                })
-                .catch((error) => {
-                  console.error('Error creating product document:', error);
-                });
-            })
-            .catch((error) => {
-              console.error('Error getting download URL:', error);
-            });
-        })
-        .catch((error) => {
-          console.error('Error uploading image:', error);
-        });
-      form.reset();
-      setImageUrl(null);
+        const productsCollectionRef = collection(db, 'products');
+        await addDoc(productsCollectionRef, productData);
+        toast.success('Product created successfully');
+      }
+
+      // Cleanup and navigate back or to another page as needed
       setFile(null);
-    } catch (error: any) {
-      processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      setFormIsLoading(false);
+      if (isEditing) {
+        setIsEditing(false);
+        setEditData(null);
+      }
+      // navigate(-1) or any other post submission logic
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error ${isEditing ? 'updating' : 'creating'} product. Please try again.`);
+      setFormIsLoading(false);
     }
-    setFormIsLoading(false);
   }
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8  px-container-md pb-[2.1rem]'>
       <div className='mb-8 flex  w-full items-center justify-between gap-4 md:flex-row'>
         <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
-          <button onClick={() => navigate(-1)}>
+          <button
+            onClick={() => {
+              navigate(-1);
+              setIsEditing(false);
+              setEditData(null);
+            }}
+          >
             <ChevronLeft className='h-6 w-6 font-light' />
           </button>
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Add Product</h3>
-              <p className='text-[0.75rem] '>This will add a new product to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>
+                {isEditing ? 'Edit Product' : 'Add Product'}
+              </h3>
+              <p className='text-[0.75rem] '>
+                {isEditing
+                  ? 'Edit the product details below'
+                  : 'This will add a new product to your catalogue'}
+              </p>
             </div>
           </InlineLoader>
         </div>
 
         <div className='flex  gap-4'>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              navigate(-1);
+              setIsEditing(false);
+              setEditData(null);
+            }}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
@@ -514,7 +515,7 @@ const CreateNewProduct = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                Create Product
+                {isEditing ? 'Update Product' : 'Create Product'}
               </span>
             )}
           </button>

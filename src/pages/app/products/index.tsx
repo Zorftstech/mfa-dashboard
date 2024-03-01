@@ -52,7 +52,7 @@ import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 const ProductsPage = () => {
   const [position, setPosition] = useState('bottom');
-
+  const { setIsEditing, setEditData } = useStore((state) => state);
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'products');
 
@@ -113,6 +113,10 @@ const ProductsPage = () => {
         </div>
       </div>
       <Link
+        onClick={() => {
+          setIsEditing(false);
+          setEditData(null);
+        }}
         to={`/app/${CONSTANTS.ROUTES['create-new-product']}`}
         className='group flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
       >
@@ -126,10 +130,11 @@ const ProductsPage = () => {
           {data?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard
+                item={item}
                 img={item?.image || filmImg}
                 name={item?.name}
                 price={item?.price}
-                link={`/${item?.id}`}
+                link={`${item?.id}`}
                 rating={4.5}
               />
             </div>

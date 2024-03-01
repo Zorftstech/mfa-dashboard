@@ -3,8 +3,10 @@ import { Star, StarHalf } from 'lucide-react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { useNavigate } from 'react-router-dom';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
-
+import useStore from 'store';
+import { StoreType } from 'store';
 interface IProductCard {
+  item: any;
   img: string;
   price: string | number;
   name: string;
@@ -12,17 +14,17 @@ interface IProductCard {
   rating: string | number;
 }
 
-const ProductCard = ({
-  img,
-  price,
-  name,
-  link = `/${CONSTANTS.ROUTES.blogs}/test-blog`,
-}: IProductCard) => {
+const ProductCard = ({ img, price, name, link, item }: IProductCard) => {
+  const { setEditData, setIsEditing } = useStore((state: StoreType) => state);
   const navigate = useNavigate();
 
   return (
     <div
-      // onClick={() => navigate(link)}
+      onClick={() => {
+        setEditData(item);
+        setIsEditing(true);
+        navigate(`/app/${CONSTANTS.ROUTES['create-new-product']}?editId=${link}`);
+      }}
       className='group flex h-max w-full cursor-pointer flex-col justify-between rounded-2xl bg-slate-50 px-4 py-4 shadow-md  transition-all duration-300 ease-in-out'
     >
       <div className='flex flex-col gap-2'>
