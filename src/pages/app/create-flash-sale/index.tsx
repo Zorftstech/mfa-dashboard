@@ -43,9 +43,10 @@ import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
+import useStore from 'store';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -85,28 +86,18 @@ const FormSchema = z.object({
 const CreateFlashSale = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
+  const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
     setUploading(true);
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
     setImageUrl(fileUrl); // Store the URL in state
-
-    const formdata = new FormData();
-    formdata.append('file', files);
-
-    try {
-      console.log('====================================');
-      console.log('file', files);
-      console.log('====================================');
-    } catch (error) {
-      processError(error);
-    }
 
     setUploading(false);
   };
@@ -124,6 +115,14 @@ const CreateFlashSale = () => {
   });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      productName: editData?.name || '',
+      price: editData?.price || '',
+      description: editData?.desc || '',
+      unit: editData?.unit || '',
+      quantity: editData?.quantity || '',
+      prevPrice: editData?.prevPrice || '',
+    },
   });
 
   function extractErrorMessages(errors: ErrorMessages): string[] {
@@ -136,92 +135,103 @@ const CreateFlashSale = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    if (!file) return toast.error('Please upload an image');
     setFormIsLoading(true);
 
-    const storage = getStorage();
-    const storageRef = ref(storage, 'products/' + file?.name);
-
     try {
-      // Upload the file to Firebase Storage
-      await uploadBytes(storageRef, file)
-        .then((snapshot) => {
-          console.log('Uploaded a blob or file!', snapshot);
+      // Initialize flashSaleData with common fields
+      let flashSaleData = {
+        name: data.productName,
+        desc: data.description,
+        price: data.price,
+        quantity: data.quantity,
+        unit: data.unit,
+        prevPrice: data.prevPrice,
+      };
 
-          // Get the URL of the uploaded file
-          getDownloadURL(snapshot.ref)
-            .then((downloadURL) => {
-              console.log('File available at', downloadURL);
+      // Check if editing and a new file is provided
+      if (isEditing && file) {
+        const storageRef = ref(getStorage(), `flashSales/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-              // Now you can proceed to create a Firestore document with this URL
-              const productsCollectionRef = collection(db, 'flashsales');
-              const newProductRef = doc(productsCollectionRef);
+        // Add or update the image URL in flash sale data
+        flashSaleData = { ...flashSaleData, image: downloadURL } as typeof flashSaleData & {
+          image: string;
+        };
+      }
 
-              const productData = {
-                name: data.productName,
-                desc: data.description,
-                image: downloadURL,
+      if (isEditing) {
+        // Assuming `editData` contains the ID of the flash sale to be edited
+        const flashSaleRef = doc(db, 'flashsales', editData.id);
+        await setDoc(flashSaleRef, flashSaleData, { merge: true });
+        toast.success('Flash Sale updated successfully');
+        navigate(-1);
+      } else {
+        if (!file) throw new Error('Please upload an image for the new flash sale');
+        // Proceed with new flash sale creation, including initial image upload
+        const storageRef = ref(getStorage(), `flashSales/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        flashSaleData = { ...flashSaleData, image: downloadURL } as typeof flashSaleData & {
+          image: string;
+        };
 
-                category: {
-                  id: 'flash-sales',
-                  name: 'Flash Sales',
-                },
-                price: data.price,
-                unit: data.unit,
-                quantity: data.quantity,
-                prevPrice: data.prevPrice,
-              };
+        const flashSalesCollectionRef = collection(db, 'flashsales');
+        await addDoc(flashSalesCollectionRef, flashSaleData);
+        toast.success('Flash Sale created successfully');
+      }
 
-              // Add a new document in collection "categories"
-              setDoc(newProductRef, productData)
-                .then(() => {
-                  console.log(`New product document created with ID: ${newProductRef.id}`);
-                  toast.success('Flash Sale Created Successfully');
-                })
-                .catch((error) => {
-                  console.error('Error creating product document:', error);
-                });
-            })
-            .catch((error) => {
-              console.error('Error getting download URL:', error);
-            });
-        })
-        .catch((error) => {
-          console.error('Error uploading image:', error);
-        });
-      form.reset();
-      setImageUrl(null);
+      // Cleanup and navigate back or to another page as needed
       setFile(null);
-    } catch (error: any) {
-      processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      setImageUrl(null); // Ensure to clear the image URL state as well
+      setFormIsLoading(false);
+      if (isEditing) {
+        setIsEditing(false);
+        setEditData(null);
+      }
+      // navigate(-1) or any other post submission logic
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error ${isEditing ? 'updating' : 'creating'} flash sale. Please try again.`);
+      setFormIsLoading(false);
     }
-    setFormIsLoading(false);
   }
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8  px-container-md pb-[2.1rem]'>
       <div className='mb-8 flex  w-full items-center justify-between gap-4 md:flex-row'>
         <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
-          <button onClick={() => navigate(-1)}>
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+              navigate(-1);
+            }}
+          >
             <ChevronLeft className='h-6 w-6 font-light' />
           </button>
 
           <InlineLoader isLoading={false}>
             <div className='flex flex-col  gap-1'>
-              <h3 className=' text-base font-semibold md:text-xl'>Add Flash Sale</h3>
-              <p className='text-[0.75rem] '>This will add a new flash sale to your catalogue</p>
+              <h3 className=' text-base font-semibold md:text-xl'>
+                {isEditing ? 'Edit Flash Sale' : 'Add Flash Sale'}
+              </h3>
+              <p className='text-[0.75rem] '>
+                {isEditing
+                  ? 'Edit the flash sale details'
+                  : 'This will add a new flash sale to your catalogue'}
+              </p>
             </div>
           </InlineLoader>
         </div>
 
         <div className='flex  gap-4'>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+              navigate(-1);
+            }}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
@@ -425,7 +435,7 @@ const CreateFlashSale = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                Create Flash Sale
+                {isEditing ? 'Update Flash Sale' : ' Create Flash Sale'}
               </span>
             )}
           </button>

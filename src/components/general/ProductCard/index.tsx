@@ -10,7 +10,7 @@ interface IProductCard {
   img: string;
   price: string | number;
   name: string;
-  link?: string;
+  link: string;
   rating: string | number;
 }
 
@@ -23,7 +23,11 @@ const ProductCard = ({ img, price, name, link, item }: IProductCard) => {
       onClick={() => {
         setEditData(item);
         setIsEditing(true);
-        navigate(`/app/${CONSTANTS.ROUTES['create-new-product']}?editId=${link}`);
+        navigate(
+          `/app/${
+            CONSTANTS.ROUTES[link as keyof typeof CONSTANTS.ROUTES]
+          }?editId=${name}&edit=${true}`,
+        );
       }}
       className='group flex h-max w-full cursor-pointer flex-col justify-between rounded-2xl bg-slate-50 px-4 py-4 shadow-md  transition-all duration-300 ease-in-out'
     >

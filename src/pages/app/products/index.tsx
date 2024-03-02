@@ -131,10 +131,10 @@ const ProductsPage = () => {
             <div key={idx} className='h-full w-full'>
               <ProductCard
                 item={item}
-                img={item?.image || filmImg}
+                img={item?.image}
                 name={item?.name}
                 price={item?.price}
-                link={`${item?.id}`}
+                link={`create-new-product`}
                 rating={4.5}
               />
             </div>

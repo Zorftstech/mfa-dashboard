@@ -43,7 +43,7 @@ import AdvertCard from 'components/general/AdvertCard';
 import ProductCard from 'components/general/ProductCard';
 
 import MasterClassCard from 'components/general/MasterClassCard';
-
+import useStore from 'store';
 import contentService from 'services/content';
 import Icon from 'utils/Icon';
 
@@ -53,6 +53,7 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 
 const FlashSalePage = () => {
   const [position, setPosition] = useState('bottom');
+  const { setIsEditing, setEditData } = useStore((state) => state);
 
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'flashsales');
@@ -114,6 +115,10 @@ const FlashSalePage = () => {
         </div>
       </div>
       <Link
+        onClick={() => {
+          setIsEditing(false);
+          setEditData(null);
+        }}
         to={`/app/${CONSTANTS.ROUTES['create-flash-sale']}`}
         className='group flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
       >
@@ -127,11 +132,12 @@ const FlashSalePage = () => {
           {data?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard
-                img={item?.image || filmImg}
+                img={item?.image}
                 name={item?.name}
                 price={item?.price}
-                link={`/${item?.id}`}
+                link={`create-flash-sale`}
                 rating={4.5}
+                item={item}
               />
             </div>
           ))}

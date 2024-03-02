@@ -120,11 +120,12 @@ const FoodBundles = () => {
           {data?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard
-                img={item?.image || filmImg}
+                img={item?.image}
                 name={item?.name}
                 price={item?.price}
-                link={`/${item?.id}`}
+                link={`create-food-bundle`}
                 rating={4.5}
+                item={item}
               />
             </div>
           ))}
