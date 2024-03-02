@@ -48,6 +48,7 @@ import { doc, setDoc, collection, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
+import DeleteModal from 'components/modal/DeleteModal';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -199,6 +200,13 @@ const CreateCategory = () => {
         </div>
 
         <div className='flex  gap-4'>
+          {isEditing && (
+            <DeleteModal
+              btnText='Delete Category'
+              collectionName='categories'
+              documentId={editData?.id}
+            />
+          )}
           <button
             onClick={() => navigate(-1)}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'

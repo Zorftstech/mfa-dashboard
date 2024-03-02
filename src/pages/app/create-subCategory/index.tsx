@@ -47,6 +47,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
+import DeleteModal from 'components/modal/DeleteModal';
 interface Iprops {
   switchTab: (tab: string) => void;
   handleComplete: (tab: string) => void;
@@ -216,6 +217,13 @@ const CreateSubCategory = () => {
         </div>
 
         <div className='flex  gap-4'>
+          {isEditing && (
+            <DeleteModal
+              btnText='Delete Sub-category'
+              collectionName='subcategories'
+              documentId={editData?.id}
+            />
+          )}
           <button
             onClick={() => {
               navigate(-1);

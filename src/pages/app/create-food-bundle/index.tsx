@@ -47,6 +47,7 @@ import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
+import DeleteModal from 'components/modal/DeleteModal';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -181,7 +182,6 @@ const CreateFoodBundle = () => {
         setIsEditing(false);
         setEditData(null);
       }
-      // Optionally navigate back or to another page
     } catch (error) {
       console.error('Error:', error);
       toast.error(`Error ${isEditing ? 'updating' : 'creating'} food bundle. Please try again.`);
@@ -218,6 +218,13 @@ const CreateFoodBundle = () => {
         </div>
 
         <div className='flex  gap-4'>
+          {isEditing && (
+            <DeleteModal
+              btnText='Delete Food Bundle'
+              collectionName='foodbundle'
+              documentId={editData?.id}
+            />
+          )}
           <button
             onClick={() => {
               setIsEditing(false);

@@ -12,6 +12,12 @@ import {
 import { Button } from 'components/shadcn/ui/button';
 import { tr } from 'date-fns/locale';
 import Icon from 'utils/Icon';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from 'firebase';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'helper';
+import Spinner from 'components/shadcn/ui/spinner';
 
 export default function DeleteModal({
   btnText,
@@ -19,13 +25,40 @@ export default function DeleteModal({
   description,
   action,
   cancel,
+  documentId,
+  collectionName,
 }: {
   btnText?: string;
   title?: string;
   description?: string;
   action?: string;
   cancel?: string;
+  collectionName?: string;
+  documentId?: string;
 }) {
+  const [isloading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  /**
+   * Deletes a document from a specified Firestore collection.
+   *
+   * @param {string} collectionName The name of the collection containing the document to delete.
+   * @param {string} documentId The ID of the document to delete.
+   */
+
+  async function deleteItemFromCollection(collectionName: string, documentId: string) {
+    setIsLoading(true);
+    try {
+      await deleteDoc(doc(db, collectionName, documentId));
+      navigate(-1);
+      console.log(`Document with ID ${documentId} successfully deleted from ${collectionName}.`);
+      toast.success('Successfully deleted');
+      // Optionally, add more UI feedback here (e.g., showing a success message to the user)
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      // Optionally, add more UI feedback here (e.g., showing an error message to the user)
+    }
+    setIsLoading(false);
+  }
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -59,16 +92,18 @@ export default function DeleteModal({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className='sm:justify-center'>
-          <AlertDialogAction
-            className='bg-red-600 capitalize'
+          <Button
+            type='submit'
+            disabled={isloading}
+            className={`bg-red-600 capitalize transition-all duration-150 ease-in-out md:px-8 ${
+              isloading ? 'cursor-not-allowed opacity-40' : ''
+            }`}
             onClick={() => {
-              setTimeout(() => {
-                console.log('cancel');
-              }, 500);
+              deleteItemFromCollection(collectionName || '', documentId || '');
             }}
           >
-            {btnText}
-          </AlertDialogAction>
+            {isloading ? <Spinner /> : btnText}
+          </Button>
           <AlertDialogCancel className='md:px-8'>Cancel</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>

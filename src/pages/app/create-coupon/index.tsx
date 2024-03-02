@@ -49,6 +49,7 @@ import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from 'firebase';
 import useStore from 'store';
 import { StoreType } from 'store';
+import DeleteModal from 'components/modal/DeleteModal';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -183,6 +184,13 @@ const CreateCoupon = () => {
         </div>
 
         <div className='flex  gap-4'>
+          {isEditing && (
+            <DeleteModal
+              btnText='Delete Coupon'
+              collectionName='couponCodes'
+              documentId={editData?.id}
+            />
+          )}
           <button
             onClick={() => {
               setIsEditing(false);

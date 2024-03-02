@@ -47,6 +47,7 @@ import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
+import DeleteModal from 'components/modal/DeleteModal';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -226,6 +227,13 @@ const CreateFlashSale = () => {
         </div>
 
         <div className='flex  gap-4'>
+          {isEditing && (
+            <DeleteModal
+              btnText='Delete Flash Sale'
+              collectionName='flashsales'
+              documentId={editData?.id}
+            />
+          )}
           <button
             onClick={() => {
               setIsEditing(false);
