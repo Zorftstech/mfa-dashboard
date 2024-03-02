@@ -195,7 +195,9 @@ function UserTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>{row.getValue('user')?.name}</p>
+          <p className='text-center text-[0.71rem] '>
+            {(row.getValue('user') as { name: string })?.name}
+          </p>
         </div>
         // </Link>
       ),
@@ -239,7 +241,7 @@ function UserTableComponent() {
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='text-[0.71rem] capitalize'>
           {/* {Number(row.original.id) * 1245632} */}
-          {formatDate(new Date(row.getValue('delivery') * 1000).toString())}
+          {formatDate(new Date((row.getValue('delivery') as number) * 1000).toString())}
           {/* {row.getValue('delivery')} */}
         </div>
         // </Link>

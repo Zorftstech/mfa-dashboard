@@ -92,6 +92,8 @@ export interface authDetailsInterface {
     oragnization_id?: string;
   };
   refresh?: string;
+  user_id?: string;
+  displayName?: string;
 }
 
 export interface productInterface {

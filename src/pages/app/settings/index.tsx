@@ -56,36 +56,37 @@ interface ErrorMessages {
   [key: string]: string[];
 }
 
-const FormSchema = z.object({
-  fullName: z.string().min(2, {
-    message: 'Please enter a valid name',
-  }),
+const FormSchema = z
+  .object({
+    fullName: z.string().min(2, {
+      message: 'Please enter a valid name',
+    }),
 
-  // email: z
-  //   .string()
-  //   .min(1, {
-  //     message: 'Please enter a valid email',
-  //   })
-  //   .email({
-  //     message: 'Please enter a valid email',
-  //   }),
-  // oldPassword: z
-  //   .string()
-  //   .min(8, {
-  //     message: 'Password must be at least 8 characters long',
-  //   })
-  //   .optional(),
-  // newPassword: z
-  //   .string()
-  //   .min(8, {
-  //     message: 'Password must be at least 8 characters long',
-  //   })
-  //   .optional(),
-});
-// .refine((data) => data.newPassword !== '', {
-//   message: 'please enter your old password',
-//   path: ['newPassword'],
-// });
+    email: z
+      .string()
+      .min(1, {
+        message: 'Please enter a valid email',
+      })
+      .email({
+        message: 'Please enter a valid email',
+      }),
+    oldPassword: z
+      .string()
+      .min(8, {
+        message: 'Password must be at least 8 characters long',
+      })
+      .optional(),
+    newPassword: z
+      .string()
+      .min(8, {
+        message: 'Password must be at least 8 characters long',
+      })
+      .optional(),
+  })
+  .refine((data) => data.newPassword !== '', {
+    message: 'please enter your old password',
+    path: ['newPassword'],
+  });
 const AccountSettingPage = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
@@ -179,7 +180,7 @@ const AccountSettingPage = () => {
               )}
             />
 
-            {/* <FormField
+            <FormField
               control={form.control}
               name='email'
               render={({ field }) => (
@@ -200,8 +201,8 @@ const AccountSettingPage = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            /> */}
-            {/* <FormField
+            />
+            <FormField
               control={form.control}
               name='oldPassword'
               render={({ field }) => (
@@ -245,7 +246,7 @@ const AccountSettingPage = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            /> */}
+            />
           </section>
 
           <button
