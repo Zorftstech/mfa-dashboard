@@ -47,6 +47,8 @@ import Icon from 'utils/Icon';
 
 const FoodBundles = () => {
   const [position, setPosition] = useState('bottom');
+  const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
+
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'foodbundle');
 
@@ -107,6 +109,10 @@ const FoodBundles = () => {
         </div>
       </div>
       <Link
+        onClick={() => {
+          setIsEditing(false);
+          setEditData(null);
+        }}
         to={`/app/${CONSTANTS.ROUTES['create-food-bundle']}`}
         className='group flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
       >
@@ -126,6 +132,7 @@ const FoodBundles = () => {
                 link={`create-food-bundle`}
                 rating={4.5}
                 item={item}
+                interval={item?.intervals}
               />
             </div>
           ))}

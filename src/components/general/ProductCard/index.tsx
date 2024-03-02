@@ -12,9 +12,10 @@ interface IProductCard {
   name: string;
   link: string;
   rating: string | number;
+  interval?: string | number;
 }
 
-const ProductCard = ({ img, price, name, link, item }: IProductCard) => {
+const ProductCard = ({ img, price, name, link, item, interval }: IProductCard) => {
   const { setEditData, setIsEditing } = useStore((state: StoreType) => state);
   const navigate = useNavigate();
 
@@ -56,7 +57,7 @@ const ProductCard = ({ img, price, name, link, item }: IProductCard) => {
             <Star size={13} className='fill-slate-200  text-slate-200' />
           </div>
           <p className='text-[14px] font-[600] leading-[21px] tracking-[0.1px] text-primary-1 '>
-            {price}
+            {price} <span className='font-[500] text-gray-400'>{interval}</span>
           </p>
         </div>
       </div>
