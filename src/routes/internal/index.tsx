@@ -12,6 +12,8 @@ import MasterClasses from 'pages/app/master-classes';
 import Coupons from 'pages/app/coupons';
 import UserProfile from 'pages/app/user-profile';
 import Settings from 'pages/app/settings';
+import FAQPage from 'pages/app/faq';
+import FarmOfftake from 'pages/app/farm-offtake';
 import SingleBlog from 'pages/inner-pages/single-blog';
 import SinglePatient from 'pages/inner-pages/single-patient';
 import { routeTypes, routesInterface } from 'types';
@@ -20,6 +22,8 @@ import CreateSubCategory from 'pages/app/create-subCategory';
 import CreateNewProduct from 'pages/app/create-new-product';
 import CreateFoodBundle from 'pages/app/create-food-bundle';
 import CreateFlashSale from 'pages/app/create-flash-sale';
+import CreateFAQ from 'pages/app/create-faq';
+import CreateFarmOfftake from 'pages/app/create-farm-offtake';
 
 const internalRoute: routeTypes = [
   {
@@ -97,6 +101,22 @@ const internalRoute: routeTypes = [
   {
     element: <CreateNewProduct />,
     path: 'create-new-product',
+  },
+  {
+    element: <FarmOfftake />,
+    path: 'farm-offtake',
+  },
+  {
+    element: <CreateFarmOfftake />,
+    path: 'create-farm-offtake',
+  },
+  {
+    element: <FAQPage />,
+    path: 'faq',
+  },
+  {
+    element: <CreateFAQ />,
+    path: 'create-faq',
   },
 ];
 

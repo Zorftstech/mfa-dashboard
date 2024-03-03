@@ -30,7 +30,9 @@ type ISideNavTitles =
   | 'Settings'
   | 'Reports'
   | 'Settings'
-  | 'Food Bundles';
+  | 'Food Bundles'
+  | 'Farm Off-Take'
+  | 'FAQ';
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
   icons: JSX.Element;
@@ -156,6 +158,20 @@ export const sideNavLinks: extendedRouteInterface[] = [
     ),
   },
   {
+    link: 'faq',
+    title: 'FAQ',
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 20.75,
+          className: 'text-current',
+        }}
+        name='Categories'
+      />
+    ),
+  },
+  {
     link: 'settings',
     title: 'Settings',
     icons: (
@@ -166,6 +182,21 @@ export const sideNavLinks: extendedRouteInterface[] = [
           className: 'text-current',
         }}
         name='SettingWhite'
+      />
+    ),
+  },
+  {
+    link: 'farm-offtake',
+    title: 'Farm Off-Take',
+
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 20.75,
+          className: 'text-current',
+        }}
+        name='FoodBundleIcon'
       />
     ),
   },

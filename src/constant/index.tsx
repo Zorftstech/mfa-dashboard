@@ -21,6 +21,8 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'flash-sales': 'flash-sales',
   notifications: 'notifications',
   coupons: 'coupons',
+  faq: 'faq',
+  'farm-offtake': 'farm-offtake',
   'user-profile': 'user-profile',
   categories: 'categories',
   'create-category': 'create-category',
@@ -30,6 +32,8 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'create-flash-sale': 'create-flash-sale',
 
   'create-new-product': 'create-new-product',
+  'create-farm-offtake': 'create-farm-offtake',
+  'create-faq': 'create-faq',
 };
 
 const TIMBU_KEYS = {

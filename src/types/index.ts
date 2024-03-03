@@ -22,6 +22,8 @@ export type routePathTypes =
   | 'flash-sales'
   | 'notifications'
   | 'coupons'
+  | 'faq'
+  | 'farm-offtake'
   | 'user-profile'
   | 'categories'
   | 'create-category'
@@ -29,6 +31,8 @@ export type routePathTypes =
   | 'create-food-bundle'
   | 'create-sub-category'
   | 'create-flash-sale'
+  | 'create-farm-offtake'
+  | 'create-faq'
   | 'categories';
 
 export interface routesInterface<T> {
