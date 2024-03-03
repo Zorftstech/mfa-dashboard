@@ -31,6 +31,7 @@ import { useState } from 'react';
 import { ChevronDown, Filter } from 'lucide-react';
 import { Button } from 'components/shadcn/ui/button';
 import UserTableComponent from 'components/Tables/UsersTable/UsersTable';
+import { formatCurrentDateTime } from 'helper';
 
 const UserListPage = () => {
   const navigate = useNavigate();
@@ -53,9 +54,7 @@ const UserListPage = () => {
       <div className='flex justify-between '>
         <h3 className=' mb-16 text-base font-semibold md:text-2xl'>User Accounts</h3>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
-            Today: 10:23am, 30th Oct 2023
-          </p>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
           <div className='flex   gap-3'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

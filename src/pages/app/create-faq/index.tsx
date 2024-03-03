@@ -45,126 +45,56 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
-import useStore from 'store';
+import useStore, { StoreType } from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
-
-// fix for phone input build error
-const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
-interface Iprops {
-  switchTab: (tab: string) => void;
-  handleComplete: (tab: string) => void;
-  data: string[];
-  userInfo: any; // change to the right type
-  handleUserInfo: (info: any) => void; // change to the right type
-}
-interface ErrorMessages {
-  [key: string]: string[];
-}
+import { Textarea } from 'components/shadcn/textarea';
 
 const FormSchema = z.object({
-  categoryName: z.string().min(2, {
-    message: 'Please enter a valid name',
+  question: z.string().min(2, {
+    message: 'Please enter a valid question',
   }),
 
-  description: z.string().min(1, {
-    message: 'Please enter a valid description',
+  answer: z.string().min(1, {
+    message: 'Please enter a valid answer',
   }),
 });
 const CreateFAQ = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
-  const { isEditing, editData, setEditData, setIsEditing } = useStore((state) => state);
+  const { isEditing, editData, setEditData, setIsEditing } = useStore((state: StoreType) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
-  const [uploading, setUploading] = React.useState(false);
-  const [file, setFile] = React.useState<any>(null);
-  const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
-  const handleFileDrop = async (files: any) => {
-    setUploading(true);
-    setFile(files);
-    const fileUrl = URL.createObjectURL(files);
-    setImageUrl(fileUrl); // Store the URL in state
-
-    const formdata = new FormData();
-    formdata.append('file', files);
-
-    try {
-      console.log('====================================');
-      console.log('file', files);
-      console.log('====================================');
-    } catch (error) {
-      processError(error);
-    }
-
-    setUploading(false);
-  };
-  const onDrop = (acceptedFiles: any) => {
-    handleFileDrop(acceptedFiles[0]);
-  };
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple: false,
-    accept: {
-      'image/jpeg': [],
-      'image/png': [],
-      'image/gif': [],
-    },
-  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      categoryName: editData?.name || '',
-      description: editData?.desc || '',
+      question: editData?.question || '',
+      answer: editData?.answer || '',
     },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
-    let downloadURL = imageUrl;
-
-    if (file) {
-      const storageRef = ref(getStorage(), `categories/${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      downloadURL = await getDownloadURL(snapshot.ref);
-    }
-
-    if (!downloadURL) {
-      toast.error('Image is required.');
-      setFormIsLoading(false);
-      return;
-    }
 
     try {
       const categoryData = {
-        name: data.categoryName,
-        desc: data.description,
-        image: downloadURL,
+        question: data.question,
+        answer: data.answer,
       };
 
       if (isEditing && editData?.id) {
-        const docRef = doc(db, 'categories', editData.id);
+        const docRef = doc(db, 'faq', editData.id);
         await updateDoc(docRef, categoryData);
-        toast.success('Category updated successfully');
+        toast.success('Question updated successfully');
       } else {
-        const collectionRef = collection(db, 'categories');
+        const collectionRef = collection(db, 'faq');
         const docRef = doc(collectionRef);
         await setDoc(docRef, categoryData);
-        toast.success('Category created successfully');
+        toast.success('Question created successfully');
       }
 
       form.reset();
-      setImageUrl(null);
-      setFile(null);
+      setEditData(null);
       setIsEditing(false);
       navigate(-1);
     } catch (error) {
@@ -215,32 +145,7 @@ const CreateFAQ = () => {
           </button>
         </div>
       </div>
-      <div className='flex items-end justify-between'>
-        <section className=' rounded-xl    '>
-          <section {...getRootProps()}>
-            <input {...getInputProps()} />
-            {imageUrl ? (
-              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
-                <img
-                  src={imageUrl}
-                  alt='Selected'
-                  className=' h-full w-full rounded-full object-cover object-center '
-                />{' '}
-                {/* Display the selected image */}
-                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
-                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
-                </div>
-              </div>
-            ) : isDragActive ? (
-              <p>Drop the files here ...</p>
-            ) : (
-              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
-                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
-              </div>
-            )}
-          </section>
-        </section>
-      </div>
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -252,19 +157,19 @@ const CreateFAQ = () => {
           <section className=' grid grid-cols-1 gap-8 md:max-w-[40%] md:gap-6   '>
             <FormField
               control={form.control}
-              name='categoryName'
+              name='question'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Category Name
+                      Question
                     </label>
                     <FormControl>
                       <Input
                         className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
                         {...field}
                         type='text'
-                        placeholder='Enter category name'
+                        placeholder='Subject'
                       />
                     </FormControl>
                   </div>
@@ -275,19 +180,19 @@ const CreateFAQ = () => {
 
             <FormField
               control={form.control}
-              name='description'
+              name='answer'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Category Description
+                      Answer
                     </label>
                     <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
+                      <Textarea
+                        className='pb-6 pt-3 text-base placeholder:text-sm  '
                         {...field}
-                        type='text'
-                        placeholder='Enter category description'
+                        placeholder='Information'
+                        rows={6}
                       />
                     </FormControl>
                   </div>
@@ -314,7 +219,7 @@ const CreateFAQ = () => {
               </div>
             ) : (
               <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                {isEditing ? 'Update FAQ' : 'Create FAQ'}
+                {isEditing ? 'Update Question' : 'Add Question'}
               </span>
             )}
           </button>

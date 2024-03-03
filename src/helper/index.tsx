@@ -105,3 +105,34 @@ export function generateCouponCode(couponName: string): string {
 
   return couponCode;
 }
+
+export function formatCurrentDateTime() {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const currentDate = new Date();
+
+  let hours = currentDate.getHours();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const minutes =
+    currentDate.getMinutes() < 10 ? '0' + currentDate.getMinutes() : currentDate.getMinutes();
+
+  const day = currentDate.getDate();
+  const month = months[currentDate.getMonth()];
+  const year = currentDate.getFullYear();
+
+  return `${hours}:${minutes}${ampm}, ${day}th ${month} ${year}`;
+}

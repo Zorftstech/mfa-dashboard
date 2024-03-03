@@ -14,14 +14,17 @@ import {
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { Button } from 'components/shadcn/ui/button';
-import productService from 'services/product';
 import { processError } from 'helper/error';
 import { useQuery } from '@tanstack/react-query';
 import { apiInterface, productInterface } from 'types';
 import ContentLoader from 'components/general/ContentLoader';
 import assetImg from 'assets/image/assetFilmImg.png';
 import CONSTANTS from 'constant';
-import { filterStringsContainingDoc, filterStringsContainingImageExtensions } from 'helper';
+import {
+  filterStringsContainingDoc,
+  filterStringsContainingImageExtensions,
+  formatCurrentDateTime,
+} from 'helper';
 import FileSaver from 'file-saver';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -36,7 +39,12 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
-
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from 'components/shadcn/accordion';
 import ProductCard from 'components/general/ProductCard';
 
 import { collection, getDocs } from 'firebase/firestore';
@@ -44,27 +52,29 @@ import { db } from 'firebase';
 import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import Icon from 'utils/Icon';
+import { useNavigate } from 'react-router-dom';
 
 const FAQPage = () => {
   const [position, setPosition] = useState('bottom');
   const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
+  const navigate = useNavigate();
 
-  async function fetchProducts() {
-    const productsCollectionRef = collection(db, 'foodbundle');
+  async function fetchFaqs() {
+    const faqCollectionRef = collection(db, 'faq');
 
-    const querySnapshot = await getDocs(productsCollectionRef);
+    const querySnapshot = await getDocs(faqCollectionRef);
 
-    const products: any = [];
+    const faq: any = [];
 
     querySnapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() });
+      faq.push({ id: doc.id, ...doc.data() });
     });
 
-    return products;
+    return faq;
   }
   const { data, isLoading } = useQuery({
-    queryKey: ['get-foodbundles'],
-    queryFn: () => fetchProducts(),
+    queryKey: ['get-faqs'],
+    queryFn: () => fetchFaqs(),
 
     onError: (err) => {
       processError(err);
@@ -75,13 +85,11 @@ const FAQPage = () => {
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex justify-between '>
         <div>
-          <h3 className='mb-4 text-base font-semibold md:text-2xl'>Food Bundles</h3>
-          <p className='text-[0.85rem] '>All food bundles you have added will appear here</p>
+          <h3 className='mb-4 text-base font-semibold md:text-2xl'>FAQs</h3>
+          <p className='text-[0.85rem] '>All FAQs you have added will appear here</p>
         </div>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
-            Today: 10:23am, 30th Oct 2023
-          </p>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
           <div className='flex   gap-3'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -108,13 +116,14 @@ const FAQPage = () => {
           </div>
         </div>
       </div>
+      <section></section>
       <Link
         onClick={() => {
           setIsEditing(false);
           setEditData(null);
         }}
         to={`/app/${CONSTANTS.ROUTES['create-faq']}`}
-        className='group flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'
+        className='group flex w-fit items-center justify-center gap-2 place-self-end rounded-[5px]   bg-primary-1 px-3 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90 '
       >
         <Icon name='addIcon' />
         <span className='text-xs font-[400] leading-[24px] tracking-[0.4px] text-white '>
@@ -122,21 +131,36 @@ const FAQPage = () => {
         </span>
       </Link>
       <FeaturedLoader isLoading={isLoading}>
-        <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-          {data?.map((item: any, idx: number) => (
-            <div key={idx} className='h-full w-full'>
-              <ProductCard
-                img={item?.image}
-                name={item?.name}
-                price={item?.price}
-                link={`create-food-bundle`}
-                rating={4.5}
-                item={item}
-                interval={item?.intervals}
-              />
-            </div>
-          ))}
-        </div>
+        <>
+          <Accordion type='single' collapsible className='w-full md:-mt-16 md:max-w-[60%]'>
+            {data?.map((item: any, idx: number) => (
+              <AccordionItem key={idx} value={`item-${idx}`}>
+                <AccordionTrigger className='text-base font-medium capitalize'>
+                  {item?.question}
+                </AccordionTrigger>
+                <AccordionContent className='text-sm'>
+                  {item?.answer}
+
+                  <button
+                    className='mx-4 inline-block font-medium text-primary-1'
+                    onClick={() => {
+                      setEditData(item);
+                      setIsEditing(true);
+                      navigate(
+                        `/app/${CONSTANTS.ROUTES['create-faq']}?editId=${item?.question
+                          ?.split(' ')
+                          .join('-')
+                          .toLowerCase()}&edit=${true}`,
+                      );
+                    }}
+                  >
+                    Edit
+                  </button>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </>
       </FeaturedLoader>
     </div>
   );

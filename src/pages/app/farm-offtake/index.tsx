@@ -21,7 +21,11 @@ import { apiInterface, productInterface } from 'types';
 import ContentLoader from 'components/general/ContentLoader';
 import assetImg from 'assets/image/assetFilmImg.png';
 import CONSTANTS from 'constant';
-import { filterStringsContainingDoc, filterStringsContainingImageExtensions } from 'helper';
+import {
+  filterStringsContainingDoc,
+  filterStringsContainingImageExtensions,
+  formatCurrentDateTime,
+} from 'helper';
 import FileSaver from 'file-saver';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -79,9 +83,7 @@ const FarmOffTakes = () => {
           <p className='text-[0.85rem] '>All farm off-Take you have added will appear here</p>
         </div>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
-            Today: 10:23am, 30th Oct 2023
-          </p>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
           <div className='flex   gap-3'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

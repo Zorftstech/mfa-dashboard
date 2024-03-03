@@ -14,6 +14,7 @@ import {
 import { ChevronDown, Filter } from 'lucide-react';
 import { Button } from 'components/shadcn/ui/button';
 import SearchComboBox from 'components/general/SearchComboBox';
+import { formatCurrentDateTime } from 'helper';
 const Notifications = () => {
   const [position, setPosition] = useState('bottom');
   const tabs = [
@@ -55,9 +56,7 @@ const Notifications = () => {
           <h3 className='mb-4 text-base font-semibold md:text-2xl'>Notifications</h3>
         </div>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>
-            Today: 10:23am, 30th Oct 2023
-          </p>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
           <div className='flex   gap-3'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
