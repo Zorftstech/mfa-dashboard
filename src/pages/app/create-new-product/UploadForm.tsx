@@ -16,23 +16,9 @@ export default function UploadImageForm() {
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
   const handleFileDrop = async (files: any) => {
-    setUploading(true);
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
     setImageUrl(fileUrl); // Store the URL in state
-
-    const formdata = new FormData();
-    formdata.append('file', files);
-
-    try {
-      console.log('====================================');
-      console.log('file', files);
-      console.log('====================================');
-    } catch (error) {
-      processError(error);
-    }
-
-    setUploading(false);
   };
   const onDrop = (acceptedFiles: any) => {
     handleFileDrop(acceptedFiles[0]);

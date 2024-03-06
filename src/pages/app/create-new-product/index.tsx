@@ -196,6 +196,7 @@ const CreateNewProduct = () => {
       setFile(null);
       setFormIsLoading(false);
       if (isEditing) {
+        navigate(-1);
         setIsEditing(false);
         setEditData(null);
       }
