@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import FunkyPagesHero from 'components/general/FunkyPagesHero';
 import PillTabs from 'components/general/PillTabs';
 import SearchComboBox from 'components/general/SearchComboBox';
@@ -56,6 +57,7 @@ import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { formatDate, getCreatedDateFromDocument } from 'lib/utils';
 const ProductsPage = () => {
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [position, setPosition] = useState('bottom');
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
@@ -81,6 +83,9 @@ const ProductsPage = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['get-products'],
     queryFn: () => fetchProducts(),
+    onSuccess: (data) => {
+      setAllProducts(data);
+    },
 
     onError: (err) => {
       processError(err);
@@ -89,16 +94,75 @@ const ProductsPage = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
-  let filteredData = data;
 
-  if (searchTerm) {
-    filteredData = filteredData.filter(
-      (item: any) =>
-        item?.name?.toLowerCase().includes(searchTerm) ||
-        item?.desc?.toLowerCase().includes(searchTerm), // Adjust according to your data structure
-    );
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  function parseCustomDate(dateString: string) {
+    const [monthPart, dayPart, yearPart] = dateString.split(' ');
+    const month = monthNames.indexOf(monthPart) + 1;
+    const day = parseInt(dayPart);
+    const year = parseInt(yearPart) + 2000; // Adjust based on your date formatting, assuming '24' means '2024'
+
+    return { day, month, year };
   }
 
+  // Adjust your useState hook to capture the user's sorting choice
+  const [sortCriterion, setSortCriterion] = useState('');
+
+  // Handler to update the sortCriterion based on the user's selection
+  const handleSortChange = (newValue: string) => {
+    setSortCriterion(newValue);
+  };
+  const sortProducts = (products: any, criterion: any) => {
+    return products.sort((a: any, b: any) => {
+      const parsedA = parseCustomDate(a.createdDate);
+      const parsedB = parseCustomDate(b.createdDate);
+
+      switch (criterion) {
+        case 'day':
+          return (
+            parsedA.day - parsedB.day ||
+            parsedA.month - parsedB.month ||
+            parsedA.year - parsedB.year
+          );
+        case 'month':
+          return parsedA.month - parsedB.month || parsedA.year - parsedB.year;
+        case 'year':
+          return parsedA.year - parsedB.year;
+        default:
+          return 0; // No sorting
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (sortCriterion && data) {
+      const sortedData = sortProducts([...data], sortCriterion);
+      setAllProducts(sortedData);
+    }
+    if (searchTerm) {
+      let filteredData = data;
+      filteredData = filteredData.filter(
+        (item: any) =>
+          item?.name?.toLowerCase().includes(searchTerm) ||
+          item?.desc?.toLowerCase().includes(searchTerm),
+      );
+      setAllProducts(filteredData);
+    }
+  }, [sortCriterion, data, searchTerm]);
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
       <div className='flex justify-between '>
@@ -123,10 +187,10 @@ const ProductsPage = () => {
               <DropdownMenuContent className='w-56 text-[0.65rem]'>
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup value={sortCriterion} onValueChange={handleSortChange}>
+                  <DropdownMenuRadioItem value='year'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='month'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='day'>Day</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -149,12 +213,12 @@ const ProductsPage = () => {
       </Link>
       <FeaturedLoader isLoading={isLoading}>
         <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
-          {filteredData?.map((item: any, idx: number) => (
+          {allProducts?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard
                 item={item}
                 img={item?.image}
-                name={item?.name}
+                name={item?.createdDate}
                 price={item?.price}
                 link={`create-new-product`}
                 rating={4.5}
