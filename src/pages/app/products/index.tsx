@@ -54,8 +54,11 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from 'firebase';
 import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
+import { formatDate, getCreatedDateFromDocument } from 'lib/utils';
 const ProductsPage = () => {
   const [position, setPosition] = useState('bottom');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState('all');
   const { setIsEditing, setEditData } = useStore((state) => state);
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'products');
@@ -65,7 +68,12 @@ const ProductsPage = () => {
     const products: any = [];
 
     querySnapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() });
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      products.push({
+        id: doc.id,
+        ...doc.data(),
+        createdDate,
+      });
     });
 
     return products;
@@ -78,6 +86,18 @@ const ProductsPage = () => {
       processError(err);
     },
   });
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+  let filteredData = data;
+
+  if (searchTerm) {
+    filteredData = filteredData.filter(
+      (item: any) =>
+        item?.name?.toLowerCase().includes(searchTerm) ||
+        item?.desc?.toLowerCase().includes(searchTerm), // Adjust according to your data structure
+    );
+  }
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
@@ -110,7 +130,7 @@ const ProductsPage = () => {
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <SearchComboBox />
+            <SearchComboBox value={searchTerm} onChange={handleSearch} />
           </div>
         </div>
       </div>
@@ -129,7 +149,7 @@ const ProductsPage = () => {
       </Link>
       <FeaturedLoader isLoading={isLoading}>
         <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
-          {data?.map((item: any, idx: number) => (
+          {filteredData?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard
                 item={item}

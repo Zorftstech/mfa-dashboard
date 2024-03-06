@@ -1,7 +1,14 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import moment from 'moment';
-
+import { Timestamp } from 'firebase/firestore';
+interface DocumentData {
+  _document: {
+    createTime: {
+      timestamp: Timestamp;
+    };
+  };
+}
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -9,6 +16,11 @@ export function cn(...inputs: ClassValue[]) {
 export const formatDate = (i: string) => {
   return moment(i).format('MMM Do YY');
 };
+export function getCreatedDateFromDocument(documentData: DocumentData): string {
+  const createTime = documentData._document.createTime.timestamp;
+  const createdDate = new Date(createTime.seconds * 1000); // Convert seconds to milliseconds
+  return formatDate(createdDate.toDateString());
+}
 export const checkStatus = (status: string) => {
   switch (status) {
     case 'completed':
