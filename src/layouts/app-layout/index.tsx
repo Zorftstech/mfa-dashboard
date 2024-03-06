@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import useStore from 'store';
 import { processError } from 'helper/error';
 import { useQuery } from '@tanstack/react-query';
+import { getCreatedDateFromDocument } from 'lib/utils';
 const AppLayout = () => {
   const { setCategories, setSubcategories, setLoading, loggedIn } = useStore((state) => state);
   const outlet = useOutlet();
@@ -24,10 +25,12 @@ const AppLayout = () => {
     const subCategories: any = [];
 
     querySnapshot.forEach((doc) => {
-      categories.push({ id: doc.id, ...doc.data() });
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      categories.push({ id: doc.id, ...doc.data(), createdDate });
     });
     querySnapshotSub.forEach((doc) => {
-      subCategories.push({ id: doc.id, ...doc.data() });
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      subCategories.push({ id: doc.id, ...doc.data(), createdDate });
     });
 
     setLoading(false);

@@ -49,22 +49,10 @@ import Icon from 'utils/Icon';
 
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import useStore from 'store';
-type filterTypes =
-  | 'All'
-  | 'Pre-Production'
-  | 'Post-production'
-  | 'Distribution and Marketing'
-  | 'Starred';
-
-const generalFilters: filterTypes[] = [
-  'All',
-  'Pre-Production',
-  'Distribution and Marketing',
-  'Starred',
-];
+import { getCreatedDateFromDocument } from 'lib/utils';
+import useSortAndSearch from 'hooks/useSearchAndSort';
 
 const Categories = () => {
-  const [position, setPosition] = useState('bottom');
   const {
     isLoading: loading,
     categories,
@@ -72,6 +60,17 @@ const Categories = () => {
     setIsEditing,
     setEditData,
   } = useStore((state) => state);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortCriterion, setSortCriterion] = useState('');
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleSortChange = (newValue: string) => {
+    setSortCriterion(newValue);
+  };
+  const sortedAndFilteredCategories = useSortAndSearch(categories, searchTerm, sortCriterion);
+  const sortedAndFilteredSubcategories = useSortAndSearch(subcategories, searchTerm, sortCriterion);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[5.1rem]'>
@@ -97,14 +96,14 @@ const Categories = () => {
               <DropdownMenuContent className='w-56 text-[0.65rem]'>
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup value={sortCriterion} onValueChange={handleSortChange}>
+                  <DropdownMenuRadioItem value='year'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='month'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='day'>Day</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <SearchComboBox />
+            <SearchComboBox value={searchTerm} onChange={handleSearch} />
           </div>
         </div>
       </div>
@@ -129,7 +128,7 @@ const Categories = () => {
 
         <FeaturedLoader isLoading={loading}>
           <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
-            {categories?.map((item: any, idx: number) => (
+            {sortedAndFilteredCategories?.map((item: any, idx: number) => (
               <CategoryModal
                 trigger={
                   <div key={idx} className='h-full w-full'>
@@ -168,7 +167,7 @@ const Categories = () => {
 
         <FeaturedLoader isLoading={loading}>
           <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
-            {subcategories?.map((item: any, idx: number) => (
+            {sortedAndFilteredSubcategories?.map((item: any, idx: number) => (
               <CategoryModal
                 trigger={
                   <div key={idx} className='h-full w-full'>
