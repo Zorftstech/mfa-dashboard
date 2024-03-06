@@ -57,6 +57,7 @@ const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) =>
         (product) =>
           product?.purpose?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product?.question?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           product?.desc?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }

@@ -53,10 +53,13 @@ import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
-
+import { getCreatedDateFromDocument } from 'lib/utils';
+import useSortAndSearch from 'hooks/useSearchAndSort';
 const FAQPage = () => {
-  const [position, setPosition] = useState('bottom');
   const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
+  const [allFAQs, setAllFAQs] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortCriterion, setSortCriterion] = useState('');
   const navigate = useNavigate();
 
   async function fetchFaqs() {
@@ -65,9 +68,13 @@ const FAQPage = () => {
     const querySnapshot = await getDocs(faqCollectionRef);
 
     const faq: any = [];
-
     querySnapshot.forEach((doc) => {
-      faq.push({ id: doc.id, ...doc.data() });
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      faq.push({
+        id: doc.id,
+        ...doc.data(),
+        createdDate,
+      });
     });
 
     return faq;
@@ -75,11 +82,21 @@ const FAQPage = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['get-faqs'],
     queryFn: () => fetchFaqs(),
-
+    onSuccess: (data) => {
+      setAllFAQs(data);
+    },
     onError: (err) => {
       processError(err);
     },
   });
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleSortChange = (newValue: string) => {
+    setSortCriterion(newValue);
+  };
+  const sortedAndFilteredFaq = useSortAndSearch(allFAQs, searchTerm, sortCriterion);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
@@ -105,14 +122,15 @@ const FAQPage = () => {
               <DropdownMenuContent className='w-56 text-[0.65rem]'>
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={sortCriterion} onValueChange={handleSortChange}>
+                  <DropdownMenuRadioItem value='year'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='month'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='day'>Day</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <SearchComboBox />
+            <SearchComboBox value={searchTerm} onChange={handleSearch} />
           </div>
         </div>
       </div>
@@ -133,7 +151,7 @@ const FAQPage = () => {
       <FeaturedLoader isLoading={isLoading}>
         <>
           <Accordion type='single' collapsible className='w-full md:-mt-16 md:max-w-[60%]'>
-            {data?.map((item: any, idx: number) => (
+            {sortedAndFilteredFaq?.map((item: any, idx: number) => (
               <AccordionItem key={idx} value={`item-${idx}`}>
                 <AccordionTrigger className='text-base font-medium capitalize'>
                   {item?.question}
