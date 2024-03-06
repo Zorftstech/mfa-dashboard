@@ -47,7 +47,7 @@ import AdvertCard from 'components/general/AdvertCard';
 import ProductCard from 'components/general/ProductCard';
 
 import MasterClassCard from 'components/general/MasterClassCard';
-import useStore from 'store';
+import useStore, { StoreType } from 'store';
 import contentService from 'services/content';
 import Icon from 'utils/Icon';
 
@@ -57,7 +57,7 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
 const FlashSalePage = () => {
-  const { setIsEditing, setEditData } = useStore((state) => state);
+  const { setIsEditing, setEditData } = useStore((state: StoreType) => state);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');

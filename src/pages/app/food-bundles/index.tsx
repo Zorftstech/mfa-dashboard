@@ -48,10 +48,13 @@ import { db } from 'firebase';
 import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import Icon from 'utils/Icon';
-
+import { getCreatedDateFromDocument } from 'lib/utils';
+import useSortAndSearch from 'hooks/useSearchAndSort';
 const FoodBundles = () => {
-  const [position, setPosition] = useState('bottom');
   const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortCriterion, setSortCriterion] = useState('');
 
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'foodbundle');
@@ -61,7 +64,12 @@ const FoodBundles = () => {
     const products: any = [];
 
     querySnapshot.forEach((doc) => {
-      products.push({ id: doc.id, ...doc.data() });
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      products.push({
+        id: doc.id,
+        ...doc.data(),
+        createdDate,
+      });
     });
 
     return products;
@@ -69,11 +77,21 @@ const FoodBundles = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['get-foodbundles'],
     queryFn: () => fetchProducts(),
-
+    onSuccess: (data) => {
+      setAllProducts(data);
+    },
     onError: (err) => {
       processError(err);
     },
   });
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleSortChange = (newValue: string) => {
+    setSortCriterion(newValue);
+  };
+  const sortedAndFilteredProducts = useSortAndSearch(allProducts, searchTerm, sortCriterion);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
@@ -99,14 +117,14 @@ const FoodBundles = () => {
               <DropdownMenuContent className='w-56 text-[0.65rem]'>
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                <DropdownMenuRadioGroup value={sortCriterion} onValueChange={handleSortChange}>
+                  <DropdownMenuRadioItem value='year'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='month'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='day'>Day</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <SearchComboBox />
+            <SearchComboBox value={searchTerm} onChange={handleSearch} />
           </div>
         </div>
       </div>
@@ -125,7 +143,7 @@ const FoodBundles = () => {
       </Link>
       <FeaturedLoader isLoading={isLoading}>
         <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-          {data?.map((item: any, idx: number) => (
+          {sortedAndFilteredProducts?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard
                 img={item?.image}
