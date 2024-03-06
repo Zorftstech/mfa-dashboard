@@ -93,7 +93,7 @@ const AccountSettingPage = () => {
   const resetPassword = async () => {
     setFormIsLoading(true);
     try {
-      const data = await sendPasswordResetEmail(auth, authDetails.email ?? ' ');
+      const data = await sendPasswordResetEmail(authFirebase, authDetails.email ?? ' ');
       toast.success('Password reset link sent successfully');
     } catch (error) {
       processError(error);
@@ -178,14 +178,14 @@ const AccountSettingPage = () => {
             type='submit'
             className={cn(
               `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
-                form.formState.isSubmitting
+                form.formState.isSubmitting || formIsLoading
                   ? 'cursor-not-allowed bg-gray-500 font-[700]'
                   : 'cursor-pointer'
               } `,
             )}
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || formIsLoading}
           >
-            {form.formState.isSubmitting ? (
+            {form.formState.isSubmitting || formIsLoading ? (
               <div className='px-5 py-1'>
                 <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
               </div>
@@ -203,14 +203,14 @@ const AccountSettingPage = () => {
         type='button'
         className={cn(
           `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
-            form.formState.isSubmitting
+            form.formState.isSubmitting || formIsLoading
               ? 'cursor-not-allowed bg-gray-500 font-[700]'
               : 'cursor-pointer'
           } `,
         )}
-        disabled={form.formState.isSubmitting}
+        disabled={form.formState.isSubmitting || formIsLoading}
       >
-        {form.formState.isSubmitting ? (
+        {form.formState.isSubmitting || formIsLoading ? (
           <div className='px-5 py-1'>
             <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
           </div>
