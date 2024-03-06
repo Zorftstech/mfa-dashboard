@@ -55,8 +55,9 @@ const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) =>
     if (searchTerm) {
       updatedProducts = updatedProducts.filter(
         (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.desc.toLowerCase().includes(searchTerm.toLowerCase()),
+          product?.purpose?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product?.desc?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
