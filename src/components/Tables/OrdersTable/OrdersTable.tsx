@@ -29,6 +29,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from 'components/shadcn/dropdown-menu';
 import { Input } from 'components/shadcn/input';
 import {
@@ -43,7 +45,7 @@ import { Link } from 'react-router-dom';
 import CONSTANTS from 'constant';
 import Icon from 'utils/Icon';
 import API from 'services';
-import toast from 'helper';
+import toast, { formatCurrentDateTime } from 'helper';
 import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -60,6 +62,8 @@ import { set } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import EditWalletBalanceModal from 'components/modal/EditWalletBalanceModal';
+import { Filter } from 'lucide-react';
+import SearchComboBox from 'components/general/SearchComboBox';
 export type User = {
   id: string;
   number: string;
@@ -296,6 +300,7 @@ function UserTableComponent() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [position, setPosition] = React.useState('bottom');
 
   const table = useReactTable({
     data: users,
@@ -331,68 +336,88 @@ function UserTableComponent() {
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>
-      <div className='flex flex-col justify-between gap-4 md:flex-row md:items-center '>
-        <h3 className='font-semibold'>Users</h3>
-        <div className='flex  items-center justify-between gap-3'>
-          {/* <div className='flex  items-center rounded-lg border px-4'>
-            <input
-              value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-              onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
-              className='form-input w-32 max-w-xs flex-grow border-0 bg-inherit py-2  placeholder:text-xs placeholder:font-semibold  placeholder:text-textColor-disabled focus:!ring-0 md:w-full md:max-w-xl'
-              placeholder='Search Projects'
+      <div className='mb-4 flex justify-between '>
+        <h3 className=' mb-16 text-base font-semibold md:text-2xl'>Track orders</h3>
+        <div>
+          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
+          <div className='flex items-center  gap-3'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='group flex w-6/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
+                >
+                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-56 text-[0.65rem]'>
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <SearchComboBox
+              value={(table.getColumn('items')?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn('items')?.setFilterValue(event.target.value)}
             />
-            <Icon name='searchIcon' svgProp={{ className: 'text-primary-9 w-3' }} />
-          </div> */}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-12 w-12 p-0'>
-                <span className='sr-only'>Open menu</span>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='px-4 py-4  pb-4'>
-              {/* <DropdownMenuLabel className='px-0 text-center text-sm font-normal'>
-                Actions
-              </DropdownMenuLabel> */}
-              <DropdownMenuItem
-                onClick={() => {
-                  table.resetSorting();
-                }}
-                className='flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-center text-xs'
-              >
-                Reset Sorting
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className='my-2' />
-
+            <div className='flex  items-center justify-between gap-3'>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className=''>
-                    <Button variant='outline' className='py-1 text-xs'>
-                      Columns <ChevronDown className='ml-2 h-3 w-3' />
-                    </Button>
-                  </div>
+                  <Button variant='ghost' className='h-12 w-12 p-0'>
+                    <span className='sr-only'>Open menu</span>
+                    <MoreHorizontal className='h-4 w-4' />
+                  </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align='end'>
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => {
-                      return (
-                        <DropdownMenuCheckboxItem
-                          key={column.id}
-                          className='text-xs capitalize'
-                          checked={column.getIsVisible()}
-                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                        >
-                          {column.id}
-                        </DropdownMenuCheckboxItem>
-                      );
-                    })}
+                <DropdownMenuContent align='end' className='px-4 py-4  pb-4'>
+                  {/* <DropdownMenuLabel className='px-0 text-center text-sm font-normal'>
+                Actions
+              </DropdownMenuLabel> */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      table.resetSorting();
+                    }}
+                    className='flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-center text-xs'
+                  >
+                    Reset Sorting
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className='my-2' />
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className=''>
+                        <Button variant='outline' className='py-1 text-xs'>
+                          Columns <ChevronDown className='ml-2 h-3 w-3' />
+                        </Button>
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                      {table
+                        .getAllColumns()
+                        .filter((column) => column.getCanHide())
+                        .map((column) => {
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={column.id}
+                              className='text-xs capitalize'
+                              checked={column.getIsVisible()}
+                              onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                            >
+                              {column.id}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -79,7 +79,7 @@ const Dashboard = () => {
           svgProp={{
             width: 18,
             height: 18,
-            className: 'text-current',
+            className: 'text-white color-white fill-white stroke-white  ',
           }}
           name={iconName}
         />

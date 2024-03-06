@@ -78,7 +78,7 @@ const Categories = () => {
       <div className='flex justify-between '>
         <div>
           <h3 className='mb-4 text-base font-semibold md:text-2xl'>Categories</h3>
-          <p className='text-[0.85rem] '>All the categories currently available</p>
+          <p className='text-[0.85rem] '>All the and categories currently available</p>
         </div>
         <div>
           <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
