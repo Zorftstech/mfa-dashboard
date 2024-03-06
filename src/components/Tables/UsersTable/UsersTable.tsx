@@ -372,12 +372,12 @@ function UserTableComponent() {
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>
-      <div className='flex justify-between mb-4 '>
+      <div className='mb-4 flex justify-between '>
         <h3 className=' mb-16 text-base font-semibold md:text-2xl'>User Accounts</h3>
         <div>
           <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
           <div className='flex items-center  gap-3'>
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant='outline'
@@ -397,7 +397,7 @@ function UserTableComponent() {
                   <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
             <SearchComboBox
               value={(table.getColumn('displayName')?.getFilterValue() as string) ?? ''}
               onChange={(event) =>

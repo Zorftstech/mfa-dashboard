@@ -31,9 +31,9 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
 const ProductsPage = () => {
+  const { setIsEditing, setEditData } = useStore((state) => state);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const { setIsEditing, setEditData } = useStore((state) => state);
   const [sortCriterion, setSortCriterion] = useState('');
 
   async function fetchProducts() {
