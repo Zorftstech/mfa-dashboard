@@ -32,7 +32,7 @@ import useUserLocation from 'hooks/useUserLoction';
 import { useEffect } from 'react';
 import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
-
+import { sendPasswordResetEmail } from 'firebase/auth';
 import toast from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
@@ -41,7 +41,8 @@ import { Switch } from 'components/shadcn/switch';
 import useStore from 'store';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from 'firebase';
+import { db, authFirebase } from 'firebase';
+
 const FormSchema = z.object({
   fullName: z.string().min(2, {
     message: 'Please enter a valid name',
@@ -88,6 +89,18 @@ const AccountSettingPage = () => {
       setFormIsLoading(false);
     }
   }
+
+  const resetPassword = async () => {
+    setFormIsLoading(true);
+    try {
+      const data = await sendPasswordResetEmail(auth, authDetails.email ?? ' ');
+      toast.success('Password reset link sent successfully');
+    } catch (error) {
+      processError(error);
+    }
+
+    setFormIsLoading(false);
+  };
   console.log('currentUser', currentUser);
   console.log('authDetails', authDetails);
 
@@ -186,6 +199,7 @@ const AccountSettingPage = () => {
       </Form>
       <p className='text-lg font-semibold'>Password changes</p>
       <button
+        onClick={resetPassword}
         type='button'
         className={cn(
           `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
