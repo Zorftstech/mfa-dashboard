@@ -98,6 +98,11 @@ export interface authDetailsInterface {
   refresh?: string;
   user_id?: string;
   displayName?: string;
+  uid?: string;
+  email?: string;
+  emailVerified?: boolean;
+  photoURL?: string;
+  role?: string;
 }
 
 export interface productInterface {

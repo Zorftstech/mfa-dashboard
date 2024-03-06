@@ -11,6 +11,7 @@ import { ItitleLinks, routePathTypes } from 'types';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from 'assets/svg/nfmLogo.svg';
+import { Avatar, AvatarFallback, AvatarImage } from 'components/shadcn/ui/avatar';
 
 // import { useWindowSize } from 'usehooks-ts';
 import Menu from '../Menu';
@@ -103,35 +104,32 @@ const AppNav = () => {
               <DropdownMenuTrigger
                 className={`focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}
               >
-                {/* <article className='flex gap-3'>
-                  <div
-                    style={{ outline: '#7EB024 solid 1px' }}
-                    className='flex  items-center justify-center  rounded-md bg-primary-1 p-2 outline-offset-[3px] md:p-2 md:px-4'
-                  >
-                    <p className='text-base font-extrabold uppercase text-white md:text-xl'>
-                      {firstCharsOfWords('bridge' || ' ')[0]}
-                    </p>
-                  </div>
-                  <div>
-                    <p className='font-semibold'>
-                      <span className='font-bold'>Bridge </span>Clinic
-                    </p>
-                    <p className='text-sm text-gray-400'>Oladimeji Ajayi</p>
-                  </div>
-                </article> */}
-
-                <Icon name='demoDp' />
+                <Avatar>
+                  <AvatarImage
+                    src={authDetails?.photoURL || 'https://github.com/shadcn.png'}
+                    alt='user'
+                    className='h-full w-full rounded-full object-cover'
+                  />
+                  <AvatarFallback>AU</AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className='mr-[1.5rem] w-[14.375rem]  bg-white shadow-5'>
                 <DropdownMenuLabel className='flex items-center gap-[0.625rem] !px-[1.25rem] !py-[0.875rem]'>
-                  <Icon name='demoDp' />
+                  <Avatar>
+                    <AvatarImage
+                      src={authDetails?.photoURL || 'https://github.com/shadcn.png'}
+                      alt='user'
+                      className='h-full w-full rounded-full object-cover'
+                    />
+                    <AvatarFallback>AU</AvatarFallback>
+                  </Avatar>
                   <div className='flex flex-col text-[14px] tracking-[0.15px]'>
                     <h6 className='font-inter font-[600] text-textColor-primary'>
-                      {authDetails?.data?.first_name} {authDetails?.data?.last_name}
+                      {authDetails?.displayName} {authDetails?.data?.last_name}
                     </h6>
-                    <span className='text-[12px] font-[400] leading-[14px] tracking-[0.4px] text-textColor-disabled'>
-                      User
+                    <span className='mt-2 text-[12px] font-[400] leading-[14px] tracking-[0.4px] text-textColor-disabled'>
+                      Admin User
                     </span>
                   </div>
                 </DropdownMenuLabel>

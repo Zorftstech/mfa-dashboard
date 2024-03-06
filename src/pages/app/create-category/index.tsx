@@ -74,32 +74,18 @@ const FormSchema = z.object({
 });
 const CreateCategory = () => {
   const { location } = useUserLocation();
-  const navigate = useNavigate();
   const { isEditing, editData, setEditData, setIsEditing } = useStore((state) => state);
 
+  const navigate = useNavigate();
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
-    setUploading(true);
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
     setImageUrl(fileUrl); // Store the URL in state
-
-    const formdata = new FormData();
-    formdata.append('file', files);
-
-    try {
-      console.log('====================================');
-      console.log('file', files);
-      console.log('====================================');
-    } catch (error) {
-      processError(error);
-    }
-
-    setUploading(false);
   };
   const onDrop = (acceptedFiles: any) => {
     handleFileDrop(acceptedFiles[0]);
@@ -121,15 +107,6 @@ const CreateCategory = () => {
     },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
     let downloadURL = imageUrl;

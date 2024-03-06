@@ -32,7 +32,6 @@ import useUserLocation from 'hooks/useUserLoction';
 import { useEffect } from 'react';
 import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
-import UploadImageForm from './UploadForm';
 import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
@@ -42,69 +41,106 @@ import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
-
-// fix for phone input build error
-const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
-interface Iprops {
-  switchTab: (tab: string) => void;
-  handleComplete: (tab: string) => void;
-  data: string[];
-  userInfo: any; // change to the right type
-  handleUserInfo: (info: any) => void; // change to the right type
-}
-interface ErrorMessages {
-  [key: string]: string[];
-}
-
+import useStore from 'store';
+import { useDropzone } from 'react-dropzone';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection, updateDoc, getDoc } from 'firebase/firestore';
+import { db } from 'firebase';
 const FormSchema = z.object({
   fullName: z.string().min(2, {
     message: 'Please enter a valid name',
   }),
 
-  email: z
-    .string()
-    .min(1, {
-      message: 'Please enter a valid email',
-    })
-    .email({
-      message: 'Please enter a valid email',
-    }),
+  // email: z
+  //   .string()
+  //   .min(1, {
+  //     message: 'Please enter a valid email',
+  //   })
+  //   .email({
+  //     message: 'Please enter a valid email',
+  //   }),
 });
 const UserProfilePage = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
 
   const [formIsLoading, setFormIsLoading] = useState(false);
+  const { currentUser, authDetails, setAuthDetails } = useStore((state) => state);
 
+  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<any>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    authDetails?.photoURL || 'https://github.com/shadcn.png',
+  ); //
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      fullName: authDetails?.displayName,
+    },
+  });
+  const handleFileDrop = async (files: any) => {
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    console.log(data);
-
     setFormIsLoading(true);
+    let downloadURL = imageUrl;
+
+    if (file) {
+      const storageRef = ref(getStorage(), `users/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      downloadURL = await getDownloadURL(snapshot.ref);
+    }
+
+    if (!downloadURL) {
+      toast.error('Image is required.');
+      setFormIsLoading(false);
+      return;
+    }
 
     try {
-      toast.success('Patient Created Successfully');
-    } catch (error: any) {
+      const adminUserData = {
+        displayName: data.fullName,
+        photoURL: downloadURL,
+      };
+
+      const docRef = doc(db, 'adminUsers', authDetails.uid ?? ' ');
+      await setDoc(docRef, adminUserData, { merge: true });
+      const user = await getDoc(docRef);
+      if (user.exists()) {
+        setAuthDetails({
+          ...authDetails,
+          ...user.data(),
+        });
+      }
+
+      toast.success('Profile updated successfully');
+
+      // form.reset();
+      // setImageUrl(null);
+      // setFile(null);
+      // setIsEditing(false);
+      // navigate(-1);
+    } catch (error) {
       processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      toast.error('An error occurred, please try again.');
+    } finally {
+      setFormIsLoading(false);
     }
-    setFormIsLoading(false);
   }
 
   return (
@@ -131,7 +167,30 @@ const UserProfilePage = () => {
         </div>
       </div>
       <div className='flex items-end justify-between'>
-        <UploadImageForm />
+        <section className=' rounded-xl    '>
+          <section {...getRootProps()}>
+            <input {...getInputProps()} />
+            {imageUrl ? (
+              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+                <img
+                  src={imageUrl}
+                  alt='Selected'
+                  className=' h-full w-full rounded-full object-cover object-center '
+                />{' '}
+                {/* Display the selected image */}
+                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+                </div>
+              </div>
+            ) : isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+              </div>
+            )}
+          </section>
+        </section>
       </div>
       <Form {...form}>
         <form
@@ -165,7 +224,20 @@ const UserProfilePage = () => {
               )}
             />
 
-            <FormField
+            <div className='relative'>
+              <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                Email Address
+              </label>
+              <FormControl>
+                <Input
+                  className='py-6 text-base placeholder:text-sm  '
+                  value={authDetails?.email}
+                  type='email'
+                  placeholder='sample@email.com'
+                />
+              </FormControl>
+            </div>
+            {/* <FormField
               control={form.control}
               name='email'
               render={({ field }) => (
@@ -186,7 +258,7 @@ const UserProfilePage = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            />
+            /> */}
           </section>
 
           <button

@@ -32,97 +32,64 @@ import useUserLocation from 'hooks/useUserLoction';
 import { useEffect } from 'react';
 import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
-import UploadImageForm from './UploadForm';
-import SavePatientModal from 'components/modal/Patients/SavePatient';
-import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
-import PI, { PhoneInputProps } from 'react-phone-input-2';
-import API from 'services';
+
 import toast from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
+import useStore from 'store';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection, updateDoc, getDoc } from 'firebase/firestore';
+import { db } from 'firebase';
+const FormSchema = z.object({
+  fullName: z.string().min(2, {
+    message: 'Please enter a valid name',
+  }),
+});
 
-// fix for phone input build error
-const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
-interface Iprops {
-  switchTab: (tab: string) => void;
-  handleComplete: (tab: string) => void;
-  data: string[];
-  userInfo: any; // change to the right type
-  handleUserInfo: (info: any) => void; // change to the right type
-}
-interface ErrorMessages {
-  [key: string]: string[];
-}
-
-const FormSchema = z
-  .object({
-    fullName: z.string().min(2, {
-      message: 'Please enter a valid name',
-    }),
-
-    email: z
-      .string()
-      .min(1, {
-        message: 'Please enter a valid email',
-      })
-      .email({
-        message: 'Please enter a valid email',
-      }),
-    oldPassword: z
-      .string()
-      .min(8, {
-        message: 'Password must be at least 8 characters long',
-      })
-      .optional(),
-    newPassword: z
-      .string()
-      .min(8, {
-        message: 'Password must be at least 8 characters long',
-      })
-      .optional(),
-  })
-  .refine((data) => data.newPassword !== '', {
-    message: 'please enter your old password',
-    path: ['newPassword'],
-  });
 const AccountSettingPage = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { currentUser, authDetails, setAuthDetails } = useStore((state) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      fullName: authDetails?.displayName,
+    },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-
-    console.log(data);
-
     setFormIsLoading(true);
 
     try {
-      toast.success('Patient Created Successfully');
-    } catch (error: any) {
+      const adminUserData = {
+        displayName: data.fullName,
+      };
+
+      const docRef = doc(db, 'adminUsers', authDetails.uid ?? ' ');
+      await setDoc(docRef, adminUserData, { merge: true });
+      const user = await getDoc(docRef);
+      if (user.exists()) {
+        setAuthDetails({
+          ...authDetails,
+          ...user.data(),
+        });
+      }
+
+      toast.success('Profile updated successfully');
+    } catch (error) {
       processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      toast.error('An error occurred, please try again.');
+    } finally {
+      setFormIsLoading(false);
     }
-    setFormIsLoading(false);
   }
+  console.log('currentUser', currentUser);
+  console.log('authDetails', authDetails);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8  px-container-md pb-[2.1rem]'>
@@ -179,74 +146,19 @@ const AccountSettingPage = () => {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name='email'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Email Address
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
-                        {...field}
-                        type='text'
-                        placeholder='sample@email.com'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='oldPassword'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Old Password
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
-                        {...field}
-                        type='text'
-                        placeholder='Enter your old password'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='newPassword'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      New Password
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
-                        {...field}
-                        type='text'
-                        placeholder='Enter your new password'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
+            <div className='relative'>
+              <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                Email Address
+              </label>
+              <FormControl>
+                <Input
+                  className='py-6 text-base placeholder:text-sm  '
+                  value={authDetails?.email}
+                  type='email'
+                  placeholder='sample@email.com'
+                />
+              </FormControl>
+            </div>
           </section>
 
           <button

@@ -111,7 +111,6 @@ const Dashboard = () => {
       processError(err);
     },
   });
-  console.log(authDetails);
 
   return (
     <div className='container flex h-full w-full flex-col overflow-auto px-container-md py-[1rem] pb-10'>
