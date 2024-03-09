@@ -143,8 +143,9 @@ const CreateFlashSale = () => {
       let flashSaleData = {
         name: data.productName,
         desc: data.description,
-        price: data.price,
-        quantity: data.quantity,
+        price: Number(data.price),
+        quantity: Number(data.quantity),
+
         unit: data.unit,
         prevPrice: data.prevPrice,
       };

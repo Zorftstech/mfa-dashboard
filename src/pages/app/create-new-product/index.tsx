@@ -69,6 +69,9 @@ const FormSchema = z.object({
   price: z.string().min(2, {
     message: 'Please enter a valid price',
   }),
+  costprice: z.string().min(2, {
+    message: 'Please enter a valid price',
+  }),
   category: z.string().min(2, {
     message: 'Please enter a valid category',
   }),
@@ -85,12 +88,7 @@ const FormSchema = z.object({
     required_error: 'quantity is required.',
   }),
 
-  minimumPrice: z
-    .string()
-    .min(2, {
-      message: 'Please enter a valid minimum price',
-    })
-    .optional(),
+  minimumPrice: z.string().optional(),
   nameYourPrice: z.boolean().default(false).optional(),
 });
 const CreateNewProduct = () => {
@@ -134,6 +132,7 @@ const CreateNewProduct = () => {
       unit: editData?.unit || '',
       quantity: editData?.quantity || '',
       minimumPrice: editData?.minimumPrice || '',
+      costprice: editData?.costprice || '',
     },
   });
 
@@ -153,8 +152,9 @@ const CreateNewProduct = () => {
           id: data.category,
           name: categories.find((c: any) => c.id === data.category)?.name,
         },
-        price: data.price,
-        quantity: data.quantity,
+        price: Number(data.price),
+        costprice: data.costprice,
+        quantity: Number(data.quantity),
         unit: data.unit,
         minimumPrice: data.minimumPrice,
         nameYourPrice: data.nameYourPrice ? true : false,
@@ -318,12 +318,35 @@ const CreateNewProduct = () => {
 
             <FormField
               control={form.control}
+              name='costprice'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Cost Price (NGN)
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        type='text'
+                        placeholder='3000'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name='price'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Price (NGN)
+                      Marked Up Price (NGN){' '}
+                      <span className='text-xs text-red-600'>*selling price</span>
                     </label>
                     <FormControl>
                       <Input
@@ -483,28 +506,30 @@ const CreateNewProduct = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='minimumPrice'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Minimum Price (NGN)
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
-                        {...field}
-                        type='text'
-                        placeholder='Set minimum price'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
+            {form.getValues('nameYourPrice') && (
+              <FormField
+                control={form.control}
+                name='minimumPrice'
+                render={({ field }) => (
+                  <FormItem>
+                    <div className='relative'>
+                      <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                        Minimum Price (NGN)
+                      </label>
+                      <FormControl>
+                        <Input
+                          className='py-6 text-base placeholder:text-sm  '
+                          {...field}
+                          type='text'
+                          placeholder='Set minimum price'
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage className='mt-1 text-sm' />
+                  </FormItem>
+                )}
+              />
+            )}
           </section>
 
           <button

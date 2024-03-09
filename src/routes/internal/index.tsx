@@ -15,6 +15,7 @@ import Settings from 'pages/app/settings';
 import FAQPage from 'pages/app/faq';
 import FarmOfftake from 'pages/app/farm-offtake';
 import SingleBlog from 'pages/inner-pages/single-blog';
+import WalletsPage from 'pages/app/wallets';
 import SinglePatient from 'pages/inner-pages/single-patient';
 import { routeTypes, routesInterface } from 'types';
 import CreateCategory from 'pages/app/create-category';
@@ -45,6 +46,14 @@ const internalRoute: routeTypes = [
   {
     element: <Users />,
     path: 'users',
+  },
+  {
+    element: <Users />,
+    path: 'users',
+  },
+  {
+    element: <WalletsPage />,
+    path: 'wallets',
   },
   {
     element: <UserProfile />,

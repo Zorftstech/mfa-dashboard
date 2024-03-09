@@ -33,7 +33,8 @@ export type routePathTypes =
   | 'create-flash-sale'
   | 'create-farm-offtake'
   | 'create-faq'
-  | 'categories';
+  | 'categories'
+  | 'wallets';
 
 export interface routesInterface<T> {
   path: T;

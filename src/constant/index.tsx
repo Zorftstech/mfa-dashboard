@@ -25,6 +25,7 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'farm-offtake': 'farm-offtake',
   'user-profile': 'user-profile',
   categories: 'categories',
+  wallets: 'wallets',
   'create-category': 'create-category',
   'create-coupons': 'create-coupons',
   'create-food-bundle': 'create-food-bundle',

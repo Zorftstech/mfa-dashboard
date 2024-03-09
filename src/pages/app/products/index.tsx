@@ -123,7 +123,7 @@ const ProductsPage = () => {
         </span>
       </Link>
       <FeaturedLoader isLoading={isLoading}>
-        <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
+        <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
           {sortedAndFilteredProducts?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
               <ProductCard

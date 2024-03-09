@@ -134,7 +134,7 @@ const CreateFarmOffTake = () => {
       let foodBundleData = {
         name: data.productName,
         desc: data.description,
-        price: data.price,
+        price: Number(data.price),
         listOfItems: data.list, // Assuming you have a field for list of items in your form schema
         intervals: data.intervals, // Assuming you have a field for intervals in your form schema
       };
