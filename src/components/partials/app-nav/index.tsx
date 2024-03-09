@@ -34,7 +34,7 @@ interface IDropNavLinks {
 export const menuLinks: IDropNavLinks = {
   level1: [{ icons: <Icon name='profileIcon' />, link: `profile`, title: `Profile` }],
   level2: [{ icons: <Icon name='settingIcon' />, link: `settings`, title: `Settings` }],
-  level3: [{ icons: <Icon name='exitIcon' />, link: `logout`, title: `Logout` }],
+  level3: [{ icons: <Icon name='exitIcon' />, link: `login`, title: `Logout` }],
 };
 
 const AppNav = () => {

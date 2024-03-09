@@ -94,14 +94,18 @@ const CouponPage = () => {
   const sortedAndFilteredItems = useSortAndSearch(allCoupons, searchTerm, sortCriterion);
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[2.1rem]'>
-      <div className='flex justify-between '>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-base pb-[2.1rem] md:px-container-md'>
+      <div className='justify-between md:flex '>
         <div>
           <h3 className='mb-4 text-base font-semibold md:text-2xl'>Coupon creation</h3>
-          <p className='text-[0.85rem] '>All coupons you have added will appear here</p>
+          <p className='hidden text-[0.85rem] md:block'>
+            All coupons you have added will appear here
+          </p>
         </div>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
+          <p className='mb-6 hidden  text-end text-[0.75rem] text-gray-400 md:block'>
+            {formatCurrentDateTime()}
+          </p>
           <div className='flex   gap-3'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

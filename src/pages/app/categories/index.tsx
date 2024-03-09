@@ -73,15 +73,19 @@ const Categories = () => {
   const sortedAndFilteredSubcategories = useSortAndSearch(subcategories, searchTerm, sortCriterion);
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-md pb-[5.1rem]'>
-      <div className='flex justify-between '>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 px-container-base  pb-[5.1rem] md:overflow-auto md:px-container-md'>
+      <div className='justify-between md:flex '>
         <div>
           <h3 className='mb-4 text-base font-semibold md:text-2xl'>Categories</h3>
-          <p className='text-[0.85rem] '>All the and categories currently available</p>
+          <p className='hidden text-[0.85rem] md:block '>
+            All the and categories currently available
+          </p>
         </div>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
-          <div className='flex   gap-3'>
+          <p className='mb-6 hidden text-end text-[0.75rem]  text-gray-400 md:block'>
+            {formatCurrentDateTime()}
+          </p>
+          <div className='my-4 flex  gap-3 md:my-0 '>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -127,7 +131,7 @@ const Categories = () => {
         </div>
 
         <FeaturedLoader isLoading={loading}>
-          <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
+          <div className='grid w-full grid-cols-2 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
             {sortedAndFilteredCategories?.map((item: any, idx: number) => (
               <CategoryModal
                 trigger={
@@ -166,7 +170,7 @@ const Categories = () => {
         </div>
 
         <FeaturedLoader isLoading={loading}>
-          <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
+          <div className='grid w-full grid-cols-2 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
             {sortedAndFilteredSubcategories?.map((item: any, idx: number) => (
               <CategoryModal
                 trigger={

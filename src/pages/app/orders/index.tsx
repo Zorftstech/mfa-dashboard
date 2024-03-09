@@ -96,7 +96,7 @@ const OrdersPage = () => {
   // }, [searchparams, data]);
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col  overflow-auto px-container-md pb-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col px-container-base pb-[2.1rem] md:overflow-auto md:px-container-md'>
       <div className='relative grid w-full'>
         <OrdersTableComponent />
       </div>

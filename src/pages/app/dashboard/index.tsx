@@ -45,6 +45,7 @@ import { db } from 'firebase';
 import TextContentLoader from 'components/Loaders/TextContentLoader';
 import useStore from 'store';
 import InlineLoader from 'components/Loaders/InlineLoader';
+
 type filterTypes = 'All' | 'Adverts' | 'Blog Posts' | 'BTS' | 'Assets' | 'Upcoming Events';
 
 const generalFilters: filterTypes[] = [
@@ -68,12 +69,14 @@ const Dashboard = () => {
     collectionName: string,
     iconName: iconTypes,
     subHeadingText: string,
+    link: string,
   ) {
     const collectionRef = collection(db, collectionName);
     const snapshot = await getCountFromServer(collectionRef); // Assuming getCountFromServer works as expected
     return {
       subHeading: subHeadingText,
       count: snapshot.data().count,
+      link: link,
       icons: (
         <Icon
           svgProp={{
@@ -91,18 +94,20 @@ const Dashboard = () => {
     queryKey: ['get-counts'],
     queryFn: async () => {
       // Define an array of collections and their corresponding UI info
-      const collectionsInfo: { name: string; icon: iconTypes; text: string }[] = [
-        { name: 'users', icon: 'RegUsers', text: 'Registered Users' },
-        { name: 'userOrders', icon: 'Orders', text: 'Orders' },
-        { name: 'flashsales', icon: 'FlashSale', text: 'Flash sale products' },
-        { name: 'products', icon: 'Products', text: 'Products' },
-        { name: 'categories', icon: 'Categories', text: 'Categories' },
-        { name: 'subcategories', icon: 'SubCat', text: 'SubCategories' },
+      const collectionsInfo: { name: string; icon: iconTypes; text: string; link: string }[] = [
+        { name: 'users', icon: 'RegUsers', text: 'Registered Users', link: 'users' },
+        { name: 'userOrders', icon: 'Orders', text: 'Orders', link: 'orders' },
+        { name: 'flashsales', icon: 'FlashSale', text: 'Flash sale products', link: 'flash-sales' },
+        { name: 'products', icon: 'Products', text: 'Products', link: 'products' },
+        { name: 'categories', icon: 'Categories', text: 'Categories', link: 'categories' },
+        { name: 'subcategories', icon: 'SubCat', text: 'SubCategories', link: 'categories' },
       ];
 
       // Use Promise.all to fetch all counts concurrently
       const countsData = await Promise.all(
-        collectionsInfo.map((info) => fetchCountAndPrepareData(info.name, info.icon, info.text)),
+        collectionsInfo.map((info) =>
+          fetchCountAndPrepareData(info.name, info.icon, info.text, info.link),
+        ),
       );
 
       return countsData;
@@ -113,7 +118,7 @@ const Dashboard = () => {
   });
 
   return (
-    <div className='container flex h-full w-full flex-col overflow-auto px-container-md py-[1rem] pb-10'>
+    <div className='container flex h-full w-full flex-col overflow-auto px-container-base py-[1rem] pb-10 md:px-container-md'>
       {/* <div className='flex items-center justify-between'>
         <h3 className='text-2xl font-bold'>Welcome Edmund</h3>
         <div className='flex  gap-3'>
@@ -150,12 +155,13 @@ const Dashboard = () => {
           <InlineLoader isLoading={isLoading}>
             <div
               className={cn(
-                `}   grid cursor-pointer grid-cols-[1fr_1fr] gap-[2rem] rounded-lg rounded-lg  transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr]`,
+                `}   grid cursor-pointer grid-cols-[1fr] gap-[2rem] rounded-lg rounded-lg  transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr]`,
               )}
             >
               {counts?.map((item, key) => {
                 return (
                   <div
+                    onClick={() => navigate(`/app/${item.link}`)}
                     className=' flex items-center  gap-4 rounded-lg  px-4  py-3 shadow-md'
                     key={key}
                   >
@@ -171,14 +177,16 @@ const Dashboard = () => {
               })}
             </div>
           </InlineLoader>
-          <div className='mt-12'>
+          <div className='mt-12 hidden md:block'>
             <p className='mb-10 text-lg font-medium text-primary-1'>Statistical Chart</p>
             <LineChartComponent />
           </div>
         </div>
         <div className='flex flex-col gap-4'>
-          <p className='text-end text-[0.75rem] text-gray-400'>Today: 10:23am, 30th Oct 2023</p>
-          <div className='mb-12 flex   gap-3'>
+          <p className='hidden text-end text-[0.75rem] text-gray-400 md:block'>
+            Today: 10:23am, 30th Oct 2023
+          </p>
+          <div className='mb-12 hidden gap-3  md:flex'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -202,7 +210,7 @@ const Dashboard = () => {
             </DropdownMenu>
             <SearchComboBox />
           </div>
-          <p className=' text-lg font-medium text-primary-1'>Today’s activity</p>
+          <p className=' text-lg  font-medium text-primary-1'>Today’s activity</p>
           <p className=' text-xs'>Today</p>
           <PieChartComponent />
           <div className='mt-6 space-y-4'>
@@ -218,7 +226,7 @@ const Dashboard = () => {
           <div className='mt-8 flex flex-col gap-3 border-t-2 border-t-gray-100 pt-6'>
             <p className=' text-lg font-medium text-primary-1'>Recent Activity</p>
 
-            <section className='flex justify-between'>
+            <section className='justify-between space-y-4 md:flex md:space-y-0'>
               <div>
                 <p className=' text-xs font-medium'>Registered users</p>
 
@@ -234,7 +242,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div>
-                <p className='text-end text-xs font-medium'>Recent orders</p>
+                <p className='text-xs font-medium md:text-end'>Recent orders</p>
 
                 <div className='mt-6 space-y-4'>
                   <div className=' flex  items-center gap-2 '>

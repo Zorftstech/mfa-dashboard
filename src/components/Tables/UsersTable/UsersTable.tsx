@@ -372,10 +372,12 @@ function UserTableComponent() {
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>
-      <div className='mb-4 flex justify-between '>
-        <h3 className=' mb-16 text-base font-semibold md:text-2xl'>User Accounts</h3>
+      <div className='mb-8 flex flex-col md:mb-4 md:flex-row md:justify-between '>
+        <h3 className=' mb-6  text-base font-semibold md:mb-16 md:text-2xl'>User Accounts</h3>
         <div>
-          <p className='mb-6 text-end  text-[0.75rem] text-gray-400'>{formatCurrentDateTime()}</p>
+          <p className='mb-6 hidden text-end text-[0.75rem] text-gray-400 md:block'>
+            {formatCurrentDateTime()}
+          </p>
           <div className='flex items-center  gap-3'>
             {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -144,7 +144,7 @@ const UserProfilePage = () => {
   }
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8  px-container-md pb-[2.1rem]'>
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-base pb-[2.1rem] md:px-container-md'>
       <div className='mb-8 flex  w-full items-center justify-between gap-4 md:flex-row'>
         <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
           <InlineLoader isLoading={false}>
