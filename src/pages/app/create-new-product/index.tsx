@@ -449,23 +449,16 @@ const CreateNewProduct = () => {
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
                       Unit
                     </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='Select a unit of measurement' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        <SelectItem value='kg' className='py-3 text-sm text-white'>
-                          kg
-                        </SelectItem>
-                        <SelectItem value='g' className='py-3 text-sm text-white'>
-                          g
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        type='text'
+                        placeholder='Enter product measurement unit'
+                      />
+                    </FormControl>
                   </div>
-                  <FormMessage className='mt-1 text-xs' />
+                  <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
             />
