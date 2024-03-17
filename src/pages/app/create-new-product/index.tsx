@@ -46,7 +46,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
-import useStore from 'store';
+import useStore, { StoreType } from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -66,10 +66,10 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  price: z.string().min(2, {
+  price: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
-  costprice: z.string().min(2, {
+  costprice: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
   category: z.string().min(2, {
@@ -84,18 +84,18 @@ const FormSchema = z.object({
   unit: z.string({
     required_error: 'unit is required.',
   }),
-  quantity: z.string({
+  quantity: z.number({
     required_error: 'quantity is required.',
   }),
 
-  minimumPrice: z.string().optional(),
+  minimumPrice: z.number().optional(),
   nameYourPrice: z.boolean().default(false).optional(),
 });
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
   const { categories, subcategories, isEditing, editData, setEditData, setIsEditing } = useStore(
-    (state) => state,
+    (state: StoreType) => state,
   );
 
   const [formIsLoading, setFormIsLoading] = useState(false);
@@ -127,12 +127,12 @@ const CreateNewProduct = () => {
       category: editData?.category?.id || '',
       subcategory: editData?.subcategory?.id || '',
       productName: editData?.name || '',
-      price: editData?.price || '',
+      price: Number(editData?.price),
       description: editData?.desc || '',
       unit: editData?.unit || '',
-      quantity: editData?.quantity || '',
-      minimumPrice: editData?.minimumPrice || '',
-      costprice: editData?.costprice || '',
+      quantity: Number(editData?.quantity ?? 0),
+      minimumPrice: Number(editData?.minimumPrice || 0),
+      costprice: Number(editData?.costprice || 0),
     },
   });
 
@@ -153,10 +153,10 @@ const CreateNewProduct = () => {
           name: categories.find((c: any) => c.id === data.category)?.name,
         },
         price: Number(data.price),
-        costprice: data.costprice,
+        costprice: Number(data.costprice),
         quantity: Number(data.quantity),
         unit: data.unit,
-        minimumPrice: data.minimumPrice,
+        minimumPrice: Number(data.minimumPrice),
         nameYourPrice: data.nameYourPrice ? true : false,
       };
 
@@ -329,6 +329,11 @@ const CreateNewProduct = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                         type='text'
                         placeholder='3000'
                       />
@@ -352,7 +357,12 @@ const CreateNewProduct = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
-                        type='text'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
+                        type='number'
                         placeholder='3000'
                       />
                     </FormControl>
@@ -476,6 +486,11 @@ const CreateNewProduct = () => {
                         className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
                         {...field}
                         type='text'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                       />
                     </FormControl>
                   </div>
@@ -515,6 +530,11 @@ const CreateNewProduct = () => {
                           {...field}
                           type='text'
                           placeholder='Set minimum price'
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === '' ? '' : Number(value));
+                          }}
+                          value={field.value}
                         />
                       </FormControl>
                     </div>
