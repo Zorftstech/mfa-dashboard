@@ -66,7 +66,7 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  price: z.string().min(2, {
+  price: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
 
@@ -76,11 +76,11 @@ const FormSchema = z.object({
   unit: z.string({
     required_error: 'unit is required.',
   }),
-  quantity: z.string({
+  quantity: z.number({
     required_error: 'quantity is required.',
   }),
 
-  prevPrice: z.string().min(2, {
+  prevPrice: z.number().min(2, {
     message: 'Please enter a valid previous price',
   }),
 });
@@ -118,23 +118,14 @@ const CreateFlashSale = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       productName: editData?.name || '',
-      price: editData?.price || '',
+      price: Number(editData?.price ?? 0),
+      quantity: Number(editData?.quantity ?? 0),
       description: editData?.desc || '',
       unit: editData?.unit || '',
-      quantity: editData?.quantity || '',
-      prevPrice: editData?.prevPrice || '',
+      prevPrice: Number(editData?.prevPrice ?? 0),
     },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
 
@@ -147,7 +138,7 @@ const CreateFlashSale = () => {
         quantity: Number(data.quantity),
 
         unit: data.unit,
-        prevPrice: data.prevPrice,
+        prevPrice: Number(data.prevPrice),
       };
 
       // Check if editing and a new file is provided
@@ -320,7 +311,12 @@ const CreateFlashSale = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
-                        type='text'
+                        type='number'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                         placeholder='3000'
                       />
                     </FormControl>
@@ -387,7 +383,12 @@ const CreateFlashSale = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
                         {...field}
-                        type='text'
+                        type='number'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                       />
                     </FormControl>
                   </div>
@@ -409,7 +410,12 @@ const CreateFlashSale = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
-                        type='text'
+                        type='number'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                         placeholder='previous price'
                       />
                     </FormControl>

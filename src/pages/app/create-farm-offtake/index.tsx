@@ -64,7 +64,7 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  price: z.string().min(2, {
+  price: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
 
@@ -110,22 +110,13 @@ const CreateFarmOffTake = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       productName: editData?.name || '',
-      price: editData?.price || '',
+      price: Number(editData?.price || 0),
       description: editData?.desc || '',
       intervals: editData?.intervals || '',
       list: editData?.listOfItems || '',
     },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
 
@@ -329,7 +320,12 @@ const CreateFarmOffTake = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
-                        type='text'
+                        type='number'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                         placeholder='3000'
                       />
                     </FormControl>

@@ -334,7 +334,7 @@ const CreateNewProduct = () => {
                           field.onChange(value === '' ? '' : Number(value));
                         }}
                         value={field.value}
-                        type='text'
+                        type='number'
                         placeholder='3000'
                       />
                     </FormControl>
@@ -485,7 +485,7 @@ const CreateNewProduct = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
                         {...field}
-                        type='text'
+                        type='number'
                         onChange={(e) => {
                           const value = e.target.value;
                           field.onChange(value === '' ? '' : Number(value));
@@ -528,8 +528,8 @@ const CreateNewProduct = () => {
                         <Input
                           className='py-6 text-base placeholder:text-sm  '
                           {...field}
-                          type='text'
                           placeholder='Set minimum price'
+                          type='number'
                           onChange={(e) => {
                             const value = e.target.value;
                             field.onChange(value === '' ? '' : Number(value));

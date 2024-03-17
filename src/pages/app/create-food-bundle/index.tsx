@@ -66,7 +66,7 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  price: z.string().min(2, {
+  price: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
 
@@ -112,7 +112,7 @@ const CreateFoodBundle = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       productName: editData?.name || '',
-      price: editData?.price || '',
+      price: Number(editData?.price || 0),
       description: editData?.desc || '',
       intervals: editData?.intervals || '',
       list: editData?.listOfItems || '',
@@ -331,7 +331,12 @@ const CreateFoodBundle = () => {
                       <Input
                         className='py-6 text-base placeholder:text-sm  '
                         {...field}
-                        type='text'
+                        type='number'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
                         placeholder='3000'
                       />
                     </FormControl>
