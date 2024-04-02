@@ -37,7 +37,7 @@ import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
 import API from 'services';
-import toast from 'helper';
+import toast, { convertFirebaseTimestampToDate } from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
@@ -48,8 +48,15 @@ import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
+import DateTimePicker from 'react-datetime-picker';
+import 'react-datetime-picker/dist/DateTimePicker.css';
+import 'react-calendar/dist/Calendar.css';
+import 'react-clock/dist/Clock.css';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
+type ValuePiece = Date | null;
+
+type Value = ValuePiece | [ValuePiece, ValuePiece];
 interface Iprops {
   switchTab: (tab: string) => void;
   handleComplete: (tab: string) => void;
@@ -88,12 +95,15 @@ const CreateFlashSale = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
   const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
-
+  const [expireDate, setExpireDate] = useState<Date | null>(
+    isEditing && editData?.expireDate
+      ? convertFirebaseTimestampToDate(editData.expireDate)
+      : new Date(new Date().setHours(new Date().getHours() + 5)),
+  );
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
-
   const handleFileDrop = async (files: any) => {
     setUploading(true);
     setFile(files);
@@ -139,6 +149,7 @@ const CreateFlashSale = () => {
 
         unit: data.unit,
         prevPrice: Number(data.prevPrice),
+        expireDate: expireDate,
       };
 
       // Check if editing and a new file is provided
@@ -424,6 +435,12 @@ const CreateFlashSale = () => {
                 </FormItem>
               )}
             />
+            <div className='flex flex-col py-6'>
+              <p className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                Expiry Date
+              </p>
+              <DateTimePicker onChange={setExpireDate} value={expireDate} className='border-none' />
+            </div>
           </section>
 
           <button

@@ -110,3 +110,11 @@ body::-webkit-scrollbar-thumb:hover {
 .sideNavScroll::-webkit-scrollbar-thumb:hover {
   background: #e1e2df;
 }
+
+.react-datetime-picker__wrapper {
+  border: none !important;
+  padding-block: 1rem;
+  border: #e1e2df 1px solid;
+  border-radius: 0.5rem;
+  padding-inline: 0.5rem;
+}

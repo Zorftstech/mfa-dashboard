@@ -136,3 +136,13 @@ export function formatCurrentDateTime() {
 
   return `${hours}:${minutes}${ampm}, ${day}th ${month} ${year}`;
 }
+
+interface FirebaseTimestamp {
+  seconds: number;
+  nanoseconds: number;
+}
+
+export function convertFirebaseTimestampToDate(timestamp: FirebaseTimestamp): Date {
+  const dateInMilliseconds = timestamp?.seconds * 1000 + timestamp?.nanoseconds / 1000000;
+  return new Date(dateInMilliseconds);
+}
