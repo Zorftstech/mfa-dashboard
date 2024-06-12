@@ -24,7 +24,7 @@ import axiosInstance from 'services';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -139,6 +139,7 @@ const CreateFoodBundle = () => {
         price: Number(data.price),
         listOfItems: data.list, // Assuming you have a field for list of items in your form schema
         intervals: data.intervals, // Assuming you have a field for intervals in your form schema
+        slug: splitStringBySpaceAndReplaceWithDash(data.productName),
       };
 
       // Check if editing and a new file is provided

@@ -24,7 +24,7 @@ import axiosInstance from 'services';
 import { ChevronLeft, ChevronRightIcon, CalendarIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -127,6 +127,7 @@ const CreateCoupon = () => {
         isActive: true,
         purpose: data.purpose,
         name: data.couponName,
+        slug: splitStringBySpaceAndReplaceWithDash(data.couponName),
       };
 
       // Decide whether to create a new document or update an existing one

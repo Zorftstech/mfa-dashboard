@@ -33,3 +33,7 @@ export const checkStatus = (status: string) => {
       return 'text-red-500';
   }
 };
+
+export function splitStringBySpaceAndReplaceWithDash(str: string): string {
+  return str.trim().split(' ').join('-').toLowerCase();
+}

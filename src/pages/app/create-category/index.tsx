@@ -25,7 +25,7 @@ import axiosInstance from 'services';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -128,6 +128,7 @@ const CreateCategory = () => {
         name: data.categoryName,
         desc: data.description,
         image: downloadURL,
+        slug: splitStringBySpaceAndReplaceWithDash(data.categoryName),
       };
 
       if (isEditing && editData?.id) {

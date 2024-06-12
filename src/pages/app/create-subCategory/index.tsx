@@ -25,7 +25,7 @@ import axiosInstance from 'services';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -157,6 +157,7 @@ const CreateSubCategory = () => {
           id: data.category,
           name: categories.find((category: any) => category.id === data.category)?.name,
         },
+        slug: splitStringBySpaceAndReplaceWithDash(data.subCategoryName),
       };
 
       // Determine if creating a new sub-category or updating an existing one
