@@ -25,6 +25,8 @@ import CreateFoodBundle from 'pages/app/create-food-bundle';
 import CreateFlashSale from 'pages/app/create-flash-sale';
 import CreateFAQ from 'pages/app/create-faq';
 import CreateFarmOfftake from 'pages/app/create-farm-offtake';
+import AllBlogs from 'pages/app/blogs';
+import CreateBlog from 'pages/app/create-blog';
 
 const internalRoute: routeTypes = [
   {
@@ -73,6 +75,10 @@ const internalRoute: routeTypes = [
     path: 'products',
   },
   {
+    element: <AllBlogs />,
+    path: 'blogs',
+  },
+  {
     element: <CreateCoupon />,
     path: 'create-coupon',
   },
@@ -90,13 +96,13 @@ const internalRoute: routeTypes = [
     path: 'create-food-bundle',
   },
   {
+    element: <CreateBlog />,
+    path: 'create-blog',
+  },
+  {
     element: <CreateFlashSale />,
     path: 'create-flash-sale',
   },
-  // {
-  //   element: <MasterClasses />,
-  //   path: 'reports',
-  // },
 
   {
     element: <Notifications />,

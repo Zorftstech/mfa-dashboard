@@ -35,6 +35,7 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'create-new-product': 'create-new-product',
   'create-farm-offtake': 'create-farm-offtake',
   'create-faq': 'create-faq',
+  'create-blog': 'create-blog',
 };
 
 const TIMBU_KEYS = {

@@ -32,6 +32,7 @@ export type routePathTypes =
   | 'create-sub-category'
   | 'create-flash-sale'
   | 'create-farm-offtake'
+  | 'create-blog'
   | 'create-faq'
   | 'categories'
   | 'wallets';

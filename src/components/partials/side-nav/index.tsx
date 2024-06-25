@@ -159,6 +159,21 @@ export const sideNavLinks: extendedRouteInterface[] = [
     ),
   },
   {
+    link: 'blogs',
+    title: 'Blogs',
+
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 20.75,
+          className: 'text-current',
+        }}
+        name='billing'
+      />
+    ),
+  },
+  {
     link: 'coupons',
     title: 'Coupons',
     icons: (
