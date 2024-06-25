@@ -48,6 +48,7 @@ import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
+import TextEditor from 'components/general/Editor';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -63,12 +64,12 @@ interface ErrorMessages {
 }
 
 const FormSchema = z.object({
-  categoryName: z.string().min(2, {
+  title: z.string().min(2, {
     message: 'Please enter a valid name',
   }),
 
-  description: z.string().min(1, {
-    message: 'Please enter a valid description',
+  data: z.string().min(1, {
+    message: 'Please enter a valid data',
   }),
 });
 const CreateBlog = () => {
@@ -80,6 +81,7 @@ const CreateBlog = () => {
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
+  const [content, setContent] = useState(editData?.data || '');
 
   const handleFileDrop = async (files: any) => {
     setFile(files);
@@ -101,8 +103,8 @@ const CreateBlog = () => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      categoryName: editData?.name || '',
-      description: editData?.desc || '',
+      title: editData?.title || '',
+      data: editData?.data || '',
     },
   });
 
@@ -111,7 +113,7 @@ const CreateBlog = () => {
     let downloadURL = imageUrl;
 
     if (file) {
-      const storageRef = ref(getStorage(), `categories/${file.name}`);
+      const storageRef = ref(getStorage(), `posts/${file.name}`);
       const snapshot = await uploadBytes(storageRef, file);
       downloadURL = await getDownloadURL(snapshot.ref);
     }
@@ -123,21 +125,21 @@ const CreateBlog = () => {
     }
 
     try {
-      const categoryData = {
-        name: data.categoryName,
-        desc: data.description,
+      const postData = {
+        title: data.title,
+        data: data.data,
         image: downloadURL,
-        slug: splitStringBySpaceAndReplaceWithDash(data.categoryName),
+        slug: splitStringBySpaceAndReplaceWithDash(data.title),
       };
 
       if (isEditing && editData?.id) {
-        const docRef = doc(db, 'categories', editData.id);
-        await updateDoc(docRef, categoryData);
+        const docRef = doc(db, 'posts', editData.id);
+        await updateDoc(docRef, postData);
         toast.success('Post updated successfully');
       } else {
-        const collectionRef = collection(db, 'categories');
+        const collectionRef = collection(db, 'posts');
         const docRef = doc(collectionRef);
-        await setDoc(docRef, categoryData);
+        await setDoc(docRef, postData);
         toast.success('Post created successfully');
       }
 
@@ -153,6 +155,11 @@ const CreateBlog = () => {
       setFormIsLoading(false);
     }
   }
+  useEffect(() => {
+    if (content) {
+      form.setValue('data', content);
+    }
+  }, [content]);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 px-container-base pb-[2.1rem] md:px-container-md'>
@@ -228,10 +235,10 @@ const CreateBlog = () => {
             formIsLoading && 'pointer-events-none cursor-not-allowed opacity-30',
           )}
         >
-          <section className=' grid grid-cols-1 gap-8 md:max-w-[40%] md:gap-6   '>
+          <section className=' grid grid-cols-1 gap-8 md:gap-6   '>
             <FormField
               control={form.control}
-              name='categoryName'
+              name='title'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
@@ -252,28 +259,7 @@ const CreateBlog = () => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='description'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Post Content
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
-                        {...field}
-                        type='text'
-                        placeholder='Enter post description'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
+            <TextEditor value={content} setValue={setContent} />
           </section>
 
           <button

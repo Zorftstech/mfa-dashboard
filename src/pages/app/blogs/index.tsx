@@ -150,15 +150,13 @@ const CouponPage = () => {
         <div className='grid w-full grid-cols-1 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4'>
           {sortedAndFilteredItems?.map((item: any, idx: number) => (
             <div key={idx} className='h-full w-full'>
-              {item?.slug}
-              {/* <BlogCard
+              <BlogCard
                 item={item}
-                purpose={item?.purpose}
-                discount={item?.discountAmount}
-                name={item?.code.slice(0, 14)}
-                link={`/${item?.id}`}
-                date={formatDate(new Date(item?.expirationDate.seconds * 1000).toString())}
-              /> */}
+                name={item?.title.slice(0, 20)}
+                link={`create-blog`}
+                img={item?.image}
+                // date={formatDate(new Date(item?.expirationDate.seconds * 1000).toString())}
+              />
             </div>
           ))}
         </div>
