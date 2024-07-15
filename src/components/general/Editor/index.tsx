@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import ReactQuill from 'react-quill';
 import { Button } from 'components/shadcn/ui/button';
-import Tooltip from './toolTip';
 import { htmlContent, markdownContent } from './data';
 import { Mic, Sparkles } from 'lucide-react';
 import { Input } from 'components/shadcn/input';
