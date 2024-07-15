@@ -12,12 +12,12 @@ import { getFirestore } from 'firebase/firestore';
 //   appId: "1:901216368405:web:8ec942ee51611df5c49b1c",
 // };
 const firebaseConfig = {
- apiKey: "AIzaSyAsTTkF8IhgzsNuDwiR-cnBXT7vMeM5v3g",
-  authDomain: "my-food-angels-9f9ca.firebaseapp.com",
-  projectId: "my-food-angels-9f9ca",
-  storageBucket: "my-food-angels-9f9ca.appspot.com",
-  messagingSenderId: "793918696364",
-  appId: "1:793918696364:web:ba7227a170a0e76cb86809"
+  apiKey: 'AIzaSyAI7ZmwJPhhtBUFEhxu9D8lOPsxKoySO2k',
+  authDomain: 'mfa-1d165.firebaseapp.com',
+  projectId: 'mfa-1d165',
+  storageBucket: 'mfa-1d165.appspot.com',
+  messagingSenderId: '588241135226',
+  appId: '1:588241135226:web:5c5e36b6c6e4c8663cbdc3',
 };
 
 // Initialize Firebase
