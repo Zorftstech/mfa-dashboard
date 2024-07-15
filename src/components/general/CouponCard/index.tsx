@@ -1,8 +1,6 @@
 import CONSTANTS from 'constant';
-import { Star, StarHalf, Clipboard, Copy } from 'lucide-react';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { copyToClipboard } from 'helper';
 import useStore from 'store';
 import { StoreType } from 'store';
