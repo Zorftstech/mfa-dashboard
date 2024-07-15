@@ -10,11 +10,6 @@ interface ITextEditor {
   setValue: React.Dispatch<React.SetStateAction<string>>;
 }
 const TextEditor = ({ value, setValue }: ITextEditor) => {
-  const [tooltip, setTooltip] = useState({
-    visible: false,
-    position: { top: 0, left: 0, right: 0, bottom: 0 },
-    text: '',
-  });
   const quill = useRef<ReactQuill | null>(null);
   function handler() {
     console.log(value);
