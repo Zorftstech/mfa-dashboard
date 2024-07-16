@@ -1,10 +1,6 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import ReactQuill from 'react-quill';
-import { Button } from 'components/shadcn/ui/button';
-import { htmlContent, markdownContent } from './data';
-import { Mic, Sparkles } from 'lucide-react';
-import { Input } from 'components/shadcn/input';
 interface ITextEditor {
   value: string;
   setValue: React.Dispatch<React.SetStateAction<string>>;

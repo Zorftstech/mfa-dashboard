@@ -48,6 +48,8 @@ import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore, { StoreType } from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
+import AddUnitsModal from 'components/modal/addUnitsModal';
+import { X } from 'lucide-react';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -56,6 +58,11 @@ interface Iprops {
   data: string[];
   userInfo: any; // change to the right type
   handleUserInfo: (info: any) => void; // change to the right type
+}
+export interface Units {
+  price: number;
+  unit: string;
+  ratio: number;
 }
 interface ErrorMessages {
   [key: string]: string[];
@@ -81,9 +88,7 @@ const FormSchema = z.object({
   description: z.string().min(1, {
     message: 'Please enter a valid description',
   }),
-  unit: z.string({
-    required_error: 'unit is required.',
-  }),
+
   quantity: z.number({
     required_error: 'quantity is required.',
   }),
@@ -102,7 +107,7 @@ const CreateNewProduct = () => {
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
-
+  const [unitsArrary, setUnitsArray] = useState<Units[]>(editData?.units || []);
   const handleFileDrop = async (files: any) => {
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
@@ -129,7 +134,6 @@ const CreateNewProduct = () => {
       productName: editData?.name || '',
       price: Number(editData?.price),
       description: editData?.desc || '',
-      unit: editData?.unit || '',
       quantity: Number(editData?.quantity ?? 0),
       minimumPrice: Number(editData?.minimumPrice || 0),
       costprice: Number(editData?.costprice || 0),
@@ -155,12 +159,15 @@ const CreateNewProduct = () => {
         price: Number(data.price),
         costprice: Number(data.costprice),
         quantity: Number(data.quantity),
-        unit: data.unit,
         minimumPrice: Number(data.minimumPrice),
         nameYourPrice: data.nameYourPrice ? true : false,
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
+        units: unitsArrary,
       };
-
+      if (unitsArrary.length === 0) {
+        toast.error('Please add units for the product');
+        throw new Error('Please add units for the product');
+      }
       // Check if editing and a new file is provided
       if (isEditing && file) {
         const storageRef = ref(getStorage(), `products/${file.name}`);
@@ -179,7 +186,10 @@ const CreateNewProduct = () => {
         await setDoc(productRef, productData, { merge: true });
         toast.success('Product updated successfully');
       } else {
-        if (!file) throw new Error('Please upload an image for the new product');
+        if (!file) {
+          toast.error('Please upload an image for the new product');
+          throw new Error('Please upload an image for the new product');
+        }
         // Proceed with new product creation, including initial image upload
         const storageRef = ref(getStorage(), `products/${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
@@ -451,28 +461,7 @@ const CreateNewProduct = () => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name='unit'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Unit
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
-                        {...field}
-                        type='text'
-                        placeholder='Enter product measurement unit'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
+
             <FormField
               control={form.control}
               name='quantity'
@@ -545,36 +534,68 @@ const CreateNewProduct = () => {
               />
             )}
           </section>
-
-          <button
-            type='submit'
-            className={cn(
-              `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
-                form.formState.isSubmitting
-                  ? 'cursor-not-allowed bg-gray-500 font-[700]'
-                  : 'cursor-pointer'
-              } `,
-            )}
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? (
-              <div className='px-5 py-1'>
-                <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
-              </div>
-            ) : (
-              <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-                {isEditing ? 'Update Product' : 'Create Product'}
-              </span>
-            )}
-          </button>
-          <p className='invisible'>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo
-            dolore? Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores
-            unde, corrupti iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores,
-            eos!
-          </p>
         </form>
       </Form>
+      <div>
+        <h3 className='text-base font-semibold'>Units</h3>
+        {unitsArrary.map((unit, index) => (
+          <div key={index} className='my-2 flex gap-4'>
+            <span className='font- text-sm'>Unit - {unit.unit}</span>
+            <span className='text-sm '>Ratio - {unit.ratio}</span>
+            <span className='text-sm '>Price - {unit.price}</span>
+            <button
+              type='button'
+              onClick={() => {
+                const newUnits = unitsArrary.filter((_, i) => i !== index);
+                setUnitsArray(newUnits);
+              }}
+              className='bg-red-100 text-red-600'
+            >
+              <X className='h-4 w-4' />
+            </button>
+          </div>
+        ))}
+
+        <AddUnitsModal
+          units={unitsArrary}
+          setUnits={setUnitsArray}
+          trigger={
+            <button className='group mt-3  flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-2 py-1 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
+              <Icon name='addIcon' />
+              <span className='text-xs font-[400] leading-[24px] tracking-[0.4px] text-white '>
+                Add Units
+              </span>
+            </button>
+          }
+        />
+      </div>
+      <button
+        type='button'
+        onClick={form.handleSubmit(onSubmit)}
+        className={cn(
+          `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
+            form.formState.isSubmitting
+              ? 'cursor-not-allowed bg-gray-500 font-[700]'
+              : 'cursor-pointer'
+          } `,
+        )}
+        disabled={form.formState.isSubmitting}
+      >
+        {form.formState.isSubmitting ? (
+          <div className='px-5 py-1'>
+            <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
+          </div>
+        ) : (
+          <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
+            {isEditing ? 'Update Product' : 'Create Product'}
+          </span>
+        )}
+      </button>
+      <p className='invisible'>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo dolore?
+        Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores unde, corrupti
+        iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores, eos!
+      </p>
     </div>
   );
 };

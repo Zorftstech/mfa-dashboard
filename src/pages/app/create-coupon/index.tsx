@@ -97,16 +97,6 @@ const CreateCoupon = () => {
     },
   });
 
-  function extractErrorMessages(errors: ErrorMessages): string[] {
-    let messages: string[] = [];
-    for (const key of Object.keys(errors)) {
-      if (Object.prototype.hasOwnProperty.call(errors, key)) {
-        messages = messages.concat(errors[key]);
-      }
-    }
-    return messages;
-  }
-
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
 
