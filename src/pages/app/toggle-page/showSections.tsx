@@ -31,40 +31,39 @@ import { useEffect, useState } from 'react';
 import toast from 'helper';
 
 const FormSchema = z.object({
-  showAnnouncement: z.boolean().default(false).optional(),
+  showOfftakes: z.boolean().default(false).optional(),
+  showFlashSales: z.boolean().default(false).optional(),
 
-  duration: z.date({
+  FarmOffTakeAvailable: z.date({
     required_error: 'a date is required',
   }),
-  text: z.string().min(1, {
-    message: 'Please enter a valid duration',
+  FlashSaleAvailable: z.date({
+    required_error: 'a date is required',
   }),
 });
 
-export default function AnnouncementToggle() {
+export default function ShowSections() {
   const { setEditData, setIsEditing } = useStore((state: StoreType) => state);
   const [formIsLoading, setformIsLoading] = useState(false);
-  async function fetchAnnouncement() {
-    const announcementRef = collection(db, 'announcement');
+  async function fetchShowSections() {
+    const docRef = collection(db, 'showSections');
 
-    const querySnapshot = await getDocs(announcementRef);
+    const querySnapshot = await getDocs(docRef);
 
-    const products: any = [];
+    const items: any = [];
 
     querySnapshot.forEach((doc) => {
-      const createdDate = getCreatedDateFromDocument(doc as any);
-      products.push({
+      items.push({
         id: doc.id,
         ...doc.data(),
-        createdDate,
       });
     });
 
-    return products;
+    return items;
   }
   const { isLoading, data, isFetched } = useQuery({
-    queryKey: ['get-announcement'],
-    queryFn: () => fetchAnnouncement(),
+    queryKey: ['get-showSections'],
+    queryFn: () => fetchShowSections(),
 
     onError: (err) => {
       processError(err);
@@ -75,18 +74,18 @@ export default function AnnouncementToggle() {
   });
   function onSubmit(values: z.infer<typeof FormSchema>) {
     setformIsLoading(true);
-    const { showAnnouncement, duration, text } = values;
-    const announcementRef = collection(db, 'announcement');
-    const announcementDoc = doc(announcementRef, data[0].id);
-    const announcementData = {
-      showAnnouncement,
-      duration: duration,
-      announcementText: text,
+    const docRef = collection(db, 'showSections');
+    const announcementDoc = doc(docRef, data[0].id);
+    const sectionData = {
+      showOfftakes: values.showOfftakes,
+      showFlashSales: values.showFlashSales,
+      FarmOffTakeAvailable: values.FarmOffTakeAvailable,
+      FlashSaleAvailable: values.FlashSaleAvailable,
     };
-    updateDoc(announcementDoc, announcementData)
+    updateDoc(announcementDoc, sectionData)
       .then(() => {
         setformIsLoading(false);
-        toast.success('Announcement updated successfully');
+        toast.success('Sections updated successfully');
       })
       .catch((error) => {
         setformIsLoading(false);
@@ -96,11 +95,10 @@ export default function AnnouncementToggle() {
 
   useEffect(() => {
     if (isFetched) {
-      form.setValue('showAnnouncement', data[0].showAnnouncement);
-      form.setValue('text', data[0].announcementText);
-      const createdDate = new Date(data[0]?.duration.seconds * 1000); // Convert seconds to milliseconds
-
-      form.setValue('duration', createdDate);
+      form.setValue('showOfftakes', data[0].showOfftakes);
+      form.setValue('showFlashSales', data[0].showFlashSales);
+      form.setValue('FarmOffTakeAvailable', new Date(data[0].FarmOffTakeAvailable.seconds * 1000));
+      form.setValue('FlashSaleAvailable', new Date(data[0].FlashSaleAvailable.seconds * 1000));
     }
   }, [isFetched]);
   return (
@@ -110,34 +108,11 @@ export default function AnnouncementToggle() {
           <section className=' grid grid-cols-1 gap-8 md:max-w-[80%] md:gap-6   '>
             <FormField
               control={form.control}
-              name='text'
+              name='showFlashSales'
               render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Text
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
-                        {...field}
-                        type='text'
-                        placeholder='Text'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='showAnnouncement'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-center justify-between rounded-lg  p-3 shadow-sm'>
+                <FormItem className='flex flex-row items-center justify-between rounded-lg  shadow-sm'>
                   <div className=''>
-                    <FormLabel className='font-semibold text-black'>show announcement</FormLabel>
+                    <FormLabel className='font-semibold text-black'>Show Flash Sales</FormLabel>
                   </div>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -148,11 +123,64 @@ export default function AnnouncementToggle() {
 
             <FormField
               control={form.control}
-              name='duration'
+              name='FlashSaleAvailable'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
                   <FormLabel className=' inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                    Expiry date
+                    Available date
+                  </FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={'outline'}
+                          className={cn(
+                            'w-full py-6 pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground',
+                          )}
+                        >
+                          {field.value ? format(field.value, 'PPP') : <span>Set a date</span>}
+                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-full p-0' align='start'>
+                      <Calendar
+                        mode='single'
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        // disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='showOfftakes'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg   shadow-sm'>
+                  <div className=''>
+                    <FormLabel className='font-semibold text-black'>Show Farm Offtakes</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='FarmOffTakeAvailable'
+              render={({ field }) => (
+                <FormItem className='flex flex-col'>
+                  <FormLabel className=' inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                    Available Date
                   </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>

@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import contentService from 'services/content';
 import { processError } from 'helper/error';
 import AnnouncementToggle from './annoucement';
+import ShowSections from './showSections';
 type filterTypes = 'All' | 'Upcoming' | 'Completed';
 
 const generalFilters: filterTypes[] = ['All', 'Upcoming', 'Completed'];
@@ -22,7 +23,10 @@ const TogglePage = () => {
         description='List of settings and configurations for the web app'
         title='Toggle Web App Sections'
       />
+      <h3 className='text-lg font-bold'>Announcement Bar</h3>
       <AnnouncementToggle />
+      <h3 className='text-lg font-bold'>Sections</h3>
+      <ShowSections />
     </div>
   );
 };
