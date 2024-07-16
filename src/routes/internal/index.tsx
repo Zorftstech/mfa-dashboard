@@ -8,7 +8,7 @@ import FlashSales from 'pages/app/flash-sales';
 import Dashboard from 'pages/app/dashboard';
 import Categories from 'pages/app/categories';
 import Notifications from 'pages/app/notifications';
-import MasterClasses from 'pages/app/master-classes';
+import TogglePage from 'pages/app/toggle-page';
 import Coupons from 'pages/app/coupons';
 import UserProfile from 'pages/app/user-profile';
 import Settings from 'pages/app/settings';
@@ -52,6 +52,10 @@ const internalRoute: routeTypes = [
   {
     element: <Users />,
     path: 'users',
+  },
+  {
+    element: <TogglePage />,
+    path: 'toggle',
   },
   {
     element: <WalletsPage />,

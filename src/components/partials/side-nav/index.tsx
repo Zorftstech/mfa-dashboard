@@ -33,7 +33,8 @@ type ISideNavTitles =
   | 'Food Bundles'
   | 'Farm Off-Take'
   | 'FAQ'
-  | 'Wallets';
+  | 'Wallets'
+  | 'Toggle Page';
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
   icons: JSX.Element;
@@ -227,6 +228,20 @@ export const sideNavLinks: extendedRouteInterface[] = [
           className: 'text-current',
         }}
         name='FoodBundleIcon'
+      />
+    ),
+  },
+  {
+    link: 'toggle',
+    title: 'Toggle Page',
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 17.75,
+          className: 'text-current',
+        }}
+        name='ProductIcon'
       />
     ),
   },

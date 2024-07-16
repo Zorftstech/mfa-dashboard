@@ -35,6 +35,7 @@ export type routePathTypes =
   | 'create-blog'
   | 'create-faq'
   | 'categories'
+  | 'toggle'
   | 'wallets';
 
 export interface routesInterface<T> {
