@@ -130,11 +130,7 @@ const CreateFAQ = () => {
 
         <div className='flex  gap-4'>
           {isEditing && (
-            <DeleteModal
-              btnText='Delete Category'
-              collectionName='categories'
-              documentId={editData?.id}
-            />
+            <DeleteModal btnText='Delete FAQ' collectionName='faq' documentId={editData?.id} />
           )}
           <button
             onClick={() => navigate(-1)}

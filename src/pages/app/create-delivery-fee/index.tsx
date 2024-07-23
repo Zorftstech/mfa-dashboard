@@ -131,8 +131,8 @@ const CreateDeliveryFee = () => {
         <div className='flex  gap-4'>
           {isEditing && (
             <DeleteModal
-              btnText='Delete Category'
-              collectionName='categories'
+              btnText='Delete Fees'
+              collectionName='deliveryFee'
               documentId={editData?.id}
             />
           )}
