@@ -185,7 +185,7 @@ function OrderTableComponent() {
       cell: ({ row }) => (
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
           <p className='text-center text-[0.71rem]  '>
-            {formatToNaira(Number(row.getValue('totalAmount')) / 100)}
+            {formatToNaira(Number(row.getValue('totalAmount')))}
           </p>
         </div>
       ),
