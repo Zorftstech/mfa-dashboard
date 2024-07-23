@@ -54,7 +54,7 @@ import { cn, checkStatus } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import EditWalletBalance from 'components/modal/EditWalletBalanceModal';
+import EditWalletBalance from 'components/modal/EditOrderModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
 import { collection, getDocs } from 'firebase/firestore';
@@ -288,49 +288,49 @@ function UserTableComponent() {
       enableSorting: false,
     },
 
-    {
-      id: 'actions',
-      enableHiding: false,
-      cell: ({ row }) => {
-        const page = row.original;
+    // {
+    //   id: 'actions',
+    //   enableHiding: false,
+    //   cell: ({ row }) => {
+    //     const page = row.original;
 
-        return (
-          <div className='flex items-center gap-4'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='h-8 w-8 p-0'>
-                  {/* <p>Action</p> */}
-                  <span className='sr-only'>Open menu</span>
-                  <MoreVertical className='h-4 w-4' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end' className='px-4 py-2'>
-                {
-                  <EditWalletBalance
-                    trigger={
-                      <Button
-                        variant='outline'
-                        className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem]   capitalize  disabled:cursor-not-allowed disabled:opacity-50'
-                        onClick={() => {
-                          setTimeout(() => {
-                            console.log('delete');
-                          }, 500);
-                        }}
-                      >
-                        <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
-                        <p>Edit </p>
-                      </Button>
-                    }
-                  ></EditWalletBalance>
-                }
-                <DropdownMenuSeparator />
-                <DeleteModal btnText='Delete' />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
-    },
+    //     return (
+    //       <div className='flex items-center gap-4'>
+    //         <DropdownMenu>
+    //           <DropdownMenuTrigger asChild>
+    //             <Button variant='ghost' className='h-8 w-8 p-0'>
+    //               {/* <p>Action</p> */}
+    //               <span className='sr-only'>Open menu</span>
+    //               <MoreVertical className='h-4 w-4' />
+    //             </Button>
+    //           </DropdownMenuTrigger>
+    //           <DropdownMenuContent align='end' className='px-4 py-2'>
+    //             {
+    //               <EditWalletBalance
+    //                 trigger={
+    //                   <Button
+    //                     variant='outline'
+    //                     className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem]   capitalize  disabled:cursor-not-allowed disabled:opacity-50'
+    //                     onClick={() => {
+    //                       setTimeout(() => {
+    //                         console.log('delete');
+    //                       }, 500);
+    //                     }}
+    //                   >
+    //                     <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
+    //                     <p>Edit </p>
+    //                   </Button>
+    //                 }
+    //               ></EditWalletBalance>
+    //             }
+    //             <DropdownMenuSeparator />
+    //             <DeleteModal btnText='Delete' />
+    //           </DropdownMenuContent>
+    //         </DropdownMenu>
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);

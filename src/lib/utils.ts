@@ -37,3 +37,14 @@ export const checkStatus = (status: string) => {
 export function splitStringBySpaceAndReplaceWithDash(str: string): string {
   return str.trim().split(' ').join('-').toLowerCase();
 }
+
+export const formatToNaira = (amount: number) => {
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+    .format(amount)
+    .replace('NGN', '₦');
+};

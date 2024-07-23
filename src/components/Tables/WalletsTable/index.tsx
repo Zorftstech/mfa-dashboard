@@ -51,11 +51,11 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import { cn, checkStatus } from 'lib/utils';
+import { cn, checkStatus, formatToNaira, getCreatedDateFromDocument } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import EditWalletBalance from 'components/modal/EditWalletBalanceModal';
+import EditWalletBalance from 'components/modal/EditOrderModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
 import { collection, getDocs } from 'firebase/firestore';
@@ -99,7 +99,7 @@ function WalletsTableComponent() {
 
   async function fetchAllUsers() {
     // Create a reference to the 'users' collection
-    const usersCollectionRef = collection(db, 'users');
+    const usersCollectionRef = collection(db, 'wallets');
 
     // Await the completion of the getDocs call
     const querySnapshot = await getDocs(usersCollectionRef);
@@ -109,15 +109,15 @@ function WalletsTableComponent() {
 
     // Iterate over each document in the querySnapshot
     querySnapshot.forEach((doc) => {
-      // Add the document data (and potentially the document ID) to the users array
-      users.push({ id: doc.id, ...doc.data() });
+      const created = getCreatedDateFromDocument(doc as any);
+      users.push({ id: doc.id, ...doc.data(), created });
     });
 
     return users;
   }
   const columns: ColumnDef<any>[] = [
     {
-      accessorKey: 'displayName',
+      accessorKey: 'name',
       header: ({ column }) => {
         return (
           <Button
@@ -130,11 +130,7 @@ function WalletsTableComponent() {
           </Button>
         );
       },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-[0.71rem] capitalize'>{row.getValue('displayName')}</div>
-        // </Link>
-      ),
+      cell: ({ row }) => <div className='text-[0.71rem] capitalize'>{row.getValue('name')}</div>,
       enableHiding: false,
     },
     {
@@ -152,15 +148,13 @@ function WalletsTableComponent() {
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
           <p className='text-center text-[0.71rem]  '>{row.getValue('email')}</p>
         </div>
-        // </Link>
       ),
     },
     {
-      accessorKey: 'city',
+      accessorKey: 'totalDeposit',
       header: ({ column }) => {
         return (
           <Button
@@ -174,19 +168,16 @@ function WalletsTableComponent() {
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
           <p className='text-center text-[0.71rem]  '>
-            {row.getValue('city')}
-            N0.00
+            {formatToNaira(row.getValue('totalDeposit'))}
           </p>
         </div>
-        // </Link>
       ),
     },
 
     {
-      accessorKey: 'number',
+      accessorKey: 'totalSpent',
       header: ({ column }) => {
         return (
           <Button
@@ -200,18 +191,13 @@ function WalletsTableComponent() {
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>
-            {row.getValue('number')}
-            N0.00
-          </p>
+          <p className='text-center text-[0.71rem] '>{formatToNaira(row.getValue('totalSpent'))}</p>
         </div>
-        // </Link>
       ),
     },
     {
-      accessorKey: 'orders',
+      accessorKey: 'balance',
       header: ({ column }) => {
         return (
           <Button
@@ -225,41 +211,12 @@ function WalletsTableComponent() {
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>
-            {row.getValue('orders')}
-            N0.00
-          </p>
+          <p className='text-center text-[0.71rem] '>{formatToNaira(row.getValue('balance'))}</p>
         </div>
-        // </Link>
       ),
     },
 
-    {
-      accessorKey: 'status',
-      header: ({ column }) => {
-        return (
-          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Status
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div
-          className={`flex w-fit items-center  rounded-2xl    text-[0.71rem] capitalize ${checkStatus(
-            row.getValue('status'),
-          )}`}
-        >
-          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
-          {row.getValue('status')}
-          <Check className='w-4 text-primary-1' />
-        </div>
-        // </Link>
-      ),
-      enableSorting: false,
-    },
     {
       id: 'created',
       accessorKey: 'created',
@@ -271,60 +228,54 @@ function WalletsTableComponent() {
         );
       },
 
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-[0.71rem] capitalize'>
-          {/* {Number(row.original.id) * 1245632} */}
-          {row.getValue('created')}
-        </div>
-        // </Link>
-      ),
+      cell: ({ row }) => <div className='text-[0.71rem] capitalize'>{row.getValue('created')}</div>,
     },
 
-    {
-      id: 'actions',
-      enableHiding: false,
-      cell: ({ row }) => {
-        const page = row.original;
+    // {
+    //   id: 'actions',
+    //   enableHiding: false,
+    //   cell: ({ row }) => {
+    //     const page = row.original;
 
-        return (
-          <div className='flex items-center gap-4'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='h-8 w-8 p-0'>
-                  {/* <p>Action</p> */}
-                  <span className='sr-only'>Open menu</span>
-                  <MoreVertical className='h-4 w-4' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end' className='px-4 py-2'>
-                {
-                  <EditWalletBalance
-                    trigger={
-                      <Button
-                        variant='outline'
-                        className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem]   capitalize  disabled:cursor-not-allowed disabled:opacity-50'
-                        onClick={() => {
-                          setTimeout(() => {
-                            console.log('delete');
-                          }, 500);
-                        }}
-                      >
-                        <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
-                        <p>Edit </p>
-                      </Button>
-                    }
-                  ></EditWalletBalance>
-                }
-                <DropdownMenuSeparator />
-                <DeleteModal btnText='Delete' />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
-    },
+    //     return (
+    //       <div className='flex items-center gap-4'>
+    //         <DropdownMenu>
+    //           <DropdownMenuTrigger asChild>
+    //             <Button variant='ghost' className='h-8 w-8 p-0'>
+    //               {/* <p>Action</p> */}
+    //               <span className='sr-only'>Open menu</span>
+    //               <MoreVertical className='h-4 w-4' />
+    //             </Button>
+    //           </DropdownMenuTrigger>
+    //           <DropdownMenuContent align='end' className='px-4 py-2'>
+    //             {
+    //               <EditWalletBalance
+    //                 trigger={
+    //                   <Button
+    //                     variant='outline'
+    //                     className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem]   capitalize  disabled:cursor-not-allowed disabled:opacity-50'
+    //                     onClick={() => {
+    //                       setTimeout(() => {
+    //                         console.log('delete');
+    //                       }, 500);
+    //                     }}
+    //                   >
+    //                     <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
+    //                     <p>Edit </p>
+    //                   </Button>
+    //                 }
+    //               ></EditWalletBalance>
+    //             }
+    //             <DropdownMenuSeparator />
+    //             <DeleteModal btnText='Delete' />
+    //           </DropdownMenuContent>
+    //         </DropdownMenu>
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -373,10 +324,8 @@ function WalletsTableComponent() {
           </p>
           <div className='flex items-center  gap-3'>
             <SearchComboBox
-              value={(table.getColumn('displayName')?.getFilterValue() as string) ?? ''}
-              onChange={(event) =>
-                table.getColumn('displayName')?.setFilterValue(event.target.value)
-              }
+              value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
             />
             <div className='flex  items-center justify-between gap-3'>
               <DropdownMenu>

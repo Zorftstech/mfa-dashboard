@@ -50,7 +50,7 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import { cn, checkStatus, formatDate } from 'lib/utils';
+import { cn, checkStatus, formatDate, getCreatedDateFromDocument, formatToNaira } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
@@ -61,7 +61,7 @@ import { db } from 'firebase';
 import { set } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
-import EditWalletBalanceModal from 'components/modal/EditWalletBalanceModal';
+import EditOrderModal from 'components/modal/EditOrderModal';
 import { Filter } from 'lucide-react';
 import SearchComboBox from 'components/general/SearchComboBox';
 export type User = {
@@ -76,9 +76,9 @@ export type User = {
   total: string;
 };
 
-function UserTableComponent() {
+function OrderTableComponent() {
   const navigate = useNavigate();
-  const [users, setUsers] = React.useState<any[]>([]);
+  const [orders, setOrders] = React.useState<any[]>([]);
 
   // refactor this
   const deletePage = async (id: string) => {
@@ -95,27 +95,27 @@ function UserTableComponent() {
     // setIsLoading(false);
   };
 
-  async function fetchAllUsers() {
-    // Create a reference to the 'users' collection
-    const usersCollectionRef = collection(db, 'userOrders');
+  async function fetchOrders() {
+    // Create a reference to the 'orders' collection
+    const ordersCollectionRef = collection(db, 'orders');
 
     // Await the completion of the getDocs call
-    const querySnapshot = await getDocs(usersCollectionRef);
+    const querySnapshot = await getDocs(ordersCollectionRef);
 
     // Initialize an array to hold user data
-    const users: any = [];
+    const orders: any = [];
 
     // Iterate over each document in the querySnapshot
     querySnapshot.forEach((doc) => {
-      // Add the document data (and potentially the document ID) to the users array
-      users.push({ id: doc.id, ...doc.data() });
+      const created = getCreatedDateFromDocument(doc as any);
+      orders.push({ id: doc.id, ...doc.data(), created });
     });
 
-    return users;
+    return orders;
   }
   const columns: ColumnDef<any>[] = [
     {
-      accessorKey: 'orderNumber',
+      accessorKey: 'orderId',
       header: ({ column }) => {
         return (
           <Button
@@ -129,16 +129,12 @@ function UserTableComponent() {
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-[0.71rem] capitalize text-green-600'>
-          {row.getValue('orderNumber')}
-        </div>
-        // </Link>
+        <div className='text-[0.71rem] capitalize text-green-600'>{row.getValue('orderId')}</div>
       ),
       enableHiding: false,
     },
     {
-      accessorKey: 'driver',
+      accessorKey: 'name',
       header: ({ column }) => {
         return (
           <Button
@@ -146,21 +142,19 @@ function UserTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Driver
+            Name
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-[0.71rem]  '>{row.getValue('driver')}</p>
+          <p className='text-center text-[0.71rem]  '>{row.getValue('name')}</p>
         </div>
-        // </Link>
       ),
     },
     {
-      accessorKey: 'items',
+      accessorKey: 'totalAmount',
       header: ({ column }) => {
         return (
           <Button
@@ -168,22 +162,22 @@ function UserTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Items
+            Total
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-[0.71rem]  '>{row.getValue('items')}</p>
+          <p className='text-center text-[0.71rem]  '>
+            {formatToNaira(Number(row.getValue('totalAmount')) / 100)}
+          </p>
         </div>
-        // </Link>
       ),
     },
 
     {
-      accessorKey: 'user',
+      accessorKey: 'email',
       header: ({ column }) => {
         return (
           <Button
@@ -191,19 +185,18 @@ function UserTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Customer
+            Email
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg  '>
           <p className='text-center text-[0.71rem] '>
-            {(row.getValue('user') as { name: string })?.name}
+            {/* {(row.getValue('user') as { name: string })?.name} */}
           </p>
+          <p className='text-center text-[0.71rem] '>{row.getValue('email')}</p>
         </div>
-        // </Link>
       ),
     },
 
@@ -217,13 +210,11 @@ function UserTableComponent() {
         );
       },
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div
           className={`flex w-fit items-center  rounded-2xl    text-[0.71rem] capitalize ${checkStatus(
             row.getValue('status'),
           )}`}
         >
-          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
           {row.getValue('status')}
         </div>
         // </Link>
@@ -231,24 +222,21 @@ function UserTableComponent() {
       enableSorting: false,
     },
     {
-      id: 'delivery',
-      accessorKey: 'delivery',
+      id: 'created',
+      accessorKey: 'created',
       header: ({ column }) => {
         return (
           <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Time of Delivery
+            Created
           </Button>
         );
       },
 
       cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='text-[0.71rem] capitalize'>
-          {/* {Number(row.original.id) * 1245632} */}
-          {formatDate(new Date((row.getValue('delivery') as number) * 1000).toString())}
-          {/* {row.getValue('delivery')} */}
+          {/* {formatDate(new Date((row.getValue('created') as number) * 1000).toString())} */}
+          {row.getValue('created')}
         </div>
-        // </Link>
       ),
     },
 
@@ -270,7 +258,7 @@ function UserTableComponent() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end' className='px-4 py-2'>
                 {
-                  <EditWalletBalanceModal
+                  <EditOrderModal
                     trigger={
                       <Button
                         variant='outline'
@@ -285,7 +273,7 @@ function UserTableComponent() {
                         <p>Edit </p>
                       </Button>
                     }
-                  ></EditWalletBalanceModal>
+                  ></EditOrderModal>
                 }
                 <DropdownMenuSeparator />
                 <DeleteModal btnText='Delete' />
@@ -303,7 +291,7 @@ function UserTableComponent() {
   const [position, setPosition] = React.useState('bottom');
 
   const table = useReactTable({
-    data: users,
+    data: orders,
     columns,
 
     onSortingChange: setSorting,
@@ -323,10 +311,10 @@ function UserTableComponent() {
   });
 
   const { isLoading, data } = useQuery({
-    queryKey: ['get-users'],
-    queryFn: () => fetchAllUsers(),
+    queryKey: ['get-orders'],
+    queryFn: () => fetchOrders(),
     onSuccess: (data) => {
-      setUsers(data);
+      setOrders(data);
     },
 
     onError: (err) => {
@@ -432,7 +420,7 @@ function UserTableComponent() {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className=' py-3 font-medium'>
-                      {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
+                      {/* <Link to={`/${CONSTANTS.ROUTES['view-ordersList']}/${cell.id}`}> */}
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       {/* </Link> */}
                     </TableCell>
@@ -443,7 +431,7 @@ function UserTableComponent() {
               <TableRow>
                 <TableCell colSpan={columns.length} className='h-[400px] text-center'>
                   <div>
-                    <p className='text-base font-semibold text-gray-500'>No Users Records</p>
+                    <p className='text-base font-semibold text-gray-500'>No orders Records</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -454,7 +442,7 @@ function UserTableComponent() {
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>
-          Showing {table.getRowModel().rows?.length ?? 0} of {users?.length} results
+          Showing {table.getRowModel().rows?.length ?? 0} of {orders?.length} results
         </div>
         <div className='space-x-2'>
           <Button
@@ -484,4 +472,4 @@ function UserTableComponent() {
   );
 }
 
-export default UserTableComponent;
+export default OrderTableComponent;
