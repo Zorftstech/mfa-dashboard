@@ -22,18 +22,19 @@ export function getCreatedDateFromDocument(documentData: DocumentData): string {
   return formatDate(createdDate.toDateString());
 }
 export const checkStatus = (status: string) => {
-  switch (status) {
-    case 'completed':
+  switch (status.toLowerCase()) {
+    case 'order received':
       return 'text-green-600';
-    case 'scheduled':
+    case 'pending':
       return 'text-yellow-400';
-    case 'in progress':
-      return 'text-yellow-500';
+    case 'en route':
+      return 'text-green-600';
+    case 'delivered':
+      return 'text-blue-500';
     default:
       return 'text-red-500';
   }
 };
-
 export function splitStringBySpaceAndReplaceWithDash(str: string): string {
   return str.trim().split(' ').join('-').toLowerCase();
 }

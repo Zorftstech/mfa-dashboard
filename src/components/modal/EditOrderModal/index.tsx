@@ -1,78 +1,238 @@
-import { Dialog, DialogContent, DialogTrigger } from 'components/shadcn/dialog';
-
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogTrigger } from 'components/shadcn/dialog';
 import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
 import TextInfoSTack from 'components/general/InfoStack/InfoStack';
 import { Checkbox } from 'components/shadcn/checkbox';
+import { db } from 'firebase';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { processError } from 'helper/error';
+import { useQuery } from '@tanstack/react-query';
+import ContentLoader from 'components/general/ContentLoader';
+import { Order } from 'types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from 'components/shadcn/ui/table';
+import { formatToNaira } from 'lib/utils';
+import Spinner from 'components/shadcn/ui/spinner';
 
 interface Iprop {
   trigger: JSX.Element;
   triggerClassName?: string;
   title?: string;
+  orderId: string;
+  refetchAllOrders: () => void;
 }
 
-const EditWalletBalanceModal = ({ trigger, triggerClassName, title }: Iprop) => {
+const ViewOrderDetailsModal = ({
+  trigger,
+  triggerClassName,
+  title,
+  orderId,
+  refetchAllOrders,
+}: Iprop) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
+
+  const fetchSingleOrder = async () => {
+    const ordersRef = collection(db, 'orders');
+    const q = query(ordersRef, where('orderId', '==', orderId));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const firstDoc = querySnapshot.docs[0];
+        return { id: firstDoc.id, ...firstDoc.data() };
+      } else {
+        console.log('No matching documents found.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error querying documents: ', error);
+      return null;
+    }
+  };
+
+  const { isLoading, data, refetch } = useQuery<any, any, Order>({
+    queryKey: ['get-single-order', orderId],
+    queryFn: () => fetchSingleOrder(),
+    onError: (err) => {
+      processError(err);
+    },
+  });
+
+  const order = data as Order;
+  const TableHeadings = ['Product', 'Price', 'Quantity', 'Subtotal'];
+  const [orderStatus, setOrderStatus] = useState(order?.status);
+
+  const updateOrderStatus = useMutation(
+    async (newStatus: string) => {
+      if (order?.id) {
+        setUpdating(true);
+        const orderRef = doc(db, 'orders', order.id);
+        await updateDoc(orderRef, { status: newStatus });
+        refetch();
+        refetchAllOrders();
+        setUpdating(false);
+      }
+    },
+    {
+      onError: (err) => {
+        processError(err);
+      },
+    },
+  );
+
+  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setOrderStatus(event.target.value);
+    updateOrderStatus.mutate(event.target.value);
+  };
 
   return (
     <Dialog onOpenChange={(i) => setModalOpen(i)} open={modalOpen}>
       <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
-      <DialogContent className='no-scrollbar mt-4  w-full max-w-full overflow-auto  overflow-x-hidden bg-white  px-6  md:!max-w-[700px] lg:px-[2rem]'>
-        <div className='flex w-full flex-col '>
-          <div className='w-full gap-[0.87rem] py-6'>
-            {/* <Icon name='saveIcon' svgProp={{ className: 'w-20 h-16 text-gray-500' }} /> */}
-            <p className='mb-6 text-xl font-semibold'>Edit wallet balance</p>
-
-            <div className='my-4 space-y-3'>
-              <p className='text-sm font-semibold'>Amount (₦)</p>
-              <div className='flex flex-grow items-center rounded-lg border px-6 '>
-                <input className='form-input mx-2 flex-grow border-0  placeholder:text-sm placeholder:font-bold placeholder:text-textColor-disabled focus:!ring-0' />
-              </div>
+      <DialogContent className='no-scrollbar mt-4  w-full max-w-full overflow-scroll bg-white  px-6  md:!max-w-[1000px] lg:px-[2rem]'>
+        <ContentLoader isLoading={isLoading}>
+          <section className='flex w-full flex-col '>
+            <div className='flex items-center gap-2 border-b px-4 py-4 text-[14px] text-[#4D4D4D]'>
+              <h1 className='text-[20px] font-[500]'>Order Details</h1>
+              <p>•</p>
+              <p>{order?.createdDate}</p>
+              <p>•</p>
+              <p></p>
             </div>
-
-            <section className='my-8 flex  gap-8'>
-              <div className='flex flex-row items-center gap-2 rounded-md '>
-                <Checkbox />
-
-                <div className=' leading-none'>
-                  <label className='text-sm font-semibold '>Debit</label>
+            <div className='my-4 grid gap-4 px-4 md:grid-cols-[2fr,1fr]'>
+              <div className='grid rounded-xl border md:grid-cols-2'>
+                <div>
+                  <div className='p-4'>
+                    <div className='mb-8'>
+                      <p className='mb-2 text-[16px] leading-[24px] text-[#1A1A1A]'>
+                        {order?.address}
+                      </p>
+                      <p className='text-[14px] text-[#666666]'>{order?.address}</p>
+                    </div>
+                    <div className='mb-2'>
+                      <p className=' text-[12px] uppercase text-[#999999]'>Email</p>
+                      <p className='break-all text-[14px] text-[#1A1A1A]'>{order?.email}</p>
+                    </div>
+                    <div>
+                      <p className='text-[12px] uppercase text-[#999999]'>Phone</p>
+                      <p className='text-[14px] text-[#1A1A1A]'>{order?.phone}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className='flex flex-row items-center gap-2  rounded-md '>
-                <Checkbox />
-
-                <div className=' leading-none'>
-                  <label className='text-sm font-semibold'>Credit</label>
+              <div className='rounded-xl border'>
+                <div className='flex gap-4 border-b p-4'>
+                  <div>
+                    <p className='mb-[4px] text-[12px] uppercase text-[#999999]'>Order ID:</p>
+                    <p className='text-[14px] text-[#1A1A1A]'>{order?.orderId}</p>
+                  </div>
+                  <div></div>
+                </div>
+                <div className='flex flex-col gap-6 p-4'>
+                  <div className='flex justify-between text-[18px]'>
+                    <p className='capitalize text-[#1A1A1A]'>Total</p>
+                    <p className='font-medium text-[#2C742F]'>
+                      {formatToNaira(order?.totalAmount / 100)}
+                    </p>
+                  </div>
+                </div>
+                <div className='px-4 text-base md:py-12'>
+                  <p className='capitalize text-[#1A1A1A]'>Status</p>
+                  {updating ? (
+                    <Spinner />
+                  ) : (
+                    <select
+                      value={orderStatus}
+                      defaultValue={orderStatus}
+                      onChange={handleStatusChange}
+                      className='mt-2 rounded border p-2'
+                    >
+                      <option value='Order received'>Order received</option>
+                      <option value='Pending'>Pending</option>
+                      <option value='En route'>En route</option>
+                      <option value='Delivered'>Delivered</option>
+                    </select>
+                  )}
                 </div>
               </div>
-            </section>
-            <div className='my-4 space-y-3'>
-              <p className='text-sm font-semibold'>Description</p>
-              <div className='flex flex-grow items-center rounded-lg border px-6 '>
-                <input className='form-input mx-2 flex-grow border-0  placeholder:text-sm placeholder:font-bold placeholder:text-textColor-disabled focus:!ring-0' />
+            </div>
+
+            {/* desktop */}
+            <div className='hidden w-full overflow-auto px-4 md:block'>
+              <Table className='w-full py-[0px]'>
+                <TableHeader className='bg-[#F2F2F2]'>
+                  <TableRow className='border-none px-6'>
+                    {TableHeadings.map((heading, idx) => (
+                      <TableHead key={idx} className='text-xs uppercase'>
+                        {heading}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {order?.cartItems.map((item, idx) => (
+                    <TableRow className='border-none text-[#333333]' key={idx}>
+                      <TableCell className='flex items-center gap-2'>
+                        <img alt='product-image' src={item.image} className='h-[45px] w-[45px]' />
+                        <span>{item.name}</span>
+                      </TableCell>
+                      <TableCell className=''>{formatToNaira(item.price)}</TableCell>
+                      <TableCell>x{item.no_of_items}</TableCell>
+                      <TableCell className=''>
+                        {formatToNaira(item.no_of_items * item.price)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            {/* mobile */}
+            <div className='px-4 md:hidden'>
+              <div className='mb-8 flex flex-col gap-4'>
+                {order?.cartItems.map((item, idx) => (
+                  <div key={idx} className='flex items-center gap-4 rounded-xl bg-slate-100 p-4'>
+                    <img alt='product-image' className='h-[80px] w-[80px]' src={item.image} />
+                    <div>
+                      <p className='mb-2 text-[14px] font-[500] text-[#1A1A1A]'>{item.name}</p>
+                      <div className='flex items-end gap-4'>
+                        <p className='text-[10px] text-[#767676]'>
+                          Price:{' '}
+                          <span className='text-[14px] font-[500] text-[#1A1A1A]'>
+                            {formatToNaira(item.price)}
+                          </span>
+                        </p>
+                        <p className='text-[10px] text-[#767676]'>
+                          Qty:{' '}
+                          <span className='text-[14px] font-[500] text-[#1A1A1A]'>
+                            {item.no_of_items}
+                          </span>
+                        </p>
+                      </div>
+                      <p className='text-[10px] text-[#767676]'>
+                        Sub total:{' '}
+                        <span className='text-[14px] font-[500] text-[#1A1A1A]'>
+                          {formatToNaira(item.no_of_items * item.price)}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            <div className='my-4 mt-8 flex w-full justify-end gap-4'>
-              <button className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                  Update Wallet Balance
-                </span>
-              </button>
-
-              <button className='group flex  items-center justify-center gap-2  rounded-[5px] border   px-5 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'>
-                <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
-                  Cancel
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
+          </section>
+        </ContentLoader>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default EditWalletBalanceModal;
+export default ViewOrderDetailsModal;

@@ -194,3 +194,159 @@ export interface productInterface {
   featured_reviews: Array<string>;
   unavailability: string;
 }
+export interface Order {
+  id: string;
+  totalAmount: number;
+  address: string;
+  paymentReference: string;
+  message: string;
+  userId: string;
+  name: string;
+  phone: string;
+  lastName: string;
+  firstName: string;
+  orderId: string;
+  cartItems: CartItem[];
+  email: string;
+  status: string;
+  createdDate: string;
+}
+export interface Order {
+  id: string;
+  totalAmount: number;
+  address: string;
+  paymentReference: string;
+  message: string;
+  userId: string;
+  name: string;
+  phone: string;
+  lastName: string;
+  firstName: string;
+  orderId: string;
+  cartItems: CartItem[];
+  email: string;
+  status: string;
+  createdDate: string;
+}
+
+export interface Category {
+  id: string;
+  image: string;
+  desc: string;
+  name: string;
+  createdDate: string;
+}
+
+interface CartItem {
+  chosenUnit: string;
+  id: string;
+  quantity: number;
+  expireDate: Timestamp;
+  unit: string;
+  name: string;
+  slug: string;
+  price: number;
+  no_of_items: number;
+  ratings: Rating[];
+  subcategory: Category;
+  costprice: string;
+  minimumPrice: number;
+  nameYourPrice: boolean;
+  desc: string;
+  createdDate: string;
+  units: Unit[];
+  nameYourPriceFields?: NameYourPriceField[];
+  image: string;
+}
+
+interface Timestamp {
+  seconds: number;
+  nanoseconds: number;
+}
+
+interface Rating {
+  rating: number;
+  caption: string;
+  ratedBy: RatedBy;
+  description: string;
+}
+
+interface RatedBy {
+  converter: any;
+  _key: Key;
+  type: string;
+  firestore: Firestore;
+}
+
+interface Key {
+  path: Path;
+  offset: number;
+  len: number;
+}
+
+interface Path {
+  segments: string[];
+  offset: number;
+  len: number;
+}
+
+interface Firestore {
+  app: App;
+  databaseId: DatabaseId;
+  settings: FirestoreSettings;
+}
+
+interface App {
+  _isDeleted: boolean;
+  _options: AppOptions;
+  _config: AppConfig;
+  _name: string;
+  _automaticDataCollectionEnabled: boolean;
+  _container: Container;
+}
+
+interface AppOptions {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+}
+
+interface AppConfig {
+  name: string;
+  automaticDataCollectionEnabled: boolean;
+}
+
+interface Container {
+  name: string;
+  providers: Record<string, unknown>;
+}
+
+interface DatabaseId {
+  projectId: string;
+  database: string;
+}
+
+interface FirestoreSettings {
+  host: string;
+  ssl: boolean;
+  ignoreUndefinedProperties: boolean;
+  cacheSizeBytes: number;
+  experimentalForceLongPolling: boolean;
+  experimentalAutoDetectLongPolling: boolean;
+  experimentalLongPollingOptions: Record<string, unknown>;
+  useFetchStreams: boolean;
+}
+
+interface Unit {
+  ratio: number | string;
+  unit: string;
+  price: number | string;
+}
+
+interface NameYourPriceField {
+  userRef: RatedBy;
+  namedPrice: number;
+}

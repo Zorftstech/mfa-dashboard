@@ -113,6 +113,21 @@ function OrderTableComponent() {
 
     return orders;
   }
+  const { isLoading, data, refetch } = useQuery({
+    queryKey: ['get-orders'],
+    queryFn: () => fetchOrders(),
+    onSuccess: (data) => {
+      setOrders(data);
+    },
+
+    onError: (err) => {
+      processError(err);
+    },
+  });
+  const refetchAllOrders = () => {
+    refetch();
+  };
+
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: 'orderId',
@@ -217,7 +232,6 @@ function OrderTableComponent() {
         >
           {row.getValue('status')}
         </div>
-        // </Link>
       ),
       enableSorting: false,
     },
@@ -270,9 +284,11 @@ function OrderTableComponent() {
                         }}
                       >
                         <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
-                        <p>Edit </p>
+                        <p>View Details </p>
                       </Button>
                     }
+                    orderId={row.getValue('orderId')}
+                    refetchAllOrders={refetchAllOrders}
                   ></EditOrderModal>
                 }
                 <DropdownMenuSeparator />
@@ -307,18 +323,6 @@ function OrderTableComponent() {
       columnFilters,
       columnVisibility,
       rowSelection,
-    },
-  });
-
-  const { isLoading, data } = useQuery({
-    queryKey: ['get-orders'],
-    queryFn: () => fetchOrders(),
-    onSuccess: (data) => {
-      setOrders(data);
-    },
-
-    onError: (err) => {
-      processError(err);
     },
   });
 
