@@ -34,7 +34,8 @@ type ISideNavTitles =
   | 'Farm Off-Take'
   | 'FAQ'
   | 'Wallets'
-  | 'Toggle Page';
+  | 'Toggle Page'
+  | 'Delivery Fees';
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
   icons: JSX.Element;
@@ -242,6 +243,20 @@ export const sideNavLinks: extendedRouteInterface[] = [
           className: 'text-current',
         }}
         name='ProductIcon'
+      />
+    ),
+  },
+  {
+    link: 'delivery-fee',
+    title: 'Delivery Fees',
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 22.75,
+          className: 'text-current',
+        }}
+        name='CouponsIcon'
       />
     ),
   },

@@ -13,6 +13,7 @@ import Coupons from 'pages/app/coupons';
 import UserProfile from 'pages/app/user-profile';
 import Settings from 'pages/app/settings';
 import FAQPage from 'pages/app/faq';
+import DeliveryFeePage from 'pages/app/delivery-fee';
 import FarmOfftake from 'pages/app/farm-offtake';
 import SingleBlog from 'pages/inner-pages/single-blog';
 import WalletsPage from 'pages/app/wallets';
@@ -24,6 +25,7 @@ import CreateNewProduct from 'pages/app/create-new-product';
 import CreateFoodBundle from 'pages/app/create-food-bundle';
 import CreateFlashSale from 'pages/app/create-flash-sale';
 import CreateFAQ from 'pages/app/create-faq';
+import CreateDeliveryFee from 'pages/app/create-delivery-fee';
 import CreateFarmOfftake from 'pages/app/create-farm-offtake';
 import AllBlogs from 'pages/app/blogs';
 import CreateBlog from 'pages/app/create-blog';
@@ -136,6 +138,14 @@ const internalRoute: routeTypes = [
   {
     element: <CreateFAQ />,
     path: 'create-faq',
+  },
+  {
+    element: <DeliveryFeePage />,
+    path: 'delivery-fee',
+  },
+  {
+    element: <CreateDeliveryFee />,
+    path: 'create-delivery-fee',
   },
 ];
 

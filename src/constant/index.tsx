@@ -31,12 +31,13 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'create-food-bundle': 'create-food-bundle',
   'create-sub-category': 'create-sub-category',
   'create-flash-sale': 'create-flash-sale',
-
+  'create-delivery-fee': 'create-delivery-fee',
   'create-new-product': 'create-new-product',
   'create-farm-offtake': 'create-farm-offtake',
   'create-faq': 'create-faq',
   'create-blog': 'create-blog',
   toggle: 'toggle',
+  'delivery-fee': 'delivery-fee',
 };
 
 const TIMBU_KEYS = {

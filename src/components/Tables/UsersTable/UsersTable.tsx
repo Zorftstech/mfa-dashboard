@@ -202,52 +202,7 @@ function UserTableComponent() {
         // </Link>
       ),
     },
-    {
-      accessorKey: 'orders',
-      header: ({ column }) => {
-        return (
-          <Button
-            className='px-0 text-[0.71rem]  font-semibold '
-            variant='ghost'
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Orders
-            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>{row.getValue('orders')}</p>
-        </div>
-        // </Link>
-      ),
-    },
 
-    {
-      accessorKey: 'status',
-      header: ({ column }) => {
-        return (
-          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Profile Status
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div
-          className={`flex w-fit items-center  rounded-2xl    text-[0.71rem] capitalize ${checkStatus(
-            row.getValue('status'),
-          )}`}
-        >
-          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
-          {row.getValue('status')}
-        </div>
-        // </Link>
-      ),
-      enableSorting: false,
-    },
     {
       id: 'created',
       accessorKey: 'created',
@@ -267,25 +222,6 @@ function UserTableComponent() {
         </div>
         // </Link>
       ),
-    },
-    {
-      accessorKey: 'total',
-      header: ({ column }) => {
-        return (
-          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Total
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className={`w-fit  text-[0.71rem] capitalize`}>
-          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
-          {row.getValue('total')}
-        </div>
-        // </Link>
-      ),
-      enableSorting: false,
     },
 
     // {
