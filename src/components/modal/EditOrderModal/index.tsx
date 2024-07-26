@@ -98,10 +98,10 @@ const ViewOrderDetailsModal = ({
   return (
     <Dialog onOpenChange={(i) => setModalOpen(i)} open={modalOpen}>
       <DialogTrigger className={triggerClassName}>{trigger}</DialogTrigger>
-      <DialogContent className='no-scrollbar mt-4  w-full max-w-full overflow-scroll bg-white  px-6  md:!max-w-[1000px] lg:px-[2rem]'>
+      <DialogContent className='no-scrollbar mt-4  h-full w-full max-w-full overflow-scroll  bg-white  px-6 md:!max-w-[1000px] lg:px-[2rem]'>
         <ContentLoader isLoading={isLoading}>
-          <section className='flex w-full flex-col '>
-            <div className='flex items-center gap-2 border-b px-4 py-4 text-[14px] text-[#4D4D4D]'>
+          <section className='flex h-full w-full flex-col '>
+            <div className='flex items-center gap-2 border-b px-4 py-4 text-[14px]  text-[#4D4D4D]'>
               <h1 className='text-[20px] font-[500]'>Order Details</h1>
               <p>•</p>
               <p>{order?.createdDate}</p>
@@ -141,7 +141,7 @@ const ViewOrderDetailsModal = ({
                   <div className='flex justify-between text-[18px]'>
                     <p className='capitalize text-[#1A1A1A]'>Total</p>
                     <p className='font-medium text-[#2C742F]'>
-                      {formatToNaira(order?.totalAmount / 100)}
+                      {formatToNaira(order?.totalAmount)}
                     </p>
                   </div>
                 </div>
@@ -152,11 +152,9 @@ const ViewOrderDetailsModal = ({
                   ) : (
                     <select
                       value={orderStatus}
-                      defaultValue={orderStatus}
                       onChange={handleStatusChange}
                       className='mt-2 rounded border p-2'
                     >
-                      <option value='Order received'>Order received</option>
                       <option value='Pending'>Pending</option>
                       <option value='En route'>En route</option>
                       <option value='Delivered'>Delivered</option>

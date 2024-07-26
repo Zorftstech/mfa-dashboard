@@ -76,6 +76,9 @@ const FormSchema = z.object({
   price: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
+  rating: z.number().min(2, {
+    message: 'Please enter a valid price',
+  }),
   costprice: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
@@ -95,6 +98,7 @@ const FormSchema = z.object({
 
   minimumPrice: z.number().optional(),
   nameYourPrice: z.boolean().default(false).optional(),
+  inStock: z.boolean().default(true).optional(),
 });
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
@@ -137,6 +141,8 @@ const CreateNewProduct = () => {
       quantity: Number(editData?.quantity ?? 0),
       minimumPrice: Number(editData?.minimumPrice || 0),
       costprice: Number(editData?.costprice || 0),
+      inStock: editData?.inStock,
+      rating: Number(editData?.rating || 5),
     },
   });
 
@@ -163,6 +169,8 @@ const CreateNewProduct = () => {
         nameYourPrice: data.nameYourPrice ? true : false,
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
         units: unitsArrary,
+        inStock: data.inStock,
+        rating: Number(data.rating),
       };
       if (unitsArrary.length === 0) {
         toast.error('Please add units for the product');
@@ -326,6 +334,20 @@ const CreateNewProduct = () => {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name='inStock'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg  p-3 shadow-sm'>
+                  <div className=''>
+                    <FormLabel className='font-semibold text-black'> In Stock?</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -375,6 +397,35 @@ const CreateNewProduct = () => {
                         value={field.value}
                         type='number'
                         placeholder='3000'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='rating'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Product Rating
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        min={1}
+                        max={5}
+                        value={field.value}
+                        type='number'
+                        placeholder='(1-5)'
                       />
                     </FormControl>
                   </div>
