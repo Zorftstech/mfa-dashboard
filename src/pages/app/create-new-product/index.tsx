@@ -43,7 +43,7 @@ import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection, updateDoc, addDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore, { StoreType } from 'store';
@@ -132,7 +132,7 @@ const CreateNewProduct = () => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      nameYourPrice: false,
+      nameYourPrice: editData?.nameYourPrice === undefined ? false : editData?.nameYourPrice,
       category: editData?.category?.id || '',
       subcategory: editData?.subcategory?.id || '',
       productName: editData?.name || '',
@@ -141,7 +141,7 @@ const CreateNewProduct = () => {
       quantity: Number(editData?.quantity ?? 0),
       minimumPrice: Number(editData?.minimumPrice || 0),
       costprice: Number(editData?.costprice || 0),
-      inStock: editData?.inStock,
+      inStock: editData?.inStock === undefined ? true : editData?.inStock,
       rating: Number(editData?.rating || 5),
     },
   });
@@ -171,6 +171,7 @@ const CreateNewProduct = () => {
         units: unitsArrary,
         inStock: data.inStock,
         rating: Number(data.rating),
+        created_date: serverTimestamp(),
       };
       if (unitsArrary.length === 0) {
         toast.error('Please add units for the product');

@@ -56,7 +56,7 @@ import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInf
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from 'firebase';
 import { set } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
@@ -98,9 +98,9 @@ function OrderTableComponent() {
   async function fetchOrders() {
     // Create a reference to the 'orders' collection
     const ordersCollectionRef = collection(db, 'orders');
-
+    const ordersQuery = query(ordersCollectionRef, orderBy('created_date', 'desc'));
     // Await the completion of the getDocs call
-    const querySnapshot = await getDocs(ordersCollectionRef);
+    const querySnapshot = await getDocs(ordersQuery);
 
     // Initialize an array to hold user data
     const orders: any = [];
@@ -336,8 +336,8 @@ function OrderTableComponent() {
           </p>
           <div className='flex items-center  gap-3'>
             <SearchComboBox
-              value={(table.getColumn('items')?.getFilterValue() as string) ?? ''}
-              onChange={(event) => table.getColumn('items')?.setFilterValue(event.target.value)}
+              value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
             />
             <div className='flex  items-center justify-between gap-3'>
               <DropdownMenu>

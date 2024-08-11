@@ -24,7 +24,7 @@ import { ChevronDown, Filter } from 'lucide-react';
 import ProductCard from 'components/general/ProductCard';
 
 import Icon from 'utils/Icon';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from 'firebase';
 import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
@@ -38,8 +38,9 @@ const ProductsPage = () => {
 
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'products');
+    const productsQuery = query(productsCollectionRef, orderBy('created_date', 'desc'));
 
-    const querySnapshot = await getDocs(productsCollectionRef);
+    const querySnapshot = await getDocs(productsQuery);
 
     const products: any = [];
 

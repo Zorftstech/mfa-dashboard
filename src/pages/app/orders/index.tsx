@@ -57,44 +57,6 @@ const generalFilters: filterTypes[] = [
 ];
 
 const OrdersPage = () => {
-  const [position, setPosition] = useState('bottom');
-
-  // const [currFilter, setCurrFilter] = useState<filterTypes>('All');
-  // const [templateExpanded, setTemplateExpanded] = useState(false);
-  // const [currentFocusedTemplate, setCurrentFocusedTemplate] = useState<productInterface | null>(
-  //   null,
-  // );
-  // const [downloadConfirmationOpen, setDownloadConfirmationOpen] = useState(false);
-  // const [stagedFile, setStagedFile] = useState('');
-  // const [searchparams] = useSearchParams();
-
-  // const { data, isLoading } = useQuery<apiInterface<productInterface[]>>({
-  //   queryKey: ['get-assets-templates'],
-  //   queryFn: () =>
-  //     productService.getProduct({
-  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-  //     }),
-  //   onError: (err) => {
-  //     processError(err);
-  //   },
-  // });
-
-  // const doFileDownLoad = () => {
-  //   setDownloadConfirmationOpen(false);
-  //   FileSaver.saveAs(stagedFile);
-  // };
-
-  // useEffect(() => {
-  //   const targetedId = searchparams.get('open');
-  //   if (targetedId) {
-  //     const item = data?.items?.find((i) => i?.id === targetedId);
-  //     if (item) {
-  //       setCurrentFocusedTemplate(item);
-  //       setTemplateExpanded(true);
-  //     }
-  //   }
-  // }, [searchparams, data]);
-
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col px-container-base pb-[2.1rem] md:overflow-auto md:px-container-md'>
       <div className='relative grid w-full'>
