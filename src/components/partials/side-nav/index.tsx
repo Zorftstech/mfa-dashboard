@@ -131,20 +131,20 @@ export const sideNavLinks: extendedRouteInterface[] = [
       />
     ),
   },
-  {
-    link: 'flash-sales',
-    title: 'Flash Sales',
-    icons: (
-      <Icon
-        svgProp={{
-          width: 22.75,
-          height: 20.75,
-          className: 'text-current',
-        }}
-        name='FlashSaleIcon'
-      />
-    ),
-  },
+  // {
+  //   link: 'flash-sales',
+  //   title: 'Flash Sales',
+  //   icons: (
+  //     <Icon
+  //       svgProp={{
+  //         width: 22.75,
+  //         height: 20.75,
+  //         className: 'text-current',
+  //       }}
+  //       name='FlashSaleIcon'
+  //     />
+  //   ),
+  // },
   {
     link: 'food-bundles',
     title: 'Food Bundles',
@@ -217,21 +217,21 @@ export const sideNavLinks: extendedRouteInterface[] = [
       />
     ),
   },
-  {
-    link: 'farm-offtake',
-    title: 'Farm Off-Take',
+  // {
+  //   link: 'farm-offtake',
+  //   title: 'Farm Off-Take',
 
-    icons: (
-      <Icon
-        svgProp={{
-          width: 22.75,
-          height: 20.75,
-          className: 'text-current',
-        }}
-        name='FoodBundleIcon'
-      />
-    ),
-  },
+  //   icons: (
+  //     <Icon
+  //       svgProp={{
+  //         width: 22.75,
+  //         height: 20.75,
+  //         className: 'text-current',
+  //       }}
+  //       name='FoodBundleIcon'
+  //     />
+  //   ),
+  // },
   {
     link: 'toggle',
     title: 'Toggle Page',
