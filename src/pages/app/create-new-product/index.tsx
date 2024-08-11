@@ -174,6 +174,7 @@ const CreateNewProduct = () => {
         units: unitsArrary,
         inStock: data.inStock,
         rating: Number(editData?.rating || 0),
+        ratingCount: Number(editData?.ratingCount || 0),
         created_date: serverTimestamp(),
       };
       if (unitsArrary.length === 0) {
