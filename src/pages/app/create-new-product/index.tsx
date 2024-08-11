@@ -76,9 +76,9 @@ const FormSchema = z.object({
   price: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
-  rating: z.number().min(2, {
-    message: 'Please enter a valid price',
-  }),
+  // rating: z.number().min(2, {
+  //   message: 'Please enter a valid price',
+  // }),
   costprice: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
@@ -142,7 +142,7 @@ const CreateNewProduct = () => {
       minimumPrice: Number(editData?.minimumPrice || 0),
       costprice: Number(editData?.costprice || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
-      rating: Number(editData?.rating || 5),
+      // rating: Number(editData?.rating || 0),
     },
   });
 
@@ -170,7 +170,7 @@ const CreateNewProduct = () => {
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
         units: unitsArrary,
         inStock: data.inStock,
-        rating: Number(data.rating),
+        rating: Number(editData?.rating || 0),
         created_date: serverTimestamp(),
       };
       if (unitsArrary.length === 0) {
@@ -405,7 +405,7 @@ const CreateNewProduct = () => {
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
               control={form.control}
               name='rating'
               render={({ field }) => (
@@ -433,7 +433,7 @@ const CreateNewProduct = () => {
                   <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
-            />
+            /> */}
             <FormField
               control={form.control}
               name='category'

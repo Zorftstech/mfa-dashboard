@@ -49,13 +49,13 @@ const ProductCard = ({ img, price, name, link, item, interval }: IProductCard) =
           <h5 className='  text-[0.9rem] font-medium capitalize leading-[27px] text-primary-8'>
             {name}
           </h5>
-          <div className='flex'>
+          {/* <div className='flex'>
             <Star size={13} className='fill-primary-7  text-primary-7' />
             <Star size={13} className='fill-primary-7  text-primary-7' />
             <Star size={13} className='fill-primary-7  text-primary-7' />
             <Star size={13} className='fill-primary-7  text-primary-7' />
             <Star size={13} className='fill-slate-200  text-slate-200' />
-          </div>
+          </div> */}
           <p className='text-[14px] font-[600] leading-[21px] tracking-[0.1px] text-primary-1 '>
             {price} <span className='font-[500] text-gray-400'>{interval}</span>
           </p>
