@@ -63,6 +63,9 @@ export interface Units {
   price: number;
   unit: string;
   ratio: number;
+  markedUpPrice: number;
+  image?: string | undefined;
+  isDiscounted: boolean;
 }
 interface ErrorMessages {
   [key: string]: string[];
@@ -591,19 +594,35 @@ const CreateNewProduct = () => {
       <div>
         <h3 className='text-base font-semibold'>Units</h3>
         {unitsArrary.map((unit, index) => (
-          <div key={index} className='my-2 flex gap-4'>
+          <div key={index} className='my-2 flex items-center gap-4'>
             <span className='font- text-sm'>Unit - {unit.unit}</span>
             <span className='text-sm '>Ratio - {unit.ratio}</span>
             <span className='text-sm '>Price - {unit.price}</span>
+            <AddUnitsModal
+              units={unitsArrary}
+              setUnits={setUnitsArray}
+              isEditing={true}
+              editData={unit}
+              trigger={
+                <button className='  '>
+                  <Icon
+                    name='editPen'
+                    svgProp={{
+                      className: 'text-white fill-current',
+                    }}
+                  />
+                </button>
+              }
+            />
             <button
               type='button'
               onClick={() => {
                 const newUnits = unitsArrary.filter((_, i) => i !== index);
                 setUnitsArray(newUnits);
               }}
-              className='bg-red-100 text-red-600'
+              className=' text-red-600'
             >
-              <X className='h-4 w-4' />
+              <X className='h-6 w-6' />
             </button>
           </div>
         ))}
