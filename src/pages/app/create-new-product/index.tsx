@@ -24,7 +24,7 @@ import axiosInstance from 'services';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import { cn, formatToNaira, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -598,7 +598,7 @@ const CreateNewProduct = () => {
           <div key={index} className='my-2 flex items-center gap-4'>
             <span className='font- text-sm'>Unit - {unit.unit}</span>
             <span className='text-sm '>Ratio - {unit.ratio}</span>
-            <span className='text-sm '>Price - {unit.price}</span>
+            <span className='text-sm '>Price - {formatToNaira(unit.price)}</span>
             <AddUnitsModal
               units={unitsArrary}
               setUnits={setUnitsArray}

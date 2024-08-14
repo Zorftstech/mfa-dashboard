@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import useStore from 'store';
 import { StoreType } from 'store';
+import { formatToNaira } from 'lib/utils';
 interface IProductCard {
   item: any;
   img: string;
@@ -57,7 +58,8 @@ const ProductCard = ({ img, price, name, link, item, interval }: IProductCard) =
             <Star size={13} className='fill-slate-200  text-slate-200' />
           </div> */}
           <p className='text-[14px] font-[600] leading-[21px] tracking-[0.1px] text-primary-1 '>
-            {price} <span className='font-[500] text-gray-400'>{interval}</span>
+            {formatToNaira(price as number)}{' '}
+            <span className='font-[500] text-gray-400'>{interval}</span>
           </p>
         </div>
       </div>
