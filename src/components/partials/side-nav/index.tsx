@@ -145,21 +145,21 @@ export const sideNavLinks: extendedRouteInterface[] = [
   //     />
   //   ),
   // },
-  {
-    link: 'food-bundles',
-    title: 'Food Bundles',
+  // {
+  //   link: 'food-bundles',
+  //   title: 'Food Bundles',
 
-    icons: (
-      <Icon
-        svgProp={{
-          width: 22.75,
-          height: 20.75,
-          className: 'text-current',
-        }}
-        name='FoodBundleIcon'
-      />
-    ),
-  },
+  //   icons: (
+  //     <Icon
+  //       svgProp={{
+  //         width: 22.75,
+  //         height: 20.75,
+  //         className: 'text-current',
+  //       }}
+  //       name='FoodBundleIcon'
+  //     />
+  //   ),
+  // },
   {
     link: 'blogs',
     title: 'Blogs',
