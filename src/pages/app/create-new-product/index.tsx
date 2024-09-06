@@ -62,7 +62,7 @@ interface Iprops {
 export interface Units {
   price: number;
   unit: string;
-
+  markedUpPrice: number;
   image?: string | undefined;
   isDiscounted: boolean;
 }
