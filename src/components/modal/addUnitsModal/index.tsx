@@ -40,7 +40,7 @@ interface Iprop {
   setUnits?: React.Dispatch<React.SetStateAction<Units[]>>;
   item?: any;
   isEditing?: boolean;
-  editData?: Units;
+  editData?: Units & { markedUpPrice: number };
 }
 const FormSchema = z.object({
   price: z.number().min(1, {
