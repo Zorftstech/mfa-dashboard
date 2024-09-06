@@ -62,8 +62,7 @@ interface Iprops {
 export interface Units {
   price: number;
   unit: string;
-  ratio: number;
-  markedUpPrice: number;
+
   image?: string | undefined;
   isDiscounted: boolean;
 }
@@ -76,21 +75,13 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  price: z.number().min(2, {
-    message: 'Please enter a valid price',
-  }),
-  // rating: z.number().min(2, {
-  //   message: 'Please enter a valid price',
-  // }),
   costprice: z.number().min(2, {
     message: 'Please enter a valid price',
   }),
   category: z.string().min(2, {
     message: 'Please enter a valid category',
   }),
-  subcategory: z.string().min(2, {
-    message: 'Please enter a valid subcategory',
-  }),
+
   description: z.string().min(1, {
     message: 'Please enter a valid description',
   }),
@@ -137,9 +128,7 @@ const CreateNewProduct = () => {
     defaultValues: {
       nameYourPrice: editData?.nameYourPrice === undefined ? false : editData?.nameYourPrice,
       category: editData?.category?.id || '',
-      subcategory: editData?.subcategory?.id || '',
       productName: editData?.name || '',
-      price: Number(editData?.price),
       description: editData?.desc || '',
       quantity: Number(editData?.quantity ?? 0),
       minimumPrice: Number(editData?.minimumPrice || 0),
@@ -157,15 +146,12 @@ const CreateNewProduct = () => {
       let productData = {
         name: data.productName,
         desc: data.description,
-        subcategory: {
-          id: data.subcategory,
-          name: subcategories.find((sc: any) => sc.id === data.subcategory)?.name,
-        },
+
         category: {
           id: data.category,
           name: categories.find((c: any) => c.id === data.category)?.name,
         },
-        price: Number(data.price),
+        price: Number(data.costprice),
         costprice: Number(data.costprice),
         quantity: Number(data.quantity),
         minimumPrice: Number(data.minimumPrice),
@@ -381,34 +367,7 @@ const CreateNewProduct = () => {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name='price'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Marked Up Price (NGN){' '}
-                      <span className='text-xs text-red-600'>*selling price</span>
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm  '
-                        {...field}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          field.onChange(value === '' ? '' : Number(value));
-                        }}
-                        value={field.value}
-                        type='number'
-                        placeholder='3000'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
+
             {/* <FormField
               control={form.control}
               name='rating'
@@ -457,34 +416,6 @@ const CreateNewProduct = () => {
                         {categories?.map((category: any) => (
                           <SelectItem value={category.id} className='py-3 text-sm text-white'>
                             {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage className='mt-1 text-xs' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='subcategory'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                      Subcategory
-                    </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='Select product subcategory' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        {subcategories?.map((subcategory: any) => (
-                          <SelectItem value={subcategory.id} className='py-3 text-sm text-white'>
-                            {subcategory.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -597,7 +528,6 @@ const CreateNewProduct = () => {
         {unitsArrary.map((unit, index) => (
           <div key={index} className='my-2 flex items-center gap-4'>
             <span className='font- text-sm'>Unit - {unit.unit}</span>
-            <span className='text-sm '>Ratio - {unit.ratio}</span>
             <span className='text-sm '>Price - {formatToNaira(unit.price)}</span>
             <AddUnitsModal
               units={unitsArrary}

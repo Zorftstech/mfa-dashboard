@@ -47,10 +47,6 @@ const FormSchema = z.object({
     message: 'Please enter a valid price',
   }),
 
-  ratio: z.number().min(1, {
-    message: 'Please enter a valid ratio',
-  }),
-
   unit: z.string().min(1, {
     message: 'Please enter a valid unit',
   }),
@@ -103,7 +99,6 @@ const AddUnitsModal = ({
     defaultValues: {
       price: editData?.price || 0,
       isDiscounted: editData?.isDiscounted === undefined ? false : editData?.isDiscounted,
-      ratio: editData?.ratio || 0,
       unit: editData?.unit || '',
       image: editData?.image || '',
       markedUpPrice: editData?.markedUpPrice || 0,
@@ -258,33 +253,6 @@ const AddUnitsModal = ({
                             }}
                             type='number'
                             placeholder='Price'
-                          />
-                        </FormControl>
-                      </div>
-                      <FormMessage className='mt-1 text-sm' />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={unitForm.control}
-                  name='ratio'
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className='relative'>
-                        <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                          Ratio
-                        </label>
-                        <FormControl>
-                          <Input
-                            className='py-6 text-base placeholder:text-sm  '
-                            {...field}
-                            type='number'
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              field.onChange(value === '' ? '' : Number(value));
-                            }}
-                            placeholder='E.g 1, 0.5'
                           />
                         </FormControl>
                       </div>

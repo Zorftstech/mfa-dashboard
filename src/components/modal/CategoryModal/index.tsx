@@ -50,12 +50,6 @@ const CategoryModal = ({
           </h4>
 
           <h2 className=' text-[0.7rem] font-[400] leading-[1.2rem] '>{desc}</h2>
-          {!isSubcategory && (
-            <p className='text-[0.65rem]'>
-              <span className='font-bold'>Sub-categories:</span>{' '}
-              {subcategories?.map((item: any) => item?.name).join(', ')}
-            </p>
-          )}
 
           <button
             onClick={() => {

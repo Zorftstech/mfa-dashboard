@@ -100,7 +100,6 @@ const Dashboard = () => {
         { name: 'flashsales', icon: 'FlashSale', text: 'Flash sale products', link: 'flash-sales' },
         { name: 'products', icon: 'Products', text: 'Products', link: 'products' },
         { name: 'categories', icon: 'Categories', text: 'Categories', link: 'categories' },
-        { name: 'subcategories', icon: 'SubCat', text: 'SubCategories', link: 'categories' },
       ];
 
       // Use Promise.all to fetch all counts concurrently
