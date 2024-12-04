@@ -14,7 +14,7 @@ import InputErrorWrapper from 'components/Hocs/InputError';
 import { DevTool } from '@hookform/devtools';
 import { useMutation } from '@tanstack/react-query';
 import { processError } from 'helper/error';
-import customerService from 'services/customer';
+
 import BtnLoader from 'components/Hocs/BtnLoader';
 import { customerLoginInterface } from '../Login/login.model';
 import { authDetailsInterface } from 'types';

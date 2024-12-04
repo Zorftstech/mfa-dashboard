@@ -1,18 +1,18 @@
-import API from '../index';
-import {getProductInterface} from './product.types'
+// import API from '../index';
+// import {getProductInterface} from './product.types'
 
-const getProduct = async(params: getProductInterface)=>{
-    const {data} = await API.get(`/products`, {
-        params: {
-            ...params
-        }
-    })
-    return data
-}
+// const getProduct = async(params: getProductInterface)=>{
+//     const {data} = await API.get(`/products`, {
+//         params: {
+//             ...params
+//         }
+//     })
+//     return data
+// }
 
 
-const productService = {
-    getProduct
-}
+// const productService = {
+//     getProduct
+// }
 
-export default productService
+// export default productService

@@ -15,7 +15,7 @@ import {
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { Button } from 'components/shadcn/ui/button';
-import productService from 'services/product';
+
 import { processError } from 'helper/error';
 import { useQuery } from '@tanstack/react-query';
 import { apiInterface, productInterface } from 'types';
@@ -42,7 +42,7 @@ import {
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
 import CategoryModal from 'components/modal/CategoryModal';
-import contentService from 'services/content';
+
 import CategoryCard from 'components/general/CategoryCard';
 
 import Icon from 'utils/Icon';
@@ -51,17 +51,18 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import useStore from 'store';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
+import { collection, getDocs, query } from 'firebase/firestore';
+import { db } from 'firebase';
 
 const Categories = () => {
   const {
-    isLoading: loading,
-    categories,
-    subcategories,
+
     setIsEditing,
     setEditData,
   } = useStore((state) => state);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
+  const [categories, setCategories] = useState([])
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
@@ -69,7 +70,46 @@ const Categories = () => {
   const handleSortChange = (newValue: string) => {
     setSortCriterion(newValue);
   };
+
+
   const sortedAndFilteredCategories = useSortAndSearch(categories, searchTerm, sortCriterion);
+
+async function fetchCategories() {
+  const categoriesCollectionRef = collection(db, "categories");
+  const categoryQuery = query(categoriesCollectionRef);
+
+  const querySnapshot = await getDocs(categoryQuery);
+
+  const categoryArray: any = []
+  querySnapshot.forEach((doc) => {
+    const createdDate = getCreatedDateFromDocument(doc as any);
+   // console.log("doc", doc.data())
+    categoryArray.push(
+      {
+        id: doc.id,
+        ...doc.data(),
+        createdDate
+      }
+    )
+  })
+
+  return categoryArray;
+}
+
+
+const { isLoading } = useQuery({
+  queryKey: ['get-categories'],
+  queryFn: () => fetchCategories(),
+  onSuccess: (data) => {
+  //  setAllProducts(data);
+ // console.log('data', data)
+  setCategories(data)
+  },
+
+  onError: (err) => {
+    processError(err);
+  },
+});
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 px-container-base  pb-[5.1rem] md:overflow-auto md:px-container-md'>
@@ -129,7 +169,7 @@ const Categories = () => {
           </Link>
         </div>
 
-        <FeaturedLoader isLoading={loading}>
+        <FeaturedLoader isLoading={isLoading}>
           <div className='grid w-full grid-cols-2 gap-x-[1.5rem] gap-y-[2.875rem] sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-5'>
             {sortedAndFilteredCategories?.map((item: any, idx: number) => (
               <CategoryModal

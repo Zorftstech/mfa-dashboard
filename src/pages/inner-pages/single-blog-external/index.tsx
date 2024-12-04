@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { useQuery } from '@tanstack/react-query';
 import { apiInterface, apiInterfaceV2, contentApiItemInterface } from 'types';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import InlineLoader from 'components/Loaders/InlineLoader';

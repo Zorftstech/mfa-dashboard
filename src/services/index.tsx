@@ -1,60 +1,55 @@
-import axios from 'axios';
-
-// const baseURL = import.meta.env.VITE_USE_PROXY === 'true' ? '/api' : import.meta.env.VITE_API_URL;
-const baseURL = 'https://api-mfa-dashboard.onrender.com';
-
 // api with auth
-const store = JSON.parse(localStorage.getItem('store') || '{}');
-const token = store?.state?.authDetails?.access || '';
-const axiosInstance = axios.create({
-  baseURL,
-  withCredentials: true,
+const store = JSON.parse(localStorage.getItem('user') || '{}');
+const token = store?.state?.user?.access_token || '';
+const client = store?.state?.user?.client || '';
+const uid = store?.state?.user?.uid || '';
 
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    return { ...config, withCredentials: true };
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
+export const services = () => {
+  const service = axios.create({
+    baseURL: 'https://api0.loystar.co/api/v2/',
+    headers: {
+      'Content-Type': 'application/json',
+      accesss_token: token,
+      client: client,
+      uid: uid,
+    },
+  });
 
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    return Promise.reject(error);
-  },
-);
+  service.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    // config.headers["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
+    return config;
+  });
 
-// api no auth
-export const ApiNoAuth = axios.create({
-  baseURL,
-  withCredentials: true,
-});
+  service.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => Promise.reject(error),
+  );
 
-ApiNoAuth.interceptors.request.use(
-  (config) => {
-    return { ...config, withCredentials: true };
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
+  type RequestProps = {
+    url: string;
+    payload?: object;
+  };
 
-ApiNoAuth.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    return Promise.reject(error);
-  },
-);
+  type HttpMethodType = 'get' | 'post' | 'patch' | 'put' | 'delete';
 
-export default axiosInstance;
+  const methodHandler = async (
+    method: HttpMethodType,
+    { url, payload }: RequestProps,
+  ): Promise<AxiosResponse> => {
+    return await service[method](url, payload);
+  };
+
+  return {
+    get: async (url: string) => await methodHandler('get', { url }),
+    post: async (data: RequestProps) => await methodHandler('post', data),
+    patch: async (data: RequestProps) => await methodHandler('patch', data),
+    put: async (data: RequestProps) => await methodHandler('put', data),
+
+    // passing payload to DELETE works differently
+    delete: async (url: string) => await methodHandler('delete', { url }),
+  };
+};
+
+export const axiosRequest = services();

@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from 'components/shadcn/ui/select';
 import { Input } from 'components/shadcn/input';
-import axiosInstance from 'services';
+
 import { ChevronLeft, ChevronRightIcon, CalendarIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
@@ -36,7 +36,7 @@ import UploadImageForm from './UploadForm';
 import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
-import API from 'services';
+// import API from 'services';
 import toast, { generateCouponCode } from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';

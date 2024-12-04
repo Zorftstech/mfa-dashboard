@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from 'components/shadcn/ui/select';
 import { Input } from 'components/shadcn/input';
-import axiosInstance from 'services';
+
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
@@ -37,7 +37,7 @@ import UploadImageForm from './UploadForm';
 import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
-import API from 'services';
+// import API from 'services';
 import toast from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
@@ -49,6 +49,7 @@ import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
+import { getAuth } from 'firebase/auth';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -108,11 +109,13 @@ const CreateCategory = () => {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+
     setFormIsLoading(true);
     let downloadURL = imageUrl;
 
     if (file) {
-      const storageRef = ref(getStorage(), `categories/${file.name}`);
+      const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const storageRef = ref(getStorage(), `categories/${refinedFileName}`);
       const snapshot = await uploadBytes(storageRef, file);
       downloadURL = await getDownloadURL(snapshot.ref);
     }

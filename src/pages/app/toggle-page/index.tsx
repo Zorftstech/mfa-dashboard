@@ -6,7 +6,7 @@ import MasterClassCard from 'components/general/MasterClassCard';
 import filmImg from 'assets/image/masterClassImg.png';
 
 import { useQuery } from '@tanstack/react-query';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import AnnouncementToggle from './annoucement';
 import ShowSections from './showSections';

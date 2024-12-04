@@ -20,11 +20,11 @@ import {
   SelectValue,
 } from 'components/shadcn/ui/select';
 import { Input } from 'components/shadcn/input';
-import axiosInstance from 'services';
+
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, formatToNaira, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import { cn, formatToNaira, getCreatedDateFromDocument, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -36,20 +36,23 @@ import UploadImageForm from './UploadForm';
 import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
-import API from 'services';
+// import API from 'services';
 import toast from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc, getDocs, query,addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore, { StoreType } from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
 import AddUnitsModal from 'components/modal/addUnitsModal';
+
+
 import { X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -97,7 +100,8 @@ const FormSchema = z.object({
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
-  const { categories, subcategories, isEditing, editData, setEditData, setIsEditing } = useStore(
+  const [categories, setCategories] = useState<any[]>([])
+  const { isEditing, editData, setEditData, setIsEditing } = useStore(
     (state: StoreType) => state,
   );
 
@@ -123,6 +127,44 @@ const CreateNewProduct = () => {
       'image/gif': [],
     },
   });
+
+
+async function fetchCategories() {
+  const categoriesCollectionRef = collection(db, "categories");
+  const categoryQuery = query(categoriesCollectionRef);
+
+  const querySnapshot = await getDocs(categoryQuery);
+
+  const categoryArray: any = []
+  querySnapshot.forEach((doc) => {
+    const createdDate = getCreatedDateFromDocument(doc as any);
+   // console.log("doc", doc.data())
+    categoryArray.push(
+      {
+        id: doc.id,
+        ...doc.data(),
+        createdDate
+      }
+    )
+  })
+
+  return categoryArray;
+}
+
+
+const { isLoading } = useQuery({
+  queryKey: ['get-categories'],
+  queryFn: () => fetchCategories(),
+  onSuccess: (data) => {
+  //  setAllProducts(data);
+ // console.log('data', data)
+  setCategories(data)
+  },
+
+  onError: (err) => {
+    processError(err);
+  },
+});
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -197,6 +239,8 @@ const CreateNewProduct = () => {
           image: string;
         };
 
+        console.log('product data ref',productData)
+
         const productsCollectionRef = collection(db, 'products');
         await addDoc(productsCollectionRef, productData);
         toast.success('Product created successfully');
@@ -214,6 +258,9 @@ const CreateNewProduct = () => {
     } catch (error) {
       console.error('Error:', error);
       toast.error(`Error ${isEditing ? 'updating' : 'creating'} product. Please try again.`);
+     
+    }
+    finally {
       setFormIsLoading(false);
     }
   }

@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { useQuery } from '@tanstack/react-query';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import ContentLoader from 'components/general/ContentLoader';
 import { apiInterface, contentApiItemInterface } from 'types';

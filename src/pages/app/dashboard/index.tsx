@@ -15,12 +15,12 @@ import assetImg from 'assets/image/assetFilmImg.png';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { useQuery } from '@tanstack/react-query';
 import { apiInterface, contentApiItemInterface, productInterface } from 'types';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import ContentLoader from 'components/general/ContentLoader';
 import EmptyContentWrapper from 'components/Hocs/EmptyContentWrapper';
-import productService from 'services/product';
+
 import { filterStringsContainingImageExtensions } from 'helper';
 import { useNavigate } from 'react-router-dom';
 import { data } from './dashboardData';

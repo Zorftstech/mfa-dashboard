@@ -20,7 +20,7 @@ import movie4 from 'assets/image/the-man-for-the-job.jpg?format=webp&w=240&h=153
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { apiInterface, contentApiItemInterface } from 'types';
 import { useQuery } from '@tanstack/react-query';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import ContentLoader from 'components/general/ContentLoader';
 import EmptyContentWrapper from 'components/Hocs/EmptyContentWrapper';

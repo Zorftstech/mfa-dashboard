@@ -40,6 +40,7 @@
     "keen-slider": "^6.8.6",
     "lucide-react": "^0.224.0",
     "moment": "^2.29.4",
+    "nanoid": "^5.0.9",
     "prettier": "^2.8.8",
     "react": "^18.2.0",
     "react-calendar": "^4.8.0",

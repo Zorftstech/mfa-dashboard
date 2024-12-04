@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from 'components/shadcn/ui/select';
 import { Input } from 'components/shadcn/input';
-import axiosInstance from 'services';
+
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
@@ -34,7 +34,7 @@ import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
 
 import PI, { PhoneInputProps } from 'react-phone-input-2';
-import API from 'services';
+// import API from 'services';
 import toast from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';

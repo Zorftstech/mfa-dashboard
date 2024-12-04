@@ -15,7 +15,7 @@ import {
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { Button } from 'components/shadcn/ui/button';
-import productService from 'services/product';
+
 import { processError } from 'helper/error';
 import { useQuery } from '@tanstack/react-query';
 import { apiInterface, productInterface } from 'types';

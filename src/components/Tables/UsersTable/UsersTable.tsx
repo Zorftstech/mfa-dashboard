@@ -44,7 +44,7 @@ import {
 import { Link } from 'react-router-dom';
 import CONSTANTS from 'constant';
 import Icon from 'utils/Icon';
-import API from 'services';
+// import API from 'services';
 import toast, { formatCurrentDateTime } from 'helper';
 import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
@@ -64,6 +64,7 @@ import { useQuery } from '@tanstack/react-query';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { Filter } from 'lucide-react';
 import SearchComboBox from 'components/general/SearchComboBox';
+import axios from 'axios';
 export type User = {
   id: string;
   number: string;
@@ -96,6 +97,8 @@ function UserTableComponent() {
   };
 
   async function fetchAllUsers() {
+
+    //await axios.get(`https://api0.loystar.co/api/v2/customers_list`)
     // Create a reference to the 'users' collection
     const usersCollectionRef = collection(db, 'users');
 
@@ -472,9 +475,9 @@ function UserTableComponent() {
           </Button>
         </div>
       </div>
-      <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
+      {/* <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
         Export
-      </button>
+      </button> */}
     </div>
   );
 }

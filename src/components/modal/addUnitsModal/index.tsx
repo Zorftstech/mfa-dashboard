@@ -106,53 +106,63 @@ const AddUnitsModal = ({
   });
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setUploading(true);
-    let unitData = {
-      ...editData,
-      ...data,
-      image: imageUrl || '',
-    };
-    if (isEditing && file) {
-      const storageRef = ref(
-        getStorage(),
-        `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
-      );
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-
-      // Add or update the image URL in product data
-      unitData = { ...unitData, image: downloadURL } as typeof unitData & {
-        image: string;
+    try {
+      let unitData = {
+        ...editData,
+        ...data,
+        image: imageUrl || '',
       };
-    }
-
-    if (isEditing) {
-      // Assuming `UnitData` contains the ID of the unit to be edited
-      const index = units?.findIndex((unit) => unit.unit === editData?.unit) || 0;
-      units[index] = unitData;
-      setUnits?.(units);
-    } else {
-      if (!file) {
-        toast.error('Please upload an image for the new unit');
-        throw new Error('Please upload an image for the new unit');
+      if (isEditing && file) {
+        const storageRef = ref(
+          getStorage(),
+          `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
+        );
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+  
+        // Add or update the image URL in product data
+        unitData = { ...unitData, image: downloadURL } as typeof unitData & {
+          image: string;
+        };
       }
-      // Proceed with new unit creation, including initial image upload
-      const storageRef = ref(
-        getStorage(),
-        `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
-      );
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      unitData = { ...unitData, image: downloadURL } as typeof unitData & {
-        image: string;
-      };
-
-      setUnits?.((prev) => [...prev, unitData]);
+  
+      if (isEditing) {
+        // Assuming `UnitData` contains the ID of the unit to be edited
+        const index = units?.findIndex((unit) => unit.unit === editData?.unit) || 0;
+        units[index] = unitData;
+        setUnits?.(units);
+      } else {
+        if (!file) {
+          toast.error('Please upload an image for the new unit');
+          throw new Error('Please upload an image for the new unit');
+        }
+        // Proceed with new unit creation, including initial image upload
+        const storageRef = ref(
+          getStorage(),
+          `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
+        );
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        unitData = { ...unitData, image: downloadURL } as typeof unitData & {
+          image: string;
+        };
+  
+        setUnits?.((prev) => [...prev, unitData]);
+      }
+      setFile(null);
+      unitForm.reset();
+      setModalOpen(false);
     }
-    setFile(null);
-    unitForm.reset();
+    catch(e) {
+      setUploading(false);
+    }
+    finally {
+      setUploading(false);
+      
+    }
+  
 
-    setUploading(false);
-    setModalOpen(false);
+  
   }
 
   return (

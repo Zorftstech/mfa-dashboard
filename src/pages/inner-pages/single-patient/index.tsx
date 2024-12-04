@@ -5,7 +5,7 @@ import Icon from 'utils/Icon';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import { apiInterfaceV2, contentApiItemInterface } from 'types';
 import { cn } from 'lib/utils';

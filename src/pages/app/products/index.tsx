@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
+import {nanoid} from "nanoid";
 
 import ProductCard from 'components/general/ProductCard';
 
@@ -30,11 +31,16 @@ import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
+import { useCreate } from 'hooks/requests';
 const ProductsPage = () => {
   const { setIsEditing, setEditData } = useStore((state) => state);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
+  const {create} = useCreate("add_product")
+
+// if loystar product is empty - add firebase product(if it is not empty)
+
 
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'products');
@@ -45,6 +51,7 @@ const ProductsPage = () => {
     const products: any = [];
 
     querySnapshot.forEach((doc) => {
+     
       const createdDate = getCreatedDateFromDocument(doc as any);
       products.push({
         id: doc.id,
@@ -52,9 +59,13 @@ const ProductsPage = () => {
         createdDate,
       });
     });
+   // console.log(products)
+    if(Array.isArray(products) && products?.length > 0) {
 
+    }
     return products;
   }
+
   const { isLoading } = useQuery({
     queryKey: ['get-products'],
     queryFn: () => fetchProducts(),

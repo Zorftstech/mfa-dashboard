@@ -1,6 +1,6 @@
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import rocketBoy from 'assets/image/rocketBoy.png?format=webp&w=700&h=669.86&imagetools';
-import loginIcon from 'assets/svg/login.svg?format=webp&w=700&h=669.86&imagetools';
+// import { LazyLoadImage } from 'react-lazy-load-image-component';
+// import rocketBoy from 'assets/image/rocketBoy.png?format=webp&w=700&h=669.86&imagetools';
+// import loginIcon from 'assets/svg/login.svg?format=webp&w=700&h=669.86&imagetools';
 import Icon from 'utils/Icon';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Input } from 'components/shadcn/input';
@@ -10,7 +10,6 @@ import CONSTANTS from 'constant';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from 'components/shadcn/dialog';
 import { useMutation } from '@tanstack/react-query';
-import customerService from 'services/customer';
 import { customerLoginFormInterface, customerLoginFormSchema } from './login.model';
 import { processError } from 'helper/error';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -19,26 +18,29 @@ import InputErrorWrapper from 'components/Hocs/InputError';
 import BtnLoader from 'components/Hocs/BtnLoader';
 import { authDetailsInterface } from 'types';
 import useStore from 'store';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormLabel,
-  FormDescription,
-} from 'components/shadcn/ui/form';
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormMessage,
+//   FormLabel,
+//   FormDescription,
+// } from 'components/shadcn/ui/form';
 import { EyeOff, Eye } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { authFirebase } from 'firebase';
 import { db } from 'firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { set } from 'date-fns';
+import axios from 'axios';
+import useUserStore from 'store/globalUserStore';
 
 const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
   const { setAuthDetails, setLoggedIn, setCurrentUser, currentUser } = useStore((store) => store);
+  const {setUser}   = useUserStore()
   const [showPassword, setShowPassword] = useState(true);
   const [params] = useSearchParams();
   const [checked, setChecked] = useState(false);
@@ -59,6 +61,20 @@ const Login = () => {
   const { mutate, isLoading } = useMutation<any, any, customerLoginFormInterface>({
     mutationFn: async ({ email, password }) => {
       const user = await signInWithEmailAndPassword(authFirebase, email, password);
+
+      const response = await axios.post(
+        "https://mtier0.loystar.co/auth/login",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json", 
+            "Accept": "application/json",          
+          },
+        
+        },
+        
+      );
+      setUser(response.data.data)
       return user;
     },
     onSuccess: async (data) => {
