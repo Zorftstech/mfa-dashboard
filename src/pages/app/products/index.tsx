@@ -105,7 +105,29 @@ console.log(data)
   //         };
 
   //       //  console.log(payload)
-  //       await create({data: payload})
+  //     const responseData =  await create({data: payload})
+
+  // if (responseData && Array.isArray(product?.units) && product?.units?.length > 0) {
+  //   const customQuantityPayload = product?.units?.map((item) => {
+  //     return {
+  //       product_id: responseData?.id,
+  //       merchant_id: responseData?.merchant_id,
+  //       price: item?.price,
+  //       name: item?.unit,
+  //       quantity: Number(item?.quantity || 0) ,
+  //       barcode: '',
+  //     };
+  //   });
+
+  //   // custom quantity
+  //   await Promise.all(
+  //     customQuantityPayload.map(async (custom) => {
+  //       const addedUnits = await createCustomQuantity({ data: { ...custom } });
+
+  //       return addedUnits;
+  //     }),
+  //   );
+  // }
   //       }),
   //     );
   //     await refetch()
@@ -113,6 +135,9 @@ console.log(data)
   //   }
   //   setIsLoystarUpdated(true);
   // })()
+
+
+  
   // },[allProducts, data])
 
     // deprecated for now - but maybe the needed later
