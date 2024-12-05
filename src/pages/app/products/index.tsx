@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import SearchComboBox from 'components/general/SearchComboBox';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from 'components/shadcn/ui/button';
 import { processError } from 'helper/error';
@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from 'components/shadcn/dropdown-menu';
 import { ChevronDown, Filter } from 'lucide-react';
-import {nanoid} from "nanoid";
+import { nanoid } from 'nanoid';
 
 import ProductCard from 'components/general/ProductCard';
 
@@ -31,17 +31,17 @@ import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
-import { useCreate } from 'hooks/requests';
+import { useCreate, useGetData } from 'hooks/requests';
 const ProductsPage = () => {
   const { setIsEditing, setEditData } = useStore((state) => state);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
-  const {create} = useCreate("add_product")
+  const { create } = useCreate('add_product');
+  const { data } = useGetData<any[]>('get_latest_merchant_products');
 
-// if loystar product is empty - add firebase product(if it is not empty)
-
-
+  // if loystar product is empty - add firebase product(if it is not empty)
+console.log(data)
   async function fetchProducts() {
     const productsCollectionRef = collection(db, 'products');
     const productsQuery = query(productsCollectionRef, orderBy('created_date', 'desc'));
@@ -51,7 +51,6 @@ const ProductsPage = () => {
     const products: any = [];
 
     querySnapshot.forEach((doc) => {
-     
       const createdDate = getCreatedDateFromDocument(doc as any);
       products.push({
         id: doc.id,
@@ -59,10 +58,9 @@ const ProductsPage = () => {
         createdDate,
       });
     });
-   // console.log(products)
-    if(Array.isArray(products) && products?.length > 0) {
 
-    }
+    
+   
     return products;
   }
 
@@ -77,6 +75,40 @@ const ProductsPage = () => {
       processError(err);
     },
   });
+  
+  useEffect(() => {
+  (async () => {
+
+    if (
+      Array.isArray(allProducts) &&
+      allProducts?.length > 0 &&
+      Array.isArray(data) &&
+      data?.length < allProducts?.length
+    ) {
+      await Promise.all(
+        allProducts?.map((product) => {
+
+          const payload = {
+            name: product?.name,
+            description: product?.desc,
+            price: product?.price,
+            cost_price: product?.costprice,
+            picture: null,
+            merchant_product_category_id: product?.category?.id,
+
+            track_inventory:true,
+            quantity: product?.quantity,
+          };
+
+        //  console.log(payload)
+        }),
+      );
+    }
+
+
+  })()
+  },[allProducts, data])
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
   };

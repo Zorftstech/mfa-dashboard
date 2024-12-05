@@ -51,18 +51,22 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import useStore from 'store';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, writeBatch } from 'firebase/firestore';
 import { db } from 'firebase';
+import { useCreate, useGetData, useLoystarGetRequest } from 'hooks/requests';
 
 const Categories = () => {
-  const {
-
-    setIsEditing,
-    setEditData,
-  } = useStore((state) => state);
+  const { setIsEditing, setEditData } = useStore((state) => state);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoystarUpdated, setIsLoystarUpdated] = useState(false);
+  const { create } = useCreate('add_product_category');
+  const { data, refetch } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories', {
+    data: {
+      time_stamp: 0,
+    },
+  });
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
@@ -71,45 +75,136 @@ const Categories = () => {
     setSortCriterion(newValue);
   };
 
-
   const sortedAndFilteredCategories = useSortAndSearch(categories, searchTerm, sortCriterion);
 
-async function fetchCategories() {
-  const categoriesCollectionRef = collection(db, "categories");
-  const categoryQuery = query(categoriesCollectionRef);
+  async function fetchCategories() {
+    const categoriesCollectionRef = collection(db, 'categories');
+    const categoryQuery = query(categoriesCollectionRef);
 
-  const querySnapshot = await getDocs(categoryQuery);
+    const querySnapshot = await getDocs(categoryQuery);
 
-  const categoryArray: any = []
-  querySnapshot.forEach((doc) => {
-    const createdDate = getCreatedDateFromDocument(doc as any);
-   // console.log("doc", doc.data())
-    categoryArray.push(
-      {
+    const categoryArray: any = [];
+    querySnapshot.forEach((doc) => {
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      // console.log("doc", doc.data())
+      categoryArray.push({
         id: doc.id,
         ...doc.data(),
-        createdDate
+        createdDate,
+      });
+    });
+
+    return categoryArray;
+  }
+
+  const { isLoading } = useQuery({
+    queryKey: ['get-categories'],
+    queryFn: () => fetchCategories(),
+    onSuccess: (data) => {
+      //  setAllProducts(data);
+      // console.log('data', data)
+      setCategories(data);
+    },
+
+    onError: (err) => {
+      processError(err);
+    },
+  });
+
+  useEffect(() => {
+    (async () => {
+      if (
+        Array.isArray(categories) &&
+        categories?.length > 0 &&
+        Array.isArray(data) &&
+        data?.length < categories?.length
+      ) {
+        await Promise.all(
+          categories?.map(async (category) => {
+            const payload = {
+              name: category?.name,
+            };
+            await create({ data: payload });
+          }),
+        );
+        await refetch();
       }
-    )
-  })
-
-  return categoryArray;
-}
+      setIsLoystarUpdated(true);
+    })();
+  }, [categories, data]);
 
 
-const { isLoading } = useQuery({
-  queryKey: ['get-categories'],
-  queryFn: () => fetchCategories(),
-  onSuccess: (data) => {
-  //  setAllProducts(data);
- // console.log('data', data)
-  setCategories(data)
-  },
-
-  onError: (err) => {
-    processError(err);
-  },
-});
+  // deprecated for now - but maybe the needed later
+  
+  // useEffect(() => {
+  //   if (
+  //     isLoystarUpdated &&
+  //     Array.isArray(data) &&
+  //     Array.isArray(categories) &&
+  //     categories.length > 0 &&
+  //     data?.length > 0
+  //   ) {
+  //     const allCategoryNamesMatch = categories.every((category) => {
+  //       return data.some((item) => category.name === item.name);
+  //     });
+  
+  //     if (allCategoryNamesMatch) {
+  //       const batch = writeBatch(db);
+  
+  //       const checkAndUpdateCategories = async () => {
+  //         for (const category of categories) {
+  //           const matchingData = data.find((item) => item.name === category.name);
+  
+  //           if (matchingData) {
+  //             const categoryDocRef = doc(db, "categories", category.id);
+  
+  //             try {
+  //               // Check if `loystarId` already exists
+  //               const categoryDocSnap = await getDoc(categoryDocRef);
+  
+  //               if (categoryDocSnap.exists()) {
+  //                 const categoryDocData = categoryDocSnap.data();
+  
+  //                 if (!categoryDocData.loystarId) {
+  //                   // Add to batch only if `loystarId` is not already present
+  //                   batch.update(categoryDocRef, {
+  //                     loystarId: matchingData.id,
+  //                   });
+  //                   console.log(
+  //                     `loystarId: ${matchingData.id} will be added to category ${category.name}`
+  //                   );
+  //                 } else {
+  //                   console.log(
+  //                     `Category ${category.name} already has a loystarId.`
+  //                   );
+  //                 }
+  //               } else {
+  //                 console.warn(
+  //                   `Category document with ID ${category.id} does not exist.`
+  //                 );
+  //               }
+  //             } catch (error) {
+  //               console.error(
+  //                 `Error checking loystarId for category ${category.name}:`,
+  //                 error
+  //               );
+  //             }
+  //           }
+  //         }
+  
+  //         // Commit the batch after all checks are complete
+  //         try {
+  //           await batch.commit();
+  //           console.log("Batch update completed!");
+  //         } catch (error) {
+  //           console.error("Batch update failed:", error);
+  //         }
+  //       };
+  
+  //       checkAndUpdateCategories();
+  //     }
+  //   }
+  // }, [isLoystarUpdated, data, categories]);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 px-container-base  pb-[5.1rem] md:overflow-auto md:px-container-md'>

@@ -3,6 +3,7 @@ const store = JSON.parse(localStorage.getItem('user') || '{}');
 const token = store?.state?.user?.access_token || '';
 const client = store?.state?.user?.client || '';
 const uid = store?.state?.user?.uid || '';
+// const mtierToken = store?.state?.user?.mtierToken || ''
 
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
@@ -11,14 +12,17 @@ export const services = () => {
     baseURL: 'https://api0.loystar.co/api/v2/',
     headers: {
       'Content-Type': 'application/json',
-      accesss_token: token,
-      client: client,
+
+      "Accept":"application/json, text/plain, */*",
+      "access-token": token,
       uid: uid,
+      "client": client
+      
     },
   });
 
   service.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    // config.headers["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
+    // config.headers["Authorization"] = `Bearer ${localStorage.getItem("token")}`;  
     return config;
   });
 

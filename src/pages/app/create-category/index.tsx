@@ -44,12 +44,13 @@ import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, updateDoc, where, query, getDocs } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
 import { getAuth } from 'firebase/auth';
+import { useCreate, useLoystarGetRequest, useMutate } from 'hooks/requests';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -81,6 +82,13 @@ const CreateCategory = () => {
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
+  const { create } = useCreate('add_product_category');
+  const { queryData } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories', {
+    data: {
+      time_stamp: 0,
+    },
+  });
+  const { mutating } = useMutate(`merchant_product_categories/${editData?.loystarId}`);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
@@ -108,10 +116,38 @@ const CreateCategory = () => {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
 
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
     let downloadURL = imageUrl;
+    if (!isEditing) {
+      const categoriesRef = collection(db, 'categories');
+      const q = query(categoriesRef, where('name', '==', data.categoryName));
+
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        toast.error('Category name already exists!');
+        return setFormIsLoading(false);
+      }
+    }
+
+    if (isEditing && editData?.loystarId) {
+      await mutating({
+        data: { name: data?.categoryName, id: editData?.loystarId },
+      });
+    } else {
+      await create({ data: { name: data?.categoryName } });
+    }
+
+    const categories = await queryData();
+
+    const loystarCategories = categories?.find((v: any) => v?.name === data?.categoryName);
+
+    if (!loystarCategories) {
+      toast.error('ERP not responding');
+      return;
+    }
 
     if (file) {
       const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -131,6 +167,7 @@ const CreateCategory = () => {
         name: data.categoryName,
         desc: data.description,
         image: downloadURL,
+        loystarId: loystarCategories?.id,
         slug: splitStringBySpaceAndReplaceWithDash(data.categoryName),
       };
 
@@ -181,13 +218,13 @@ const CreateCategory = () => {
         </div>
 
         <div className='flex  gap-4'>
-          {isEditing && (
+          {/* {isEditing && (
             <DeleteModal
               btnText='Delete Category'
               collectionName='categories'
               documentId={editData?.id}
             />
-          )}
+          )} */}
           <button
             onClick={() => navigate(-1)}
             className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
