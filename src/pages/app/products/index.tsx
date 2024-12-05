@@ -38,7 +38,8 @@ const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
   const { create } = useCreate('add_product');
-  const { data } = useGetData<any[]>('get_latest_merchant_products');
+  const [isLoystarUpdated, setIsLoystarUpdated] = useState(false);
+  const { data, refetch } = useGetData<any[]>('get_latest_merchant_products');
 
   // if loystar product is empty - add firebase product(if it is not empty)
 console.log(data)
@@ -68,6 +69,7 @@ console.log(data)
     queryKey: ['get-products'],
     queryFn: () => fetchProducts(),
     onSuccess: (data) => {
+      console.log(data)
       setAllProducts(data);
     },
 
@@ -76,38 +78,114 @@ console.log(data)
     },
   });
   
-  useEffect(() => {
-  (async () => {
+  // useEffect(() => {
+  // (async () => {
 
-    if (
-      Array.isArray(allProducts) &&
-      allProducts?.length > 0 &&
-      Array.isArray(data) &&
-      data?.length < allProducts?.length
-    ) {
-      await Promise.all(
-        allProducts?.map((product) => {
+  //   if (
+  //     Array.isArray(allProducts) &&
+  //     allProducts?.length > 0 &&
+  //     Array.isArray(data) &&
+  //     data?.length < allProducts?.length
+  //   ) {
+  //     await Promise.all(
+  //       allProducts?.map( async(product) => {
 
-          const payload = {
-            name: product?.name,
-            description: product?.desc,
-            price: product?.price,
-            cost_price: product?.costprice,
-            picture: null,
-            merchant_product_category_id: product?.category?.id,
-
-            track_inventory:true,
-            quantity: product?.quantity,
-          };
-
-        //  console.log(payload)
-        }),
-      );
-    }
+  //         const payload = {
+  //           name: product?.name,
+  //           description: product?.desc,
+  //           price: product?.price,
+  //           cost_price: product?.costprice,
+  //           picture: null,
+  //           merchant_product_category_id: product?.category?.loystarId,
 
 
-  })()
-  },[allProducts, data])
+  //           track_inventory:true,
+  //               unit: 'units',
+  //           quantity: product?.quantity,
+  //         };
+
+  //       //  console.log(payload)
+  //       await create({data: payload})
+  //       }),
+  //     );
+  //     await refetch()
+      
+  //   }
+  //   setIsLoystarUpdated(true);
+  // })()
+  // },[allProducts, data])
+
+    // deprecated for now - but maybe the needed later
+  
+  // useEffect(() => {
+  //   if (
+  //     isLoystarUpdated &&
+  //     Array.isArray(data) &&
+  //     Array.isArray(allProducts) &&
+  //     allProducts.length > 0 &&
+  //     data?.length > 0
+  //   ) {
+  //     const allProductNamesMatch = allProducts.every((product) => {
+  //       return data.some((item) => product.name === item.name);
+  //     });
+  
+  //     if (allProductNamesMatch) {
+  //       const batch = writeBatch(db);
+  
+  //       const checkAndUpdateProducts = async () => {
+  //         for (const product of allProducts) {
+  //           const matchingData = data.find((item) => item.name === product.name);
+  
+  //           if (matchingData) {
+  //             const productDocRef = doc(db, "products", product.id);
+  
+  //             try {
+  //               // Check if `loystarId` already exists
+  //               const productDocSnap = await getDoc(productDocRef);
+  
+  //               if (productDocSnap.exists()) {
+  //                 const productDocData = productDocSnap.data();
+  
+  //                 if (!productDocData.loystarId) {
+  //                   // Add to batch only if `loystarId` is not already present
+  //                   batch.update(productDocRef, {
+  //                     loystarId: matchingData.id,
+  //                   });
+  //                   console.log(
+  //                     `loystarId: ${matchingData.id} will be added to product ${product.name}`
+  //                   );
+  //                 } else {
+  //                   console.log(
+  //                     `product ${product.name} already has a loystarId.`
+  //                   );
+  //                 }
+  //               } else {
+  //                 console.warn(
+  //                   `product document with ID ${product.id} does not exist.`
+  //                 );
+  //               }
+  //             } catch (error) {
+  //               console.error(
+  //                 `Error checking loystarId for product ${product.name}:`,
+  //                 error
+  //               );
+  //             }
+  //           }
+  //         }
+  
+  //         // Commit the batch after all checks are complete
+  //         try {
+  //           await batch.commit();
+  //           console.log("Batch update completed!");
+  //         } catch (error) {
+  //           console.error("Batch update failed:", error);
+  //         }
+  //       };
+  
+  //       checkAndUpdateProducts();
+  //     }
+  //   }
+  // }, [isLoystarUpdated, data, allProducts]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());

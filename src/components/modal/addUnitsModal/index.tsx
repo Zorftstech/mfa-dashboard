@@ -55,6 +55,9 @@ const FormSchema = z.object({
     message: 'Please enter a valid discount price',
   }),
   isDiscounted: z.boolean().default(false),
+  quantity: z.number({
+    required_error: 'quantity is required.',
+  }),
 });
 
 const AddUnitsModal = ({
@@ -102,6 +105,7 @@ const AddUnitsModal = ({
       unit: editData?.unit || '',
       image: editData?.image || '',
       markedUpPrice: editData?.markedUpPrice || 0,
+      quantity: Number(editData?.quantity || 0),
     },
   });
   async function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -119,13 +123,13 @@ const AddUnitsModal = ({
         );
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
-  
+
         // Add or update the image URL in product data
         unitData = { ...unitData, image: downloadURL } as typeof unitData & {
           image: string;
         };
       }
-  
+
       if (isEditing) {
         // Assuming `UnitData` contains the ID of the unit to be edited
         const index = units?.findIndex((unit) => unit.unit === editData?.unit) || 0;
@@ -146,23 +150,17 @@ const AddUnitsModal = ({
         unitData = { ...unitData, image: downloadURL } as typeof unitData & {
           image: string;
         };
-  
+
         setUnits?.((prev) => [...prev, unitData]);
       }
       setFile(null);
       unitForm.reset();
       setModalOpen(false);
-    }
-    catch(e) {
+    } catch (e) {
+      setUploading(false);
+    } finally {
       setUploading(false);
     }
-    finally {
-      setUploading(false);
-      
-    }
-  
-
-  
   }
 
   return (
@@ -286,6 +284,33 @@ const AddUnitsModal = ({
                             {...field}
                             type='text'
                             placeholder='E.g kg, crate, basket'
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage className='mt-1 text-sm' />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={unitForm.control}
+                  name='quantity'
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className='relative'>
+                        <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                          Quantity
+                        </label>
+                        <FormControl>
+                          <Input
+                            className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
+                            {...field}
+                            type='number'
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === '' ? '' : Number(value));
+                            }}
+                            value={field.value}
                           />
                         </FormControl>
                       </div>

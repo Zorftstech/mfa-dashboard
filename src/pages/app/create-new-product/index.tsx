@@ -24,7 +24,12 @@ import { Input } from 'components/shadcn/input';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, formatToNaira, getCreatedDateFromDocument, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import {
+  cn,
+  formatToNaira,
+  getCreatedDateFromDocument,
+  splitStringBySpaceAndReplaceWithDash,
+} from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -43,16 +48,26 @@ import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection, updateDoc, getDocs, query,addDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  collection,
+  updateDoc,
+  getDocs,
+  query,
+  addDoc,
+  serverTimestamp,
+  where,
+} from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import useStore, { StoreType } from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
 import AddUnitsModal from 'components/modal/addUnitsModal';
 
-
 import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useCreate, useDelete, useMutate } from 'hooks/requests';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -68,6 +83,8 @@ export interface Units {
   markedUpPrice: number;
   image?: string | undefined;
   isDiscounted: boolean;
+  quantity: number;
+  loystarId?: number;
 }
 interface ErrorMessages {
   [key: string]: string[];
@@ -100,16 +117,18 @@ const FormSchema = z.object({
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<any[]>([])
-  const { isEditing, editData, setEditData, setIsEditing } = useStore(
-    (state: StoreType) => state,
-  );
+  const [categories, setCategories] = useState<any[]>([]);
+  const { create } = useCreate('add_product');
+  const { create: createCustomQuantity } = useCreate('products/custom_quantity');
+  const { mutating: mutatingCustomQuantity } = useMutate('');
+  const { isEditing, editData, setEditData, setIsEditing } = useStore((state: StoreType) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
-  const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
   const [unitsArrary, setUnitsArray] = useState<Units[]>(editData?.units || []);
+  const { mutating } = useMutate(`products/${editData?.loystarId}`);
+  const { deletes, deleteLoading, postDeletes } = useDelete();
   const handleFileDrop = async (files: any) => {
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
@@ -128,83 +147,166 @@ const CreateNewProduct = () => {
     },
   });
 
+  async function fetchCategories() {
+    const categoriesCollectionRef = collection(db, 'categories');
+    const categoryQuery = query(categoriesCollectionRef);
 
-async function fetchCategories() {
-  const categoriesCollectionRef = collection(db, "categories");
-  const categoryQuery = query(categoriesCollectionRef);
+    const querySnapshot = await getDocs(categoryQuery);
 
-  const querySnapshot = await getDocs(categoryQuery);
-
-  const categoryArray: any = []
-  querySnapshot.forEach((doc) => {
-    const createdDate = getCreatedDateFromDocument(doc as any);
-   // console.log("doc", doc.data())
-    categoryArray.push(
-      {
+    const categoryArray: any = [];
+    querySnapshot.forEach((doc) => {
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      // console.log("doc", doc.data())
+      categoryArray.push({
         id: doc.id,
         ...doc.data(),
-        createdDate
-      }
-    )
-  })
+        createdDate,
+      });
+    });
 
-  return categoryArray;
-}
+    return categoryArray;
+  }
 
+  const { isLoading } = useQuery({
+    queryKey: ['get-categories'],
+    queryFn: () => fetchCategories(),
+    onSuccess: (data) => {
+      //  setAllProducts(data);
+      // console.log('data', data)
+      setCategories(data);
+    },
 
-const { isLoading } = useQuery({
-  queryKey: ['get-categories'],
-  queryFn: () => fetchCategories(),
-  onSuccess: (data) => {
-  //  setAllProducts(data);
- // console.log('data', data)
-  setCategories(data)
-  },
-
-  onError: (err) => {
-    processError(err);
-  },
-});
+    onError: (err) => {
+      processError(err);
+    },
+  });
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       nameYourPrice: editData?.nameYourPrice === undefined ? false : editData?.nameYourPrice,
-      category: editData?.category?.id || '',
+      category: String(editData?.category?.loystarId) || '',
       productName: editData?.name || '',
       description: editData?.desc || '',
-      quantity: Number(editData?.quantity ?? 0),
       minimumPrice: Number(editData?.minimumPrice || 0),
       costprice: Number(editData?.costprice || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
+      quantity: Number(editData?.quantity || 0),
+
       // rating: Number(editData?.rating || 0),
     },
   });
 
+ // console.log(editData);
+
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
 
+    let firebaseAddedUnits = [];
+
+    let responseData: any;
+
     try {
+      if (!isEditing) {
+        const categoriesRef = collection(db, 'products');
+        const q = query(categoriesRef, where('name', '==', data.productName));
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          toast.error('Product name already exists!');
+          return setFormIsLoading(false);
+        }
+      }
+
+      const payload = {
+        name: data?.productName,
+        description: data?.description,
+        price: data?.costprice,
+        cost_price: data?.costprice,
+        picture: null,
+        merchant_product_category_id: Number(data?.category),
+
+        track_inventory: true,
+        unit: 'units',
+        quantity: data?.quantity,
+      };
+      if (!isEditing) {
+        responseData = await create({ data: { ...payload } });
+
+        if (responseData && unitsArrary?.length > 0) {
+          const customQuantityPayload = unitsArrary.map((item) => {
+            return {
+              product_id: responseData?.id,
+              merchant_id: responseData?.merchant_id,
+              price: item?.price,
+              name: item?.unit,
+              quantity: item?.quantity,
+              barcode: '',
+            };
+          });
+
+          // custom quantity
+          firebaseAddedUnits = await Promise.all(
+            customQuantityPayload.map(async (custom) => {
+              const addedUnits = await createCustomQuantity({ data: { ...custom } });
+
+              return addedUnits;
+            }),
+          );
+        }
+      } else {
+        responseData = await mutating({ data: { ...payload } });
+
+        if (responseData && unitsArrary?.length > 0) {
+          const customQuantityPayload = unitsArrary.map((item) => {
+            return {
+              ...item,
+            };
+          });
+
+          // custom quantity
+          firebaseAddedUnits = await Promise.all(
+            customQuantityPayload.map(async (custom) => {
+              const { loystarId, ...rest } = custom;
+              const addedUnits = await mutatingCustomQuantity(
+                { data: { ...rest } },
+                `products/custom_quantity/${loystarId}`,
+              );
+
+              return addedUnits;
+            }),
+          );
+        }
+      }
+
       // Initialize productData with common fields
       let productData = {
         name: data.productName,
         desc: data.description,
 
-        category: {
-          id: data.category,
-          name: categories.find((c: any) => c.id === data.category)?.name,
-        },
+        category: categories.find((c: any) => c.loystarId === Number(data.category)),
         price: Number(data.costprice),
         costprice: Number(data.costprice),
         quantity: Number(data.quantity),
         minimumPrice: Number(data.minimumPrice),
         nameYourPrice: data.nameYourPrice ? true : false,
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
-        units: unitsArrary,
+        units: firebaseAddedUnits?.map((v) => {
+          const { id, ...rest } = v;
+          return {
+            ...rest,
+            loystarId: v?.id,
+          };
+        }),
         inStock: data.inStock,
         rating: Number(editData?.rating || 0),
         ratingCount: Number(editData?.ratingCount || 0),
         created_date: serverTimestamp(),
+        loystarId: responseData?.id,
       };
+
+      // console.log({ firebaseAddedUnits , productData });
+      // return setFormIsLoading(false);
       if (unitsArrary.length === 0) {
         toast.error('Please add units for the product');
         throw new Error('Please add units for the product');
@@ -239,7 +341,7 @@ const { isLoading } = useQuery({
           image: string;
         };
 
-        console.log('product data ref',productData)
+        console.log('product data ref', productData);
 
         const productsCollectionRef = collection(db, 'products');
         await addDoc(productsCollectionRef, productData);
@@ -258,11 +360,13 @@ const { isLoading } = useQuery({
     } catch (error) {
       console.error('Error:', error);
       toast.error(`Error ${isEditing ? 'updating' : 'creating'} product. Please try again.`);
-     
-    }
-    finally {
+    } finally {
       setFormIsLoading(false);
     }
+  }
+
+  async function deleteProduct() {
+    await postDeletes(`products/set_delete_flag_to_true/${editData?.loystarId}`);
   }
 
   return (
@@ -294,11 +398,12 @@ const { isLoading } = useQuery({
         </div>
 
         <div className='flex  gap-4'>
-          {isEditing && (
+          {!deleteLoading && isEditing && (
             <DeleteModal
               btnText='Delete Product'
               collectionName='products'
               documentId={editData?.id}
+              deleteFn={deleteProduct}
             />
           )}
           <button
@@ -461,7 +566,10 @@ const { isLoading } = useQuery({
                       </FormControl>
                       <SelectContent className='bg-primary-1'>
                         {categories?.map((category: any) => (
-                          <SelectItem value={category.id} className='py-3 text-sm text-white'>
+                          <SelectItem
+                            value={category.loystarId.toString()}
+                            className='py-3 text-sm text-white'
+                          >
                             {category.name}
                           </SelectItem>
                         ))}
@@ -594,9 +702,11 @@ const { isLoading } = useQuery({
             />
             <button
               type='button'
-              onClick={() => {
-                const newUnits = unitsArrary.filter((_, i) => i !== index);
+              disabled={deleteLoading}
+              onClick={async () => {
+                const newUnits = unitsArrary.filter((item, i) => i !== index);
                 setUnitsArray(newUnits);
+                await deletes(`products/custom_quantity/${unit?.loystarId}`);
               }}
               className=' text-red-600'
             >

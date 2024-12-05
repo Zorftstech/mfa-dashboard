@@ -55,6 +55,15 @@ import { collection, doc, getDoc, getDocs, query, writeBatch } from 'firebase/fi
 import { db } from 'firebase';
 import { useCreate, useGetData, useLoystarGetRequest } from 'hooks/requests';
 
+interface Product {
+  id: string;
+  category?: {
+    id: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 const Categories = () => {
   const { setIsEditing, setEditData } = useStore((state) => state);
   const [searchTerm, setSearchTerm] = useState('');
@@ -128,6 +137,7 @@ const Categories = () => {
           }),
         );
         await refetch();
+      
       }
       setIsLoystarUpdated(true);
     })();
@@ -159,7 +169,7 @@ const Categories = () => {
   //             const categoryDocRef = doc(db, "categories", category.id);
   
   //             try {
-  //               // Check if `loystarId` already exists
+  //               
   //               const categoryDocSnap = await getDoc(categoryDocRef);
   
   //               if (categoryDocSnap.exists()) {
@@ -192,7 +202,7 @@ const Categories = () => {
   //           }
   //         }
   
-  //         // Commit the batch after all checks are complete
+  //        
   //         try {
   //           await batch.commit();
   //           console.log("Batch update completed!");
@@ -205,6 +215,56 @@ const Categories = () => {
   //     }
   //   }
   // }, [isLoystarUpdated, data, categories]);
+
+
+  /** updating product category */
+
+  // useEffect(() => {
+  //   const updateProductsWithCategories = async () => {
+      
+    
+  //     try {
+
+        
+  //       const categoriesSnapshot = await getDocs(collection(db, "categories"));
+  //       const productsSnapshot = await getDocs(collection(db, "products"));
+    
+      
+  //       const categories = categoriesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  //       const products = productsSnapshot.docs.map((doc) => ({ 
+  //         id: doc.id, 
+  //         ...doc.data() 
+  //       } as Product));
+    
+      
+  //       const batch = writeBatch(db);
+    
+  //       products.forEach((product) => {
+       
+  //         const matchingCategory = categories.find((category) => category.id === product.category?.id);
+    
+  //         if (matchingCategory) {
+        
+  //           const productRef = doc(db, "products", product.id);
+    
+      
+  //           batch.update(productRef, {
+  //             category: matchingCategory,
+  //           });
+  //         }
+  //       });
+    
+  //       // Step 3: Commit the batch
+  //       await batch.commit();
+  //       console.log("Products updated with category data successfully.");
+  //     } catch (error) {
+  //       console.error("Error updating products with category data:", error);
+  //     }
+  //   };
+    
+  //   updateProductsWithCategories();
+
+  // },[])
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 px-container-base  pb-[5.1rem] md:overflow-auto md:px-container-md'>

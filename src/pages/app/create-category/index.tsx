@@ -120,49 +120,52 @@ const CreateCategory = () => {
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
     let downloadURL = imageUrl;
-    if (!isEditing) {
-      const categoriesRef = collection(db, 'categories');
-      const q = query(categoriesRef, where('name', '==', data.categoryName));
-
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        toast.error('Category name already exists!');
-        return setFormIsLoading(false);
-      }
-    }
-
-    if (isEditing && editData?.loystarId) {
-      await mutating({
-        data: { name: data?.categoryName, id: editData?.loystarId },
-      });
-    } else {
-      await create({ data: { name: data?.categoryName } });
-    }
-
-    const categories = await queryData();
-
-    const loystarCategories = categories?.find((v: any) => v?.name === data?.categoryName);
-
-    if (!loystarCategories) {
-      toast.error('ERP not responding');
-      return;
-    }
-
-    if (file) {
-      const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const storageRef = ref(getStorage(), `categories/${refinedFileName}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      downloadURL = await getDownloadURL(snapshot.ref);
-    }
-
-    if (!downloadURL) {
-      toast.error('Image is required.');
-      setFormIsLoading(false);
-      return;
-    }
+  
 
     try {
+
+      if (!isEditing) {
+        const categoriesRef = collection(db, 'categories');
+        const q = query(categoriesRef, where('name', '==', data.categoryName));
+  
+        const querySnapshot = await getDocs(q);
+  
+        if (!querySnapshot.empty) {
+          toast.error('Category name already exists!');
+          return setFormIsLoading(false);
+        }
+      }
+  
+      if (isEditing && editData?.loystarId) {
+        await mutating({
+          data: { name: data?.categoryName, id: editData?.loystarId },
+        });
+      } else {
+        await create({ data: { name: data?.categoryName } });
+      }
+  
+      const categories = await queryData();
+  
+      const loystarCategories = categories?.find((v: any) => v?.name === data?.categoryName);
+  
+      if (!loystarCategories) {
+        toast.error('ERP not responding');
+        return;
+      }
+  
+      if (file) {
+        const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const storageRef = ref(getStorage(), `categories/${refinedFileName}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        downloadURL = await getDownloadURL(snapshot.ref);
+      }
+  
+      if (!downloadURL) {
+        toast.error('Image is required.');
+        setFormIsLoading(false);
+        return;
+      }
+      
       const categoryData = {
         name: data.categoryName,
         desc: data.description,

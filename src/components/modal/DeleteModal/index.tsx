@@ -27,6 +27,7 @@ export default function DeleteModal({
   cancel,
   documentId,
   collectionName,
+  deleteFn
 }: {
   btnText?: string;
   title?: string;
@@ -35,6 +36,7 @@ export default function DeleteModal({
   cancel?: string;
   collectionName?: string;
   documentId?: string;
+  deleteFn?: () => Promise<any>
 }) {
   const [isloading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ export default function DeleteModal({
   async function deleteItemFromCollection(collectionName: string, documentId: string) {
     setIsLoading(true);
     try {
+      await deleteFn?.()
       await deleteDoc(doc(db, collectionName, documentId));
       navigate(-1);
       console.log(`Document with ID ${documentId} successfully deleted from ${collectionName}.`);
