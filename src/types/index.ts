@@ -360,4 +360,5 @@ export interface TLoystarUser {
   uid: string;
   email: string;
   mtierToken: string;
+  id: number;
 }

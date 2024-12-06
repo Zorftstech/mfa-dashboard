@@ -50,14 +50,14 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import { cn, checkStatus } from 'lib/utils';
+import { cn, checkStatus, getCreatedDateFromDocument } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
 import EditWalletBalance from 'components/modal/EditOrderModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { set } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
@@ -65,6 +65,8 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { Filter } from 'lucide-react';
 import SearchComboBox from 'components/general/SearchComboBox';
 import axios from 'axios';
+import { useCreate, useGetData } from 'hooks/requests';
+import useUserStore from 'store/globalUserStore';
 export type User = {
   id: string;
   number: string;
@@ -80,6 +82,7 @@ export type User = {
 function UserTableComponent() {
   const navigate = useNavigate();
   const [users, setUsers] = React.useState<any[]>([]);
+  const { data: userData } = useGetData('customers_list');
 
   // refactor this
   const deletePage = async (id: string) => {
@@ -96,8 +99,9 @@ function UserTableComponent() {
     // setIsLoading(false);
   };
 
-  async function fetchAllUsers() {
+  console.log(userData);
 
+  async function fetchAllUsers() {
     //await axios.get(`https://api0.loystar.co/api/v2/customers_list`)
     // Create a reference to the 'users' collection
     const usersCollectionRef = collection(db, 'users');
@@ -110,13 +114,37 @@ function UserTableComponent() {
 
     // Iterate over each document in the querySnapshot
     querySnapshot.forEach((doc) => {
+      const createdDate = getCreatedDateFromDocument(doc as any);
       // Add the document data (and potentially the document ID) to the users array
-      users.push({ id: doc.id, ...doc.data() });
+      users.push({ id: doc.id, ...doc.data(), created: createdDate });
     });
 
     return users;
   }
+
   const columns: ColumnDef<any>[] = [
+    {
+      id: 'created',
+      accessorKey: 'created',
+      header: ({ column }) => {
+        return (
+          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
+            Created
+          </Button>
+        );
+      },
+
+      cell: ({ row }) => {
+        const created = row.original.created;
+        return (
+          <div className='text-[0.71rem] capitalize'>
+            {/* {Number(row.original.id) * 1245632} */}
+            {created}
+          </div>
+        );
+      },
+    },
+
     {
       accessorKey: 'displayName',
       header: ({ column }) => {
@@ -174,17 +202,18 @@ function UserTableComponent() {
           </Button>
         );
       },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-[0.71rem]  '>{row.getValue('city')}</p>
-        </div>
-        // </Link>
-      ),
+      cell: ({ row }) => {
+        const city = row.original.addressDetails?.city;
+        return (
+          <div className='flex w-fit items-center   gap-2 rounded-lg'>
+            <p className='text-center text-[0.71rem]  '>{city}</p>
+          </div>
+        );
+      },
     },
 
     {
-      accessorKey: 'number',
+      accessorKey: 'phone',
       header: ({ column }) => {
         return (
           <Button
@@ -192,39 +221,19 @@ function UserTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Number
+            Phone Number
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-[0.71rem] '>{row.getValue('number')}</p>
-        </div>
-        // </Link>
-      ),
-    },
-
-    {
-      id: 'created',
-      accessorKey: 'created',
-      header: ({ column }) => {
+      cell: ({ row }) => {
+        const phone = row.original.phone;
         return (
-          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
-            Created
-          </Button>
+          <div className='flex w-fit items-center   gap-2 rounded-lg  '>
+            <p className='text-center text-[0.71rem] '>{phone}</p>
+          </div>
         );
       },
-
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-[0.71rem] capitalize'>
-          {/* {Number(row.original.id) * 1245632} */}
-          {row.getValue('created')}
-        </div>
-        // </Link>
-      ),
     },
 
     // {
@@ -276,6 +285,8 @@ function UserTableComponent() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [position, setPosition] = React.useState('bottom');
+  const { user } = useUserStore();
+  const { create } = useCreate(`add_user_for_merchant/${user?.id}`);
 
   const table = useReactTable({
     data: users,
@@ -301,6 +312,7 @@ function UserTableComponent() {
     queryKey: ['get-users'],
     queryFn: () => fetchAllUsers(),
     onSuccess: (data) => {
+      //  console.log(data)
       setUsers(data);
     },
 
@@ -308,6 +320,67 @@ function UserTableComponent() {
       processError(err);
     },
   });
+
+  console.log("users", users)
+
+  const updateProductsOnFirebase = async () => {
+    if (
+      Array.isArray(users) &&
+      users?.length > 0 &&
+      Array.isArray(userData) &&
+      userData?.length < users?.length
+    ) {
+      try {
+        // Process all products and create/update them on Firebase
+        await Promise.all(
+          users.slice(0, 3).map(async (user) => {
+            const payload = {
+              first_name: user?.firstName,
+              last_name: user?.lastName,
+              email: user?.email,
+              phone_number: user?.phone || "+2340000000000",
+              date_of_birth: '01-01-1980',
+              sex: 'M',
+              local_db_created_at: 'NIL',
+              address_line1: user?.addressDetails?.address || "NIL",
+              address_line2: 'NIL',
+              postcode: Number(user?.addressDetails?.zipcode) || 111111,
+              state: user?.addressDetails?.state,
+              country: user?.addressDetails?.country,
+            };
+            // push to loystar
+            const responseData = await create({ data: payload });
+
+            if (responseData){
+              // Update Firebase with the loystarId
+            const userDocRef = doc(db, 'users', user.id);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+              const productDocData = userDocSnap.data();
+              if (!productDocData.loystarId) {
+                await updateDoc(userDocRef, { loystarId: responseData.id });
+                console.log(`Updated loystarId for user: ${user.name}`);
+              } else {
+                console.log(`User ${user.name} already has a loystarId.`);
+              }
+            } else {
+              console.warn(`User document with ID ${user.id} does not exist.`);
+            }
+            }
+          }),
+        );
+
+        console.log('User updated successfully!');
+      } catch (error) {
+        console.error('Error updating products on Firebase:', error);
+      }
+    }
+  };
+
+  React.useEffect(() => {
+ //  updateProductsOnFirebase()
+  },[userData, users])
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>
@@ -449,6 +522,8 @@ function UserTableComponent() {
           </TableBody>
         </Table>
       </FeaturedLoader>
+
+     
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>
