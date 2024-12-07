@@ -37,7 +37,7 @@ interface Iprop {
   img?: string;
   desc?: string;
   units: Units[];
-  setUnits?: React.Dispatch<React.SetStateAction<Units[]>>;
+  setUnits: (unit: Units, index?:number) => void;
   item?: any;
   isEditing?: boolean;
   editData?: Units;
@@ -131,10 +131,13 @@ const AddUnitsModal = ({
       }
 
       if (isEditing) {
+        
         // Assuming `UnitData` contains the ID of the unit to be edited
         const index = units?.findIndex((unit) => unit.unit === editData?.unit) || 0;
-        units[index] = unitData;
-        setUnits?.(units);
+      
+       // units[index] = unitData;
+      //  console.log(index, units, setUnits)
+        setUnits(unitData, index);
       } else {
         if (!file) {
           toast.error('Please upload an image for the new unit');
@@ -151,7 +154,7 @@ const AddUnitsModal = ({
           image: string;
         };
 
-        setUnits?.((prev) => [...prev, unitData]);
+        setUnits(unitData);
       }
       setFile(null);
       unitForm.reset();

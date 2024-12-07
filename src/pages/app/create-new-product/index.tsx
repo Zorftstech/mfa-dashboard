@@ -95,9 +95,8 @@ const FormSchema = z.object({
     message: 'Please enter a valid name',
   }),
 
-  costprice: z.number().min(2, {
-    message: 'Please enter a valid price',
-  }),
+  costprice: z.number(),
+  price: z.number(),
   category: z.string().min(2, {
     message: 'Please enter a valid category',
   }),
@@ -180,6 +179,8 @@ const CreateNewProduct = () => {
       processError(err);
     },
   });
+
+  console.log('unitsArrary', unitsArrary);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -189,6 +190,7 @@ const CreateNewProduct = () => {
       description: editData?.desc || '',
       minimumPrice: Number(editData?.minimumPrice || 0),
       costprice: Number(editData?.costprice || 0),
+      price: Number(editData?.price || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
       quantity: Number(editData?.quantity || 0),
 
@@ -196,12 +198,14 @@ const CreateNewProduct = () => {
     },
   });
 
- // console.log(editData);
+  // console.log(editData);
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+
     setFormIsLoading(true);
 
-    let firebaseAddedUnits = [];
+    let loystarAddedUnits: any[] = [];
+    let firebaseAddedUnits: any[] = [];
 
     let responseData: any;
 
@@ -221,7 +225,7 @@ const CreateNewProduct = () => {
       const payload = {
         name: data?.productName,
         description: data?.description,
-        price: data?.costprice,
+        price: data?.price,
         cost_price: data?.costprice,
         picture: null,
         merchant_product_category_id: Number(data?.category),
@@ -246,7 +250,7 @@ const CreateNewProduct = () => {
           });
 
           // custom quantity
-          firebaseAddedUnits = await Promise.all(
+          loystarAddedUnits = await Promise.all(
             customQuantityPayload.map(async (custom) => {
               const addedUnits = await createCustomQuantity({ data: { ...custom } });
 
@@ -260,12 +264,20 @@ const CreateNewProduct = () => {
         if (responseData && unitsArrary?.length > 0) {
           const customQuantityPayload = unitsArrary.map((item) => {
             return {
-              ...item,
+              product_id: responseData?.id,
+              merchant_id: responseData?.merchant_id,
+              price: Number(item?.price),
+              name: item?.unit,
+              quantity: item?.quantity,
+              barcode: '',
+              loystarId: item?.loystarId,
             };
           });
 
+       
+
           // custom quantity
-          firebaseAddedUnits = await Promise.all(
+          loystarAddedUnits = await Promise.all(
             customQuantityPayload.map(async (custom) => {
               const { loystarId, ...rest } = custom;
               const addedUnits = await mutatingCustomQuantity(
@@ -279,38 +291,45 @@ const CreateNewProduct = () => {
         }
       }
 
+      if (unitsArrary?.length > 0 && loystarAddedUnits) {
+        firebaseAddedUnits = unitsArrary.map((unit) => {
+          const matchedItem = loystarAddedUnits.find(
+            (item) => item.name === unit.unit && Number(item.price) === Number(unit.price),
+          );
+          return {
+            ...unit,
+            loystarId: matchedItem?.id,
+          };
+        });
+      }
+
       // Initialize productData with common fields
       let productData = {
         name: data.productName,
         desc: data.description,
 
         category: categories.find((c: any) => c.loystarId === Number(data.category)),
-        price: Number(data.costprice),
+        price: Number(data.price),
         costprice: Number(data.costprice),
         quantity: Number(data.quantity),
         minimumPrice: Number(data.minimumPrice),
         nameYourPrice: data.nameYourPrice ? true : false,
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
-        units: firebaseAddedUnits?.map((v) => {
-          const { id, ...rest } = v;
-          return {
-            ...rest,
-            loystarId: v?.id,
-          };
-        }),
+        units: firebaseAddedUnits,
         inStock: data.inStock,
         rating: Number(editData?.rating || 0),
         ratingCount: Number(editData?.ratingCount || 0),
         created_date: serverTimestamp(),
         loystarId: responseData?.id,
+        merchant_id: responseData?.merchant_id,
       };
 
       // console.log({ firebaseAddedUnits , productData });
       // return setFormIsLoading(false);
-      if (unitsArrary.length === 0) {
-        toast.error('Please add units for the product');
-        throw new Error('Please add units for the product');
-      }
+      // if (unitsArrary.length === 0) {
+      //   toast.error('Please add units for the product');
+      //   throw new Error('Please add units for the product');
+      // }
       // Check if editing and a new file is provided
       if (isEditing && file) {
         const storageRef = ref(getStorage(), `products/${file.name}`);
@@ -322,6 +341,9 @@ const CreateNewProduct = () => {
           image: string;
         };
       }
+     // console.log('product data ref', productData);
+
+     // return  console.log(data, unitsArrary, editData)
 
       if (isEditing) {
         // Assuming `editData` contains the ID of the product to be edited
@@ -340,8 +362,6 @@ const CreateNewProduct = () => {
         productData = { ...productData, image: downloadURL } as typeof productData & {
           image: string;
         };
-
-        console.log('product data ref', productData);
 
         const productsCollectionRef = collection(db, 'products');
         await addDoc(productsCollectionRef, productData);
@@ -367,6 +387,24 @@ const CreateNewProduct = () => {
 
   async function deleteProduct() {
     await postDeletes(`products/set_delete_flag_to_true/${editData?.loystarId}`);
+  }
+
+  function updateUnitsArray(unit: Units, index?: number) {
+
+    if (typeof index === "number" && index !== -1) {
+      setUnitsArray(
+        unitsArrary.map((item, i) => {
+          if (i === index) {
+            return {
+              ...unit,
+            };
+          }
+          return item;
+        }),
+      );
+    } else {
+      setUnitsArray((prev) => [...prev, unit]);
+    }
   }
 
   return (
@@ -500,6 +538,34 @@ const CreateNewProduct = () => {
                   <div className='relative'>
                     <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
                       Cost Price (NGN)
+                    </label>
+                    <FormControl>
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
+                        }}
+                        value={field.value}
+                        type='number'
+                        placeholder='3000'
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage className='mt-1 text-sm' />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='price'
+              render={({ field }) => (
+                <FormItem>
+                  <div className='relative'>
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Price (NGN)
                     </label>
                     <FormControl>
                       <Input
@@ -686,7 +752,7 @@ const CreateNewProduct = () => {
             <span className='text-sm '>Price - {formatToNaira(unit.price)}</span>
             <AddUnitsModal
               units={unitsArrary}
-              setUnits={setUnitsArray}
+              setUnits={updateUnitsArray}
               isEditing={true}
               editData={unit}
               trigger={
@@ -706,7 +772,7 @@ const CreateNewProduct = () => {
               onClick={async () => {
                 const newUnits = unitsArrary.filter((item, i) => i !== index);
                 setUnitsArray(newUnits);
-                await deletes(`products/custom_quantity/${unit?.loystarId}`);
+                if (unit?.loystarId) await deletes(`products/custom_quantity/${unit?.loystarId}`);
               }}
               className=' text-red-600'
             >
@@ -717,7 +783,7 @@ const CreateNewProduct = () => {
 
         <AddUnitsModal
           units={unitsArrary}
-          setUnits={setUnitsArray}
+          setUnits={updateUnitsArray}
           trigger={
             <button className='group mt-3  flex w-fit items-center justify-center gap-2 place-self-end   rounded-[5px] bg-primary-1 px-2 py-1 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
               <Icon name='addIcon' />

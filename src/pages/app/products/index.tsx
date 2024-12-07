@@ -25,7 +25,7 @@ import { nanoid } from 'nanoid';
 import ProductCard from 'components/general/ProductCard';
 
 import Icon from 'utils/Icon';
-import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc, deleteField } from 'firebase/firestore';
 import { db } from 'firebase';
 import useStore from 'store';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
@@ -125,7 +125,7 @@ const ProductsPage = () => {
               if (productDocSnap.exists()) {
                 const productDocData = productDocSnap.data();
                 if (!productDocData.loystarId) {
-                  await updateDoc(productDocRef, { loystarId: responseData.id });
+                  await updateDoc(productDocRef, { loystarId: responseData.id, merchant_id: responseData?.merhcant_id });
                   console.log(`Updated loystarId for product: ${product.name}`);
                 } else {
                   console.log(`Product ${product.name} already has a loystarId.`);
@@ -156,7 +156,11 @@ const ProductsPage = () => {
             const productDocSnap = await getDoc(productDocRef);
             if (productDocSnap.exists()) {
               // const productDocData = productDocSnap.data();
-              await updateDoc(productDocRef, { costprice: item?.cost_price, price: item?.price });
+              await updateDoc(productDocRef, {
+                costprice: item?.cost_price,
+                price: item?.price,
+                quantity: item?.quantity,
+              });
             } else {
               console.warn(`Product document with does not exist.`);
             }
@@ -169,6 +173,31 @@ const ProductsPage = () => {
   // useEffect(() => {
   //    updateProductsOnFirebase();
   // }, [allProducts, data]);
+
+  // staging testing // remove loystarId from all the products
+
+    // staging testing // remove loystarId from all the products
+    // useEffect(() => {
+    //   const removeLoystarIdFromFirebase = async () => {
+    //     try {
+    //       await Promise.all(
+    //         allProducts.map(async (product) => {
+    //           const productDocRef = doc(db, 'products', product.id);
+    //           // Check if loystarId exists before attempting to delete
+    //           if (product.loystarId) {
+    //             await updateDoc(productDocRef, { loystarId: deleteField() }); 
+    //             console.log(`Removed loystarId from product: ${product.name}`);
+    //           }
+    //         })
+    //       );
+    //       console.log('loystarId removed from all products successfully!');
+    //     } catch (error) {
+    //       console.error('Error removing loystarId from Firebase:', error);
+    //     }
+    //   };
+  
+    //   removeLoystarIdFromFirebase(); 
+    // }, [allProducts]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
