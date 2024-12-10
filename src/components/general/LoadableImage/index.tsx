@@ -4,7 +4,7 @@ interface ILoadableImage {
   link: string;
 }
 
-const LoadableImage = ({}: ILoadableImage) => {
+const LoadableImage = ({ image }: ILoadableImage) => {
   return <div>LoadableImage</div>;
 };
 

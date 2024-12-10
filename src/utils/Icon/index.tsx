@@ -142,9 +142,10 @@ import { ReactComponent as FlashSaleIcon } from 'assets/svg/flashSalesIcon.svg';
 import { ReactComponent as FoodBundleIcon } from 'assets/svg/foodBuddlesIcon.svg';
 import { ReactComponent as LogOut } from 'assets/svg/logout.svg';
 import { ReactComponent as OrderIcon } from 'assets/svg/ordersIcon.svg';
-import { ReactComponent as ProductIcon } from 'assets/svg/products.svg';
+import { ReactComponent as ProductIcon } from 'assets/svg/productsIcon.svg';
 import { ReactComponent as SettingWhite } from 'assets/svg/settingsIcon1.svg';
 import { ReactComponent as Users } from 'assets/svg/profileIcon.svg';
+import { ReactComponent as Camera } from 'assets/svg/camera.svg';
 
 export type iconTypes =
   | 'sort'
@@ -294,7 +295,8 @@ export type iconTypes =
   | 'LogOut'
   | 'OrderIcon'
   | 'ProductIcon'
-  | 'SettingWhite';
+  | 'SettingWhite'
+  | 'Camera';
 
 interface IconInterface {
   name: iconTypes;
@@ -303,6 +305,7 @@ interface IconInterface {
 
 const Icon = ({ name, svgProp }: IconInterface) => {
   const icons: Record<iconTypes, JSX.Element> = {
+    Camera: <Camera {...svgProp} />,
     SettingWhite: <SettingWhite {...svgProp} />,
     ProductIcon: <ProductIcon {...svgProp} />,
     OrderIcon: <OrderIcon {...svgProp} />,

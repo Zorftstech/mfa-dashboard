@@ -21,14 +21,23 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'flash-sales': 'flash-sales',
   notifications: 'notifications',
   coupons: 'coupons',
+  faq: 'faq',
+  'farm-offtake': 'farm-offtake',
   'user-profile': 'user-profile',
   categories: 'categories',
+  wallets: 'wallets',
   'create-category': 'create-category',
   'create-coupons': 'create-coupons',
   'create-food-bundle': 'create-food-bundle',
-  'create-subCategory': 'create-subCategory',
-
+  'create-sub-category': 'create-sub-category',
+  'create-flash-sale': 'create-flash-sale',
+  'create-delivery-fee': 'create-delivery-fee',
   'create-new-product': 'create-new-product',
+  'create-farm-offtake': 'create-farm-offtake',
+  'create-faq': 'create-faq',
+  'create-blog': 'create-blog',
+  toggle: 'toggle',
+  'delivery-fee': 'delivery-fee',
 };
 
 const TIMBU_KEYS = {

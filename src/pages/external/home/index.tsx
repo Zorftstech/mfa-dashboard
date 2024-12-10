@@ -9,7 +9,7 @@ import questionImageSmall from 'assets/image/questionImg.png?format=webp&w=380&h
 import Balancer from 'react-wrap-balancer';
 import Icon from 'utils/Icon';
 import CONSTANTS from 'constant';
-import BlogCard from 'components/general/Card';
+import BlogCard from 'components/general/ProductCard';
 import BtsCard from 'components/general/BtsCard';
 import BgTransitionSpan from 'components/animation/bg-transitions-span';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ import movie4 from 'assets/image/the-man-for-the-job.jpg?format=webp&w=240&h=153
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { apiInterface, contentApiItemInterface } from 'types';
 import { useQuery } from '@tanstack/react-query';
-import contentService from 'services/content';
+
 import { processError } from 'helper/error';
 import ContentLoader from 'components/general/ContentLoader';
 import EmptyContentWrapper from 'components/Hocs/EmptyContentWrapper';

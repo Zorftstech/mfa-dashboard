@@ -8,16 +8,27 @@ import FlashSales from 'pages/app/flash-sales';
 import Dashboard from 'pages/app/dashboard';
 import Categories from 'pages/app/categories';
 import Notifications from 'pages/app/notifications';
-import MasterClasses from 'pages/app/master-classes';
+import TogglePage from 'pages/app/toggle-page';
 import Coupons from 'pages/app/coupons';
 import UserProfile from 'pages/app/user-profile';
 import Settings from 'pages/app/settings';
+import FAQPage from 'pages/app/faq';
+import DeliveryFeePage from 'pages/app/delivery-fee';
+import FarmOfftake from 'pages/app/farm-offtake';
 import SingleBlog from 'pages/inner-pages/single-blog';
+import WalletsPage from 'pages/app/wallets';
 import SinglePatient from 'pages/inner-pages/single-patient';
 import { routeTypes, routesInterface } from 'types';
 import CreateCategory from 'pages/app/create-category';
 import CreateSubCategory from 'pages/app/create-subCategory';
 import CreateNewProduct from 'pages/app/create-new-product';
+import CreateFoodBundle from 'pages/app/create-food-bundle';
+import CreateFlashSale from 'pages/app/create-flash-sale';
+import CreateFAQ from 'pages/app/create-faq';
+import CreateDeliveryFee from 'pages/app/create-delivery-fee';
+import CreateFarmOfftake from 'pages/app/create-farm-offtake';
+import AllBlogs from 'pages/app/blogs';
+import CreateBlog from 'pages/app/create-blog';
 
 const internalRoute: routeTypes = [
   {
@@ -25,12 +36,12 @@ const internalRoute: routeTypes = [
     path: 'dashboard',
   },
   {
-    element: <CreateNewProduct />,
-    path: 'create-new-product',
+    element: <CreateCategory />,
+    path: 'create-category',
   },
   {
     element: <CreateSubCategory />,
-    path: 'create-category',
+    path: 'create-sub-category',
   },
   {
     element: <Categories />,
@@ -39,6 +50,18 @@ const internalRoute: routeTypes = [
   {
     element: <Users />,
     path: 'users',
+  },
+  {
+    element: <Users />,
+    path: 'users',
+  },
+  {
+    element: <TogglePage />,
+    path: 'toggle',
+  },
+  {
+    element: <WalletsPage />,
+    path: 'wallets',
   },
   {
     element: <UserProfile />,
@@ -58,6 +81,10 @@ const internalRoute: routeTypes = [
     path: 'products',
   },
   {
+    element: <AllBlogs />,
+    path: 'blogs',
+  },
+  {
     element: <CreateCoupon />,
     path: 'create-coupon',
   },
@@ -69,10 +96,19 @@ const internalRoute: routeTypes = [
     element: <Settings />,
     path: 'settings',
   },
-  // {
-  //   element: <MasterClasses />,
-  //   path: 'reports',
-  // },
+
+  {
+    element: <CreateFoodBundle />,
+    path: 'create-food-bundle',
+  },
+  {
+    element: <CreateBlog />,
+    path: 'create-blog',
+  },
+  {
+    element: <CreateFlashSale />,
+    path: 'create-flash-sale',
+  },
 
   {
     element: <Notifications />,
@@ -86,6 +122,30 @@ const internalRoute: routeTypes = [
   {
     element: <CreateNewProduct />,
     path: 'create-new-product',
+  },
+  {
+    element: <FarmOfftake />,
+    path: 'farm-offtake',
+  },
+  {
+    element: <CreateFarmOfftake />,
+    path: 'create-farm-offtake',
+  },
+  {
+    element: <FAQPage />,
+    path: 'faq',
+  },
+  {
+    element: <CreateFAQ />,
+    path: 'create-faq',
+  },
+  {
+    element: <DeliveryFeePage />,
+    path: 'delivery-fee',
+  },
+  {
+    element: <CreateDeliveryFee />,
+    path: 'create-delivery-fee',
   },
 ];
 

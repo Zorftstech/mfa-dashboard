@@ -6,9 +6,9 @@ import dpIcon from 'assets/image/demoDp.jpg?format=webp&imagetools';
 import Icon from 'utils/Icon';
 import { shimmer, toBase64 } from 'utils/general/shimmer';
 import { useState } from 'react';
-import BlogCard from 'components/general/Card';
-import { useQuery } from '@tanstack/react-query';
-import contentService from 'services/content';
+import BlogCard from 'components/general/ProductCard';
+import { useQuery, useMutation } from '@tanstack/react-query';
+
 import { processError } from 'helper/error';
 import { apiInterface, apiInterfaceV2, contentApiItemInterface } from 'types';
 import ReactMarkdown from 'react-markdown';
@@ -158,7 +158,7 @@ const SingleBlog = () => {
         >
           <ContentLoader isLoading={similarLoading}>
             <div className='grid grid-cols-1 gap-x-[1.5rem] gap-y-[2.5rem]  sm:grid-cols-2 md:grid-cols-3'>
-              {similar?.items
+              {/* {similar?.items
                 ?.filter((i) => i?.id !== id)
                 ?.map((i, idx) => (
                   <div key={idx} className='h-full w-full'>
@@ -174,7 +174,7 @@ const SingleBlog = () => {
                       link={`/app/blogs/${i?.id}`}
                     />
                   </div>
-                ))}
+                ))} */}
             </div>
           </ContentLoader>
         </EmptyContentWrapper>

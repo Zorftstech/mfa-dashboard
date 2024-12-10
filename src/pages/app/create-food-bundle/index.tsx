@@ -20,11 +20,11 @@ import {
   SelectValue,
 } from 'components/shadcn/ui/select';
 import { Input } from 'components/shadcn/input';
-import axiosInstance from 'services';
-import { ChevronRightIcon } from 'lucide-react';
+// 
+import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -36,12 +36,18 @@ import UploadImageForm from './UploadForm';
 import SavePatientModal from 'components/modal/Patients/SavePatient';
 import LinkPatientsModal from 'components/modal/Patients/LinkPatient';
 import PI, { PhoneInputProps } from 'react-phone-input-2';
-import API from 'services';
+//// import API from 'services';
 import toast from 'helper';
 import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
 import CONSTANTS from 'constant';
-
+import { Switch } from 'components/shadcn/switch';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { db } from 'firebase';
+import { useDropzone } from 'react-dropzone';
+import useStore from 'store';
+import DeleteModal from 'components/modal/DeleteModal';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -56,113 +62,62 @@ interface ErrorMessages {
 }
 
 const FormSchema = z.object({
-  firstName: z.string().min(2, {
-    message: 'Please enter a name',
-  }),
-
-  lastName: z.string().min(2, {
+  productName: z.string().min(2, {
     message: 'Please enter a valid name',
   }),
-  middleName: z.string().min(2, {
-    message: 'Please enter a valid name',
-  }),
-  age: z.string().min(1, {
-    message: 'Please enter a valid age.',
-  }),
-  maritalStatus: z.string({
-    required_error: 'Marital Status is required.',
-  }),
-  gender: z.string({
-    required_error: 'gender is required.',
-  }),
-  idType: z.string({
-    required_error: 'ID Type is required.',
-  }),
-  idNumber: z.string().min(2, {
-    message: 'Please enter a valid ID Number.',
-  }),
-  lga: z.string().min(2, {
-    message: 'Please enter a valid LGA.',
-  }),
-  hearUs: z.string({
-    required_error: 'How did you hear about us is required.',
-  }),
-  occupation: z.string().min(2, {
-    message: 'Please enter a valid occupation.',
-  }),
-  referredBy: z.string().min(2, {
-    message: 'Please enter a valid referred by.',
-  }),
-  KinName: z.string().min(2, {
-    message: 'Please enter a valid name.',
-  }),
-  relationship: z.string().min(2, {
-    message: 'Please enter a valid relationship.',
-  }),
-  kinEmail: z
-    .string()
-    .min(2, {
-      message: 'Please enter a valid email.',
-    })
-    .email(),
-  address: z.string().min(2, {
-    message: 'Please enter a valid address.',
-  }),
-  city: z.string().min(2, {
-    message: 'Please enter a valid address.',
+
+  price: z.number().min(2, {
+    message: 'Please enter a valid price',
   }),
 
-  phone_number: z.string().min(2, {
-    message: 'Please enter a valid Number.',
+  description: z.string().min(1, {
+    message: 'Please enter a valid description',
   }),
-  phone_country_code: z.string().optional(),
-
-  currency_code: z.string().optional(),
-  KinPhone_number: z.string().min(2, {
-    message: 'Please enter a valid Number.',
+  intervals: z.string({
+    required_error: 'intervals is required.',
   }),
-  KinCurrency_code: z.string().optional(),
-  KinPhone_country_code: z.string().optional(),
-  email: z
-    .string()
-    .min(2, {
-      message: 'Please enter a valid email.',
-    })
-    .email(),
+  list: z.string({
+    required_error: 'list is required.',
+  }),
 });
-const CreateNewProduct = () => {
+const CreateFoodBundle = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
+  const { isEditing, setIsEditing, editData, setEditData } = useStore((state) => state);
 
-  const [issuer, setIssuer] = useState<string | null>(null);
-  const [country, setCountry] = useState<string>('');
-  const [region, setRegion] = useState<string>('');
-  const [phoneCountry, setPhoneCountry] = useState('');
   const [formIsLoading, setFormIsLoading] = useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [file, setFile] = React.useState<any>(null);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
-  const [phoneData, setPhoneData] = useState({
-    phoneNumber: '',
-    countryCode: '',
+  const handleFileDrop = async (files: any) => {
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
   });
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      productName: editData?.name || '',
+      price: Number(editData?.price || 0),
+      description: editData?.desc || '',
+      intervals: editData?.intervals || '',
+      list: editData?.listOfItems || '',
+    },
   });
-  const handleOnPhoneChange = (phone: any, countryData: any) => {
-    setPhoneData((prev) => ({
-      ...prev,
-      phoneNumber: phone?.slice(countryData?.dialCode?.length),
-      countryCode: countryData.dialCode,
-    }));
-
-    form.setValue('phone_number', phone);
-    form.setValue('phone_country_code', `+${countryData?.dialCode}`);
-    setPhoneCountry(countryData?.iso2);
-  };
-  const handleOnPhoneChangeNextOfKin = (phone: any, countryData: any) => {
-    form.setValue('KinPhone_number', phone);
-    form.setValue('KinCurrency_code', `+${countryData?.dialCode}`);
-  };
 
   function extractErrorMessages(errors: ErrorMessages): string[] {
     let messages: string[] = [];
@@ -174,141 +129,111 @@ const CreateNewProduct = () => {
     return messages;
   }
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // switchTab(tabData[3]);
-    function generateUniquePassword(length = 10) {
-      const chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?';
-      let password = '';
-
-      for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * chars.length);
-        password += chars.charAt(randomIndex);
-      }
-
-      return password;
-    }
-
-    console.log(data);
-
-    const userInfo = {
-      ...data,
-      country,
-      region,
-      phone_number: data.phone_number?.slice(location?.country_calling_code?.slice(1)?.length),
-      phone_country_code: data.phone_country_code,
-    };
-    const info = {
-      username: `${data.firstName} ${data.lastName}`,
-      first_name: data.firstName,
-      last_name: data.lastName,
-      middle_name: data.middleName,
-      password: generateUniquePassword(),
-      profile_picture: null,
-      email: data.email,
-      title: null,
-      phone_number: data.phone_number?.slice(location?.country_calling_code?.slice(1)?.length),
-      date_of_birth: null,
-      gender: data.gender,
-      city: data.city,
-      address: data.address,
-      lga: data.lga,
-      state: region,
-      country: country,
-      how_did_you_hear_about_us: data.hearUs,
-      occupation: data.occupation,
-      referred_by: data.referredBy,
-      next_of_kin_fullname: data.KinName,
-      next_of_kin_relationship: data.relationship,
-      next_of_kin_phone_number: data.KinPhone_number?.slice(
-        location?.country_calling_code?.slice(1)?.length,
-      ),
-      role: 2,
-    };
-
     setFormIsLoading(true);
 
     try {
-      const formData = new FormData();
+      // Initialize foodBundleData with common fields
+      let foodBundleData = {
+        name: data.productName,
+        desc: data.description,
+        price: Number(data.price),
+        listOfItems: data.list, // Assuming you have a field for list of items in your form schema
+        intervals: data.intervals, // Assuming you have a field for intervals in your form schema
+        slug: splitStringBySpaceAndReplaceWithDash(data.productName),
+      };
 
-      for (const [key, value] of Object.entries(info)) {
-        if (value !== null && value !== undefined) {
-          // Convert numbers to string; keep strings and Blobs as they are
-          let valueToAppend;
-          if (typeof value === 'number') {
-            valueToAppend = value.toString();
-          } else {
-            // Assuming value is either string or Blob
-            valueToAppend = value;
-          }
+      // Check if editing and a new file is provided
+      if (isEditing && file) {
+        const storageRef = ref(getStorage(), `foodBundles/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-          formData.append(key, valueToAppend);
-        }
+        // Add or update the image URL in foodBundleData
+        foodBundleData = { ...foodBundleData, image: downloadURL } as typeof foodBundleData & {
+          image: string;
+        };
       }
 
-      const res = await API.post(`/auth/create-patients`, formData);
-      toast.success('Patient Created Successfully');
-    } catch (error: any) {
-      processError(error);
-      extractErrorMessages(error?.response?.data).forEach((err) => {
-        toast.error(err);
-      });
+      if (isEditing) {
+        // Assuming `editData` contains the ID of the food bundle to be edited
+        const foodBundleRef = doc(db, 'foodbundle', editData.id);
+        await setDoc(foodBundleRef, foodBundleData, { merge: true });
+        toast.success('Food Bundle updated successfully');
+        navigate(-1);
+      } else {
+        if (!file) throw new Error('Please upload an image for the new food bundle');
+        // Proceed with new food bundle creation, including initial image upload
+        const storageRef = ref(getStorage(), `foodBundles/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        foodBundleData = { ...foodBundleData, image: downloadURL } as typeof foodBundleData & {
+          image: string;
+        };
+
+        const foodBundlesCollectionRef = collection(db, 'foodbundle');
+        await addDoc(foodBundlesCollectionRef, foodBundleData);
+        toast.success('Food Bundle created successfully');
+      }
+
+      // Cleanup and navigate back or to another page as needed
+      setFile(null);
+      setImageUrl(null); // Ensure to clear the image URL state as well
+      setFormIsLoading(false);
+      if (isEditing) {
+        setIsEditing(false);
+        setEditData(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(`Error ${isEditing ? 'updating' : 'creating'} food bundle. Please try again.`);
+      setFormIsLoading(false);
     }
-    setFormIsLoading(false);
   }
 
-  useEffect(() => {
-    form.setValue('phone_number', location?.country_calling_code);
-    form.setValue('currency_code', location?.currency);
-    form.setValue('KinPhone_number', location?.country_calling_code);
-    form.setValue('KinCurrency_code', location?.currency);
-  }, [location?.country_calling_code, location?.currency]);
-
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
-      <div className='flex w-full  items-center justify-between gap-4 md:flex-row'>
-        <div
-          onClick={() => navigate(-1)}
-          className='flex w-max cursor-pointer items-center gap-1 rounded-[8px] px-[2px]   transition-colors duration-300 ease-in-out hover:bg-slate-100 active:bg-slate-200'
-        >
-          <Icon
-            name='arrowBack'
-            svgProp={{ width: '1.5rem', height: '1.5rem', className: 'text-black' }}
-          />
+    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 px-container-base pb-[2.1rem] md:px-container-md'>
+      <div className='mb-8 flex  w-full items-center justify-between gap-4 md:flex-row'>
+        <div className='flex w-max cursor-pointer items-center gap-3 rounded-[8px] px-[2px]'>
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+              navigate(-1);
+            }}
+          >
+            <ChevronLeft className='h-6 w-6 font-light' />
+          </button>
+
           <InlineLoader isLoading={false}>
-            <div className='flex items-center gap-1'>
-              <h5 className='text-base font-[500] capitalize leading-[113%] text-black'>Back</h5>
-              <h5 className='text-sm font-[500] capitalize leading-[113%]'></h5>
+            <div className='hidden  flex-col gap-1  md:flex'>
+              <h3 className=' text-base font-semibold md:text-xl'>
+                {isEditing ? 'Edit Food Bundle' : 'Add Food bundle'}
+              </h3>
+              <p className='text-[0.75rem] '>
+                {isEditing
+                  ? 'Edit the food bundle details'
+                  : 'This will add a new food bundle to your catalogue'}
+              </p>
             </div>
           </InlineLoader>
         </div>
 
-        <div className='flex gap-4'>
+        <div className='flex  gap-4'>
+          {isEditing && (
+            <DeleteModal
+              btnText='Delete Food Bundle'
+              collectionName='foodbundle'
+              documentId={editData?.id}
+            />
+          )}
           <button
-            // onClick={() => form.trigger()}
-            disabled={formIsLoading}
-            onClick={() => form.handleSubmit(onSubmit)()}
-            className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
+            onClick={() => {
+              setIsEditing(false);
+              setEditData(null);
+              navigate(-1);
+            }}
+            className='group flex items-center justify-center gap-2 rounded-[5px] border   px-8   py-2 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'
           >
-            {formIsLoading ? (
-              <Spinner />
-            ) : (
-              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                Create Patient
-              </span>
-            )}
-          </button>
-
-          {/* <SavePatientModal
-            trigger={
-              <button className='group flex  items-center justify-center gap-2  rounded-[5px] bg-primary-1 px-8 py-2 text-base font-semibold text-white transition-all duration-300 ease-in-out hover:opacity-90'>
-                <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-white md:text-sm'>
-                  Create Patient
-                </span>
-              </button>
-            }
-          ></SavePatientModal> */}
-
-          <button className='group flex  items-center justify-center gap-2  rounded-[5px] border   px-5 text-base font-semibold transition-all duration-300 ease-in-out hover:opacity-90'>
             <span className='text-xs font-[500] leading-[24px] tracking-[0.4px]  md:text-sm'>
               Cancel
             </span>
@@ -316,23 +241,30 @@ const CreateNewProduct = () => {
         </div>
       </div>
       <div className='flex items-end justify-between'>
-        <UploadImageForm />
-        <LinkPatientsModal
-          trigger={
-            <button className='group flex  items-center justify-center gap-2  rounded-[5px] px-4  text-base font-semibold text-primary-1  transition-all duration-300 ease-in-out hover:opacity-90'>
-              <Icon
-                name='linkIcon'
-                svgProp={{
-                  className:
-                    'text-primary-1 cursor-pointer hover:opacity-95 transition-opacity duration-300 ease-in-out active:opacity-100',
-                }}
-              />
-              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] text-primary-1 md:text-base'>
-                Link Patient
-              </span>
-            </button>
-          }
-        ></LinkPatientsModal>
+        <section className=' rounded-xl    '>
+          <section {...getRootProps()}>
+            <input {...getInputProps()} />
+            {imageUrl ? (
+              <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+                <img
+                  src={imageUrl}
+                  alt='Selected'
+                  className=' h-full w-full rounded-full object-cover object-center '
+                />{' '}
+                {/* Display the selected image */}
+                <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                  <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+                </div>
+              </div>
+            ) : isDragActive ? (
+              <p>Drop the files here ...</p>
+            ) : (
+              <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+                <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+              </div>
+            )}
+          </section>
+        </section>
       </div>
       <Form {...form}>
         <form
@@ -342,47 +274,22 @@ const CreateNewProduct = () => {
             formIsLoading && 'pointer-events-none cursor-not-allowed opacity-30',
           )}
         >
-          <div className='flex items-center gap-1'>
-            <p className='text-sm  text-gray-400   '>Demographic</p>
-            <div className='h-[1px] w-32 bg-gray-400'></div>
-          </div>
-          <section className=' grid grid-cols-1 gap-8 md:gap-6 xm:grid-cols-[1fr_1fr_1fr_1fr]  '>
+          <section className=' grid grid-cols-1 gap-8 md:max-w-[80%] md:gap-6 xm:grid-cols-[1fr_1fr]  '>
             <FormField
               control={form.control}
-              name='firstName'
+              name='productName'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      First Name
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Bundle Name
                     </label>
                     <FormControl>
                       <Input
-                        className='rounded-[8px] py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50'
+                        className='placeholder:t rounded-[8px] py-6 text-base placeholder:text-sm'
                         {...field}
                         type='text'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='middleName'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Middle Name
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                        {...field}
-                        type='text'
+                        placeholder='Enter name'
                       />
                     </FormControl>
                   </div>
@@ -392,18 +299,19 @@ const CreateNewProduct = () => {
             />
             <FormField
               control={form.control}
-              name='lastName'
+              name='description'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Last Name
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Category Description
                     </label>
                     <FormControl>
                       <Input
-                        className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
+                        className='py-6 text-base placeholder:text-sm  '
                         {...field}
                         type='text'
+                        placeholder='Enter description'
                       />
                     </FormControl>
                   </div>
@@ -413,86 +321,39 @@ const CreateNewProduct = () => {
             />
             <FormField
               control={form.control}
-              name='email'
+              name='price'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Email
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Price (NGN)
                     </label>
                     <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/80'
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='phone_number'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Phone Number
-                    </label>
-                    <FormControl>
-                      <PhoneInput
-                        containerClass='phone-container'
-                        inputClass='py-6 relative text-lg focus-within:placeholder:text-secondary-2  placeholder:text-gray-300 placeholder:text-sm  focus:border-0  transition-all duration-300 ease-in-out text-base'
-                        placeholder='phone number'
-                        buttonClass='bg-[#DBF1FF] '
-                        inputStyle={{ border: '1px solid #e4e2e2', width: '100%' }}
-                        onChange={(phone, country) => handleOnPhoneChange(phone, country)}
-                        autoFormat={true}
-                        inputProps={{
-                          name: 'phone',
-                          required: true,
-                        }}
-                        buttonStyle={{
-                          background: 'white',
-                          paddingInline: '0.1rem',
-                          border: '1px solid #e4e2e2',
-                          borderRight: 'none',
-                        }}
-                        dropdownStyle={{ height: '300px', maxHeight: '300px' }}
-                        dropdownClass='bg-white shadow-1'
-                        searchStyle={{
-                          width: '80%',
-                          border: '1px solid #e4e2e2',
-                          borderLeft: 'none',
-                          borderRight: 'none',
-                          borderTop: 'none',
-                          borderBottom: 'none',
-                          paddingBlock: '0.6rem',
-                          marginBottom: '0.1rem',
+                      <Input
+                        className='py-6 text-base placeholder:text-sm  '
+                        {...field}
+                        type='number'
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? '' : Number(value));
                         }}
                         value={field.value}
-                        country={phoneCountry || location.country_code}
-                        enableSearch={true}
-                        disableSearchIcon={true}
+                        placeholder='3000'
                       />
                     </FormControl>
-                    <FormMessage className='mt-1 text-base' />
                   </div>
+                  <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name='age'
+              name='list'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      DOB/age
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Items (separate items with a comma)
                     </label>
                     <FormControl>
                       <Input
@@ -508,442 +369,65 @@ const CreateNewProduct = () => {
             />
             <FormField
               control={form.control}
-              name='maritalStatus'
+              name='intervals'
               render={({ field }) => (
                 <FormItem>
                   <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Marital Status
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                        {...field}
-                        type='text'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='gender'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Gender
+                    <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                      Intervals
                     </label>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='' />
+                          <SelectValue placeholder='Set occurrence' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className='bg-primary-1'>
-                        <SelectItem value='male' className='py-3 text-sm text-white'>
-                          Male
+                        <SelectItem value='weekly' className='py-3 text-sm text-white'>
+                          Weekly
                         </SelectItem>
-                        <SelectItem value='female' className='py-3 text-sm text-white'>
-                          Female
+                        <SelectItem value='monthly' className='py-3 text-sm text-white'>
+                          Monthly
                         </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <FormMessage className='mt-1 text-xs' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='idType'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      ID Type
-                    </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        <SelectItem value='nationalId' className='py-3 text-sm text-white'>
-                          National Id
-                        </SelectItem>
-                        <SelectItem value='license' className='py-3 text-sm text-white'>
-                          Drivers License
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage className='mt-1 text-xs' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='idNumber'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      ID/SSN No.
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                        {...field}
-                        type='text'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='address'
-              render={({ field }) => (
-                <FormItem className='col-span-2'>
-                  <div className='relative '>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Address
-                    </label>
-                    <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50'
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <div className='relative'>
-              <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                Country
-              </label>
-              <CountryDropdown
-                value={country}
-                onChange={(val) => setCountry(val)}
-                classes=' border-gray-200 rounded-md focus:ring-0 focus:border-gray-200 py-3 w-full  text-sm text-secondary-1/90'
-              />
-            </div>
-            <div className='relative'>
-              <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>State</label>
-              <RegionDropdown
-                country={country}
-                value={region}
-                onChange={(val) => setRegion(val)}
-                blankOptionLabel='Select Region or State'
-                defaultOptionLabel='Now select a region'
-                classes=' border-gray-200 rounded-md focus:ring-0 focus:border-gray-200 py-3 w-full  text-sm text-secondary-1/90'
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name='city'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      City
-                    </label>
-
-                    <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='lga'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      LGA
-                    </label>
-
-                    <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='hearUs'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      How did you hear about us
-                    </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        <SelectItem value='FaceBook' className='py-3 text-sm text-white'>
-                          FaceBook
-                        </SelectItem>
-                        <SelectItem value='whatsApp' className='py-3 text-sm text-white'>
-                          whatsApp
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage className='mt-1 text-xs' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='occupation'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Occupation
-                    </label>
-
-                    <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='referredBy'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Referred By
-                    </label>
-
-                    <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50 '
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
                 </FormItem>
               )}
             />
           </section>
-          <div className='flex items-center gap-1'>
-            <p className='text-sm  text-gray-400   '>Next of Kin</p>
-            <div className='h-[1px] w-32 bg-gray-400'></div>
-          </div>
-          <section className=' grid grid-cols-1 gap-8 md:gap-6 xm:grid-cols-[1fr_1fr_1fr_1fr]  '>
-            <FormField
-              control={form.control}
-              name='KinName'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Full Name
-                    </label>
-                    <FormControl>
-                      <Input
-                        className='rounded-[8px] py-6 text-base placeholder:text-sm placeholder:text-secondary-1/50'
-                        {...field}
-                        type='text'
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='relationship'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Relationship
-                    </label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className='w-full py-6 text-sm  text-secondary-3 transition-all duration-300  ease-in-out  placeholder:text-lg focus-within:text-secondary-2 '>
-                          <SelectValue placeholder='' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='bg-primary-1'>
-                        <SelectItem value='brother' className='py-3 text-sm text-white'>
-                          Brother
-                        </SelectItem>
-                        <SelectItem value='sister' className='py-3 text-sm text-white'>
-                          Sister
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage className='mt-1 text-xs' />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name='kinEmail'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Email
-                    </label>
-                    <FormControl>
-                      <div className='flex flex-col items-end gap-1 xm:flex-row xm:items-center xm:gap-4'>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm placeholder:text-secondary-1/80'
-                          {...field}
-                          type='text'
-                        />
-                      </div>
-                    </FormControl>
-                  </div>
-                  <FormMessage className='mt-1 text-sm' />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='KinPhone_number'
-              render={({ field }) => (
-                <FormItem>
-                  <div className='relative'>
-                    <label className=' rounded-full bg-white px-1 text-sm  font-semibold  '>
-                      Phone Number
-                    </label>
-                    <FormControl>
-                      <PhoneInput
-                        containerClass='phone-container'
-                        inputClass='py-6 relative text-lg focus-within:placeholder:text-secondary-2  placeholder:text-gray-300 placeholder:text-sm  focus:border-0  transition-all duration-300 ease-in-out text-base'
-                        placeholder='phone number'
-                        buttonClass='bg-[#DBF1FF] '
-                        inputStyle={{ border: '1px solid #e4e2e2', width: '100%' }}
-                        onChange={(phone, country) => handleOnPhoneChangeNextOfKin(phone, country)}
-                        autoFormat={true}
-                        inputProps={{
-                          name: 'phone',
-                          required: true,
-                        }}
-                        buttonStyle={{
-                          background: 'white',
-                          paddingInline: '0.1rem',
-                          border: '1px solid #e4e2e2',
-                          borderRight: 'none',
-                        }}
-                        dropdownStyle={{ height: '300px', maxHeight: '300px' }}
-                        dropdownClass='bg-white shadow-1'
-                        searchStyle={{
-                          width: '80%',
-                          border: '1px solid #e4e2e2',
-                          borderLeft: 'none',
-                          borderRight: 'none',
-                          borderTop: 'none',
-                          borderBottom: 'none',
-                          paddingBlock: '0.6rem',
-                          marginBottom: '0.1rem',
-                        }}
-                        value={field.value}
-                        country={phoneCountry || location.country_code}
-                        enableSearch={true}
-                        disableSearchIcon={true}
-                      />
-                    </FormControl>
-                    <FormMessage className='mt-1 text-base' />
-                  </div>
-                </FormItem>
-              )}
-            />
-          </section>
-
-          <div className='invisible flex w-full items-center justify-center gap-4'>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit deserunt vero hic
-              illum quidem nesciunt accusantium facilis aut harum iusto doloribus tempora totam at
-              minima adipisci consectetur porro, ea ipsam.
-            </p>
-          </div>
-
-          {/* <div className='flex  w-full items-center justify-center gap-4'>
-            <button
-              type='submit'
-              
-              className={cn(
-                `group mt-9 flex items-center justify-center gap-2 rounded-full bg-primary-1 px-8 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-12 xm:py-4 ${
-                  form.formState.isSubmitting
-                    ? 'cursor-not-allowed bg-gray-500 font-[700]'
-                    : 'cursor-pointer'
-                } `,
-              )}
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <div className='px-5 py-1'>
-                  <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
-                </div>
-              ) : (
-                <span className='text-sm font-[600] leading-[24px]  tracking-[0.4px] text-white xm:text-base'>
-                  Continue to shipping
-                </span>
-              )}
-            </button>
-          </div> */}
+          <button
+            type='submit'
+            className={cn(
+              `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
+                form.formState.isSubmitting
+                  ? 'cursor-not-allowed bg-gray-500 font-[700]'
+                  : 'cursor-pointer'
+              } `,
+            )}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <div className='px-5 py-1'>
+                <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
+              </div>
+            ) : (
+              <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
+                {isEditing ? 'Update Food Bundle' : '  Create Food Bundle'}
+              </span>
+            )}
+          </button>
+          <p className='invisible'>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo
+            dolore? Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores
+            unde, corrupti iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores,
+            eos!
+          </p>
         </form>
       </Form>
     </div>
   );
 };
 
-export default CreateNewProduct;
+export default CreateFoodBundle;

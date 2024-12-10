@@ -1,6 +1,6 @@
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import rocketBoy from 'assets/image/rocketBoy.png?format=webp&w=700&h=669.86&imagetools';
-import loginIcon from 'assets/svg/login.svg?format=webp&w=700&h=669.86&imagetools';
+// import { LazyLoadImage } from 'react-lazy-load-image-component';
+// import rocketBoy from 'assets/image/rocketBoy.png?format=webp&w=700&h=669.86&imagetools';
+// import loginIcon from 'assets/svg/login.svg?format=webp&w=700&h=669.86&imagetools';
 import Icon from 'utils/Icon';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Input } from 'components/shadcn/input';
@@ -10,7 +10,6 @@ import CONSTANTS from 'constant';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent } from 'components/shadcn/dialog';
 import { useMutation } from '@tanstack/react-query';
-import customerService from 'services/customer';
 import { customerLoginFormInterface, customerLoginFormSchema } from './login.model';
 import { processError } from 'helper/error';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -19,21 +18,29 @@ import InputErrorWrapper from 'components/Hocs/InputError';
 import BtnLoader from 'components/Hocs/BtnLoader';
 import { authDetailsInterface } from 'types';
 import useStore from 'store';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormLabel,
-  FormDescription,
-} from 'components/shadcn/ui/form';
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormMessage,
+//   FormLabel,
+//   FormDescription,
+// } from 'components/shadcn/ui/form';
 import { EyeOff, Eye } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { authFirebase } from 'firebase';
+import { db } from 'firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { set } from 'date-fns';
+import axios from 'axios';
+import useUserStore from 'store/globalUserStore';
 
 const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
-  const { setAuthDetails, setLoggedIn } = useStore((store) => store);
+  const { setAuthDetails, setLoggedIn, setCurrentUser, currentUser } = useStore((store) => store);
+  const {setUser}   = useUserStore()
   const [showPassword, setShowPassword] = useState(true);
   const [params] = useSearchParams();
   const [checked, setChecked] = useState(false);
@@ -42,6 +49,7 @@ const Login = () => {
 
   const {
     register,
+
     handleSubmit,
     trigger,
     formState: { errors },
@@ -50,23 +58,55 @@ const Login = () => {
     mode: 'all',
   });
 
-  const { mutate, isLoading } = useMutation<authDetailsInterface, any, customerLoginFormInterface>({
-    mutationFn: ({ email, password }) =>
-      customerService.customerLogin({
-        email,
-        password,
-      }),
-    onSuccess: (data) => {
-      setAuthDetails(data);
+  const { mutate, isLoading } = useMutation<any, any, customerLoginFormInterface>({
+    mutationFn: async ({ email, password }) => {
+      const user = await signInWithEmailAndPassword(authFirebase, email, password);
+
+      const response = await axios.post(
+        "https://mtier0.loystar.co/auth/login",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json", 
+            "Accept": "application/json",          
+          },
+        
+        },
+        
+      );
+      setUser(response.data.data)
+      return user;
+    },
+    onSuccess: async (data) => {
+      // setAuthDetails(data);
       setLoggedIn(true);
+      setCurrentUser(data);
       navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+      // Create a reference to the document
+      const docRef = doc(db, 'users', data.user.uid);
+
+      // Retrieve the document
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        // Document exists, use the data
+        setAuthDetails({
+          ...docSnap.data(),
+          ...data['_tokenResponse'],
+          id: data.user.uid,
+        });
+        return docSnap.data(); // Return the document data
+      } else {
+        // Document does not exist
+        console.log('No such document!');
+        return null;
+      }
     },
     onError: (err) => {
       processError(err);
     },
   });
 
-  const onSubmit: SubmitHandler<customerLoginFormInterface> = (data) => {
+  const onSubmit: SubmitHandler<customerLoginFormInterface> = async (data) => {
     mutate(data);
   };
 
@@ -176,7 +216,7 @@ const Login = () => {
                   disabled={isLoading}
                   type='button'
                   onClick={() => navigate(`/${CONSTANTS.ROUTES['forgot-password']}`)}
-                  className='cursor-pointe  text-[12px] leading-[21px] tracking-[0.15px] text-primary-3  hover:underline'
+                  className='cursor-pointe  text-[12px] leading-[21px] tracking-[0.15px] text-primary-3  transition-all duration-300 ease-in-out hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:opacity-50 disabled:hover:no-underline'
                 >
                   Forgot Password?
                 </button>
@@ -184,7 +224,8 @@ const Login = () => {
             </div>
 
             <button
-              onClick={() => navigate('/app/dashboard')}
+              onClick={() => trigger()}
+              type='submit'
               disabled={isLoading}
               className=' w-full rounded-[8px] bg-primary-1 py-2 text-xs font-[500] text-white shadow-3 transition-opacity duration-300 ease-in-out hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
             >

@@ -7,8 +7,10 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from 'store';
 import Icon from 'utils/Icon';
+import { Avatar, AvatarFallback, AvatarImage } from 'components/shadcn/ui/avatar';
 
 const AuthMenu = ({ close }: { close: () => void }) => {
+  const { authDetails } = useStore((state) => state);
   const nav = useNavigate();
 
   const navigate = (i: string) => {
@@ -48,12 +50,21 @@ const AuthMenu = ({ close }: { close: () => void }) => {
       <div className='flex flex-col '>
         <div className='mb-4 flex items-center gap-2 px-4'>
           <div className='h-max w-max rounded-[50px] border border-extraColor-borderBottom-2'>
-            <Icon name='demoDp' />
+            <Avatar>
+              <AvatarImage
+                src={authDetails?.photoURL || 'https://github.com/shadcn.png'}
+                alt='user'
+                className='h-full w-full rounded-full object-cover'
+              />
+              <AvatarFallback>AU</AvatarFallback>
+            </Avatar>
           </div>
           <div className='flex flex-col text-[14px] tracking-[0.15px]'>
-            <h6 className='font-inter font-[600] text-textColor-primary'>John Doe</h6>
+            <h6 className='font-inter font-[600] text-textColor-primary'>
+              {authDetails?.displayName}
+            </h6>
             <span className='text-[12px] font-[400] leading-[14px] tracking-[0.4px] text-textColor-disabled'>
-              User
+              Admin User
             </span>
           </div>
         </div>
@@ -61,7 +72,7 @@ const AuthMenu = ({ close }: { close: () => void }) => {
           <div
             onClick={() => navigate(`/app/${i?.link}`)}
             key={idx}
-            className='flex cursor-pointer items-center gap-[0.63rem]  p-4 text-[14px] leading-[21px] tracking-[0.15px] text-secondary-13 transition-colors duration-300 ease-in-out hover:text-textColor-primary'
+            className='flex cursor-pointer items-center gap-[0.63rem]  p-4 text-[14px] leading-[21px] tracking-[0.15px]  transition-colors duration-300 ease-in-out hover:text-textColor-primary'
           >
             <div className='flex items-center'>{i?.icons}</div>
             <div className='flex flex-grow justify-between'>
@@ -77,7 +88,7 @@ const AuthMenu = ({ close }: { close: () => void }) => {
             <div
               onClick={() => navigate(`/app/${i?.link}`)}
               key={idx}
-              className='flex cursor-pointer items-center gap-[0.63rem]  p-4 text-[14px] leading-[21px] tracking-[0.15px] text-secondary-13 transition-colors duration-300 ease-in-out hover:text-textColor-primary'
+              className='flex cursor-pointer items-center gap-[0.63rem]  p-4 text-[14px] leading-[21px] tracking-[0.15px]  transition-colors duration-300 ease-in-out hover:text-textColor-primary'
             >
               <div className='flex items-center'>{i?.icons}</div>
               <div className='flex flex-grow justify-between'>

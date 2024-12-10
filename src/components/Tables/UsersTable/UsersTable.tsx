@@ -29,6 +29,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from 'components/shadcn/dropdown-menu';
 import { Input } from 'components/shadcn/input';
 import {
@@ -42,124 +44,138 @@ import {
 import { Link } from 'react-router-dom';
 import CONSTANTS from 'constant';
 import Icon from 'utils/Icon';
-import API from 'services';
-import toast from 'helper';
+// import API from 'services';
+import toast, { formatCurrentDateTime } from 'helper';
 import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import { cn, checkStatus } from 'lib/utils';
+import { cn, checkStatus, getCreatedDateFromDocument } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
-import MergePatientModal from 'components/modal/Patients/MergePatient';
+import EditWalletBalance from 'components/modal/EditOrderModal';
 import SampleAccordion from 'components/sampleAccordion';
 import { de } from 'date-fns/locale';
-export type Page = {
+import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { db } from 'firebase';
+import { set } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import FeaturedLoader from 'components/Loaders/FeaturedLoader';
+import { Filter } from 'lucide-react';
+import SearchComboBox from 'components/general/SearchComboBox';
+import axios from 'axios';
+import { useCreate, useGetData } from 'hooks/requests';
+import useUserStore from 'store/globalUserStore';
+export type User = {
   id: string;
-  value: string;
-  title: string;
-  invoiceDate: string;
+  number: string;
+  name: string;
+  city: string;
   status: string;
-  description: string;
-  progress: number;
-};
-
-const projects = {
-  items: [
-    {
-      id: 1,
-      value: 'N1,000,000',
-      title: 'Hospitals',
-      invoiceDate: 'Jan 5, 2024',
-      status: 'scheduled',
-      description: 'Plumber',
-      progress: 5,
-    },
-    {
-      id: 7,
-      value: 'N2,000,000',
-      title: 'Flyover',
-      invoiceDate: 'Jan 5, 2024',
-      description: 'Carpenter',
-      status: 'completed',
-      progress: 7,
-    },
-    {
-      id: 3,
-      value: 'N3,000,000',
-      title: 'Schools',
-      invoiceDate: 'Jan 5, 2024',
-      status: 'scheduled',
-      description: 'Plumber',
-      progress: 2,
-    },
-  ],
+  email: string;
+  orders: number;
+  created: string;
+  total: string;
 };
 
 function UserTableComponent() {
-  const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  const [users, setUsers] = React.useState<any[]>([]);
+  const { data: userData } = useGetData('customers_list');
 
   // refactor this
-  const data = React.useMemo(() => {
-    if (!projects?.items) return [];
-
-    return projects.items.map((i: any) => ({
-      id: i?.id,
-      value: i?.value?.slice(0, 10),
-      title: i?.title,
-      invoiceDate: i?.invoiceDate,
-      status: i?.status,
-      description: i?.description,
-      progress: i?.progress,
-    }));
-  }, [projects]);
   const deletePage = async (id: string) => {
-    setIsLoading(true);
+    // setIsLoading(true);
     //     try {
-    //       const res = await API.delete(`/projects/${id}`);
-    //       toast.success('Page deleted successfully');
+    //       const res = await API.delete(`/usersList/${id}`);
+    //       toast.success('User deleted successfully');
     //       setTimeout(() => {
     //         refetch();
     //       }, 10);
     //     } catch (error) {
     //       processError(error);
     //     }
-    setIsLoading(false);
+    // setIsLoading(false);
   };
-  const columns: ColumnDef<Page>[] = [
+
+  console.log(userData);
+
+  async function fetchAllUsers() {
+    //await axios.get(`https://api0.loystar.co/api/v2/customers_list`)
+    // Create a reference to the 'users' collection
+    const usersCollectionRef = collection(db, 'users');
+
+    // Await the completion of the getDocs call
+    const querySnapshot = await getDocs(usersCollectionRef);
+
+    // Initialize an array to hold user data
+    const users: any = [];
+
+    // Iterate over each document in the querySnapshot
+    querySnapshot.forEach((doc) => {
+      const createdDate = getCreatedDateFromDocument(doc as any);
+      // Add the document data (and potentially the document ID) to the users array
+      users.push({ id: doc.id, ...doc.data(), created: createdDate });
+    });
+
+    return users;
+  }
+
+  const columns: ColumnDef<any>[] = [
     {
-      accessorKey: 'title',
+      id: 'created',
+      accessorKey: 'created',
+      header: ({ column }) => {
+        return (
+          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
+            Created
+          </Button>
+        );
+      },
+
+      cell: ({ row }) => {
+        const created = row.original.created;
+        return (
+          <div className='text-[0.71rem] capitalize'>
+            {/* {Number(row.original.id) * 1245632} */}
+            {created}
+          </div>
+        );
+      },
+    },
+
+    {
+      accessorKey: 'displayName',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0'
+            className='px-0 text-[0.71rem] font-semibold'
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Name of Project
+            Name
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-sm capitalize'>{row.getValue('title')}</div>
+        <div className='text-[0.71rem] capitalize'>{row.getValue('displayName')}</div>
         // </Link>
       ),
       enableHiding: false,
     },
     {
-      accessorKey: 'description',
+      accessorKey: 'email',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0 '
+            className='px-0 text-[0.71rem] font-semibold   '
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Description
+            Email
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
@@ -167,120 +183,113 @@ function UserTableComponent() {
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
         <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-sm '>{row.getValue('description')}</p>
+          <p className='text-center text-[0.71rem]  '>{row.getValue('email')}</p>
         </div>
         // </Link>
       ),
     },
-
     {
-      accessorKey: 'value',
+      accessorKey: 'city',
       header: ({ column }) => {
         return (
           <Button
-            className='px-0 '
+            className='px-0 text-[0.71rem]  font-semibold'
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            Amount
+            City
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='flex w-fit items-center   gap-2 rounded-lg  '>
-          <p className='text-center text-sm '>{row.getValue('value')}</p>
-        </div>
-        // </Link>
-      ),
-    },
-
-    {
-      accessorKey: 'status',
-      header: ({ column }) => {
-        return (
-          <Button className='px-0' variant='ghost'>
-            Loan Status
-          </Button>
-        );
-      },
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div
-          className={`flex w-fit items-center gap-2 rounded-2xl px-4  py-1 capitalize ${checkStatus(
-            row.getValue('status'),
-          )}`}
-        >
-          {/* <Icon name='StatusIcon' svgProp={{ className: ' ' }} /> */}
-          {row.getValue('status')}
-        </div>
-        // </Link>
-      ),
-      enableSorting: false,
-    },
-    {
-      id: 'invoiceDate',
-      accessorKey: 'invoiceDate',
-      header: 'Date requested',
-      cell: ({ row }) => (
-        // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='text-sm capitalize'>
-          {/* {Number(row.original.id) * 1245632} */}
-          {row.getValue('invoiceDate')}
-        </div>
-        // </Link>
-      ),
-    },
-
-    {
-      id: 'actions',
-      enableHiding: false,
       cell: ({ row }) => {
-        const page = row.original;
-
+        const city = row.original.addressDetails?.city;
         return (
-          <div className='flex items-center gap-4'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='h-8 w-8 p-0'>
-                  <span className='sr-only'>Open menu</span>
-                  <MoreVertical className='h-4 w-4' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end' className='px-4 py-2'>
-                {/* <MergePatientModal
-                  trigger={ */}
-                <Button
-                  variant='outline'
-                  className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2  capitalize  disabled:cursor-not-allowed disabled:opacity-50'
-                  onClick={() => {
-                    setTimeout(() => {
-                      console.log('delete');
-                    }, 500);
-                  }}
-                >
-                  <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
-                  <p>Edit </p>
-                </Button>
-                {/* }
-                ></MergePatientModal> */}
-                <DropdownMenuSeparator />
-                <DeleteModal btnText='Delete Subcontractor' />
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className='flex w-fit items-center   gap-2 rounded-lg'>
+            <p className='text-center text-[0.71rem]  '>{city}</p>
           </div>
         );
       },
     },
+
+    {
+      accessorKey: 'phone',
+      header: ({ column }) => {
+        return (
+          <Button
+            className='px-0 text-[0.71rem] font-semibold '
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Phone Number
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
+          </Button>
+        );
+      },
+      cell: ({ row }) => {
+        const phone = row.original.phone;
+        return (
+          <div className='flex w-fit items-center   gap-2 rounded-lg  '>
+            <p className='text-center text-[0.71rem] '>{phone}</p>
+          </div>
+        );
+      },
+    },
+
+    // {
+    //   id: 'actions',
+    //   enableHiding: false,
+    //   cell: ({ row }) => {
+    //     const page = row.original;
+
+    //     return (
+    //       <div className='flex items-center gap-4'>
+    //         <DropdownMenu>
+    //           <DropdownMenuTrigger asChild>
+    //             <Button variant='ghost' className='h-8 w-8 p-0'>
+    //               {/* <p>Action</p> */}
+    //               <span className='sr-only'>Open menu</span>
+    //               <MoreVertical className='h-4 w-4' />
+    //             </Button>
+    //           </DropdownMenuTrigger>
+    //           <DropdownMenuContent align='end' className='px-4 py-2'>
+    //             {
+    //               <EditWalletBalance
+    //                 trigger={
+    //                   <Button
+    //                     variant='outline'
+    //                     className='flex w-full  items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem]   capitalize  disabled:cursor-not-allowed disabled:opacity-50'
+    //                     onClick={() => {
+    //                       setTimeout(() => {
+    //                         console.log('delete');
+    //                       }, 500);
+    //                     }}
+    //                   >
+    //                     <Icon name='editPen' svgProp={{ className: 'text-black' }}></Icon>
+    //                     <p>Edit </p>
+    //                   </Button>
+    //                 }
+    //               ></EditWalletBalance>
+    //             }
+    //             <DropdownMenuSeparator />
+    //             <DeleteModal btnText='Delete' />
+    //           </DropdownMenuContent>
+    //         </DropdownMenu>
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [position, setPosition] = React.useState('bottom');
+  const { user } = useUserStore();
+  const { create } = useCreate(`add_user_for_merchant/${user?.id}`);
 
   const table = useReactTable({
-    data,
+    data: users,
     columns,
 
     onSortingChange: setSorting,
@@ -299,126 +308,232 @@ function UserTableComponent() {
     },
   });
 
+  const { isLoading, data } = useQuery({
+    queryKey: ['get-users'],
+    queryFn: () => fetchAllUsers(),
+    onSuccess: (data) => {
+      //  console.log(data)
+      setUsers(data);
+    },
+
+    onError: (err) => {
+      processError(err);
+    },
+  });
+
+  console.log("users", users)
+
+  const updateProductsOnFirebase = async () => {
+    if (
+      Array.isArray(users) &&
+      users?.length > 0 &&
+      Array.isArray(userData) &&
+      userData?.length < users?.length
+    ) {
+      try {
+        // Process all products and create/update them on Firebase
+        await Promise.all(
+          users.slice(0, 3).map(async (user) => {
+            const payload = {
+              first_name: user?.firstName,
+              last_name: user?.lastName,
+              email: user?.email,
+              phone_number: user?.phone || "+2340000000000",
+              date_of_birth: '01-01-1980',
+              sex: 'M',
+              local_db_created_at: 'NIL',
+              address_line1: user?.addressDetails?.address || "NIL",
+              address_line2: 'NIL',
+              postcode: Number(user?.addressDetails?.zipcode) || 111111,
+              state: user?.addressDetails?.state,
+              country: user?.addressDetails?.country,
+            };
+            // push to loystar
+            const responseData = await create({ data: payload });
+
+            if (responseData){
+              // Update Firebase with the loystarId
+            const userDocRef = doc(db, 'users', user.id);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+              const productDocData = userDocSnap.data();
+              if (!productDocData.loystarId) {
+                await updateDoc(userDocRef, { loystarId: responseData.id });
+                console.log(`Updated loystarId for user: ${user.name}`);
+              } else {
+                console.log(`User ${user.name} already has a loystarId.`);
+              }
+            } else {
+              console.warn(`User document with ID ${user.id} does not exist.`);
+            }
+            }
+          }),
+        );
+
+        console.log('User updated successfully!');
+      } catch (error) {
+        console.error('Error updating products on Firebase:', error);
+      }
+    }
+  };
+
+  React.useEffect(() => {
+ //  updateProductsOnFirebase()
+  },[userData, users])
+
   return (
-    <div className='flex w-full flex-col gap-2 rounded-xl bg-slate-50 px-6  py-6'>
-      <div className='flex flex-col justify-between gap-4 md:flex-row md:items-center '>
-        <h3 className='font-semibold'>Financial Requests</h3>
-        <div className='flex  items-center justify-between gap-3'>
-          <div className='flex  items-center rounded-lg border px-4'>
-            <input
-              value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-              onChange={(event) => table.getColumn('title')?.setFilterValue(event.target.value)}
-              className='form-input w-32 max-w-xs flex-grow border-0 bg-inherit py-2  placeholder:text-xs placeholder:font-semibold  placeholder:text-textColor-disabled focus:!ring-0 md:w-full md:max-w-xl'
-              placeholder='Search Projects'
+    <div className='flex w-full flex-col gap-2 rounded-xl   '>
+      <div className='mb-8 flex flex-col md:mb-4 md:flex-row md:justify-between '>
+        <h3 className=' mb-6  text-base font-semibold md:mb-16 md:text-2xl'>User Accounts</h3>
+        <div>
+          <p className='mb-6 hidden text-end text-[0.75rem] text-gray-400 md:block'>
+            {formatCurrentDateTime()}
+          </p>
+          <div className='flex items-center  gap-3'>
+            {/* <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='outline'
+                  className='group flex w-6/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
+                >
+                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
+                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='w-56 text-[0.65rem]'>
+                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu> */}
+            <SearchComboBox
+              value={(table.getColumn('displayName')?.getFilterValue() as string) ?? ''}
+              onChange={(event) =>
+                table.getColumn('displayName')?.setFilterValue(event.target.value)
+              }
             />
-            <Icon name='searchIcon' svgProp={{ className: 'text-primary-9 w-3' }} />
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-12 w-12 p-0'>
-                <span className='sr-only'>Open menu</span>
-                <MoreHorizontal className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='px-4 py-4  pb-4'>
-              {/* <DropdownMenuLabel className='px-0 text-center text-sm font-normal'>
-                Actions
-              </DropdownMenuLabel> */}
-              <DropdownMenuItem
-                onClick={() => {
-                  table.resetSorting();
-                }}
-                className='flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-center text-xs'
-              >
-                Reset Sorting
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className='my-2' />
-
+            <div className='flex  items-center justify-between gap-3'>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <div className=''>
-                    <Button variant='outline' className='py-1 text-xs'>
-                      Columns <ChevronDown className='ml-2 h-3 w-3' />
-                    </Button>
-                  </div>
+                  <Button variant='ghost' className='h-12 w-12 p-0'>
+                    <span className='sr-only'>Open menu</span>
+                    <MoreHorizontal className='h-4 w-4' />
+                  </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align='end'>
-                  {table
-                    .getAllColumns()
-                    .filter((column) => column.getCanHide())
-                    .map((column) => {
-                      return (
-                        <DropdownMenuCheckboxItem
-                          key={column.id}
-                          className='text-xs capitalize'
-                          checked={column.getIsVisible()}
-                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                        >
-                          {column.id}
-                        </DropdownMenuCheckboxItem>
-                      );
-                    })}
+                <DropdownMenuContent align='end' className='px-4 py-4  pb-4'>
+                  {/* <DropdownMenuLabel className='px-0 text-center text-sm font-normal'>
+                Actions
+              </DropdownMenuLabel> */}
+                  <DropdownMenuItem
+                    onClick={() => {
+                      table.resetSorting();
+                    }}
+                    className='flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-center text-xs'
+                  >
+                    Reset Sorting
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className='my-2' />
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className=''>
+                        <Button variant='outline' className='py-1 text-xs'>
+                          Columns <ChevronDown className='ml-2 h-3 w-3' />
+                        </Button>
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                      {table
+                        .getAllColumns()
+                        .filter((column) => column.getCanHide())
+                        .map((column) => {
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={column.id}
+                              className='text-xs capitalize'
+                              checked={column.getIsVisible()}
+                              onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                            >
+                              {column.id}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+          </div>
         </div>
       </div>
 
-      <Table className=''>
-        <TableHeader className='border-0  [&_tr]:border-b-0'>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className='border-0 '>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id} className='border-b border-b-black/30 px-0'>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                className='border-0'
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className='px-0 py-3 font-medium'>
-                    {/* <Link to={`/${CONSTANTS.ROUTES['view-projects']}/${cell.id}`}> */}
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    {/* </Link> */}
-                  </TableCell>
-                ))}
+      <FeaturedLoader isLoading={isLoading}>
+        <Table className=''>
+          <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className='border-0   '>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className='border-b border-b-black/0 px-4  text-black'
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className='h-[400px] text-center'>
-                <div>
-                  <p className='text-base font-semibold text-gray-500'>No Project Records</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row, index) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className=' py-3 font-medium'>
+                      {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* </Link> */}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className='h-[400px] text-center'>
+                  <div>
+                    <p className='text-base font-semibold text-gray-500'>No Users Records</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </FeaturedLoader>
 
-      <div className='flex items-center justify-end space-x-2 py-4'>
-        <div className='flex-1 text-sm text-muted-foreground'>
-          Showing {table.getRowModel().rows?.length ?? 0} of {data.length} results
+     
+
+      <div className='flex items-center justify-end space-x-2 p-4'>
+        <div className='flex-1 text-xs text-muted-foreground'>
+          Showing {table.getRowModel().rows?.length ?? 0} of {users?.length} results
         </div>
         <div className='space-x-2'>
           <Button
             variant='outline'
             size='sm'
+            className='text-[0.71rem] '
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -427,6 +542,7 @@ function UserTableComponent() {
           <Button
             variant='outline'
             size='sm'
+            className='text-[0.71rem] '
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -434,6 +550,9 @@ function UserTableComponent() {
           </Button>
         </div>
       </div>
+      {/* <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
+        Export
+      </button> */}
     </div>
   );
 }

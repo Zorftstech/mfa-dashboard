@@ -10,10 +10,10 @@ const checkOutRoutes: routeTypes = [
     element: <Login />,
     path: 'login',
   },
-  // {
-  //   element: <SignUp />,
-  //   path: 'create-account',
-  // },
+  {
+    element: <SignUp />,
+    path: 'create-account',
+  },
 
   {
     element: <ForgotPassword />,

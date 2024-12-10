@@ -5,55 +5,74 @@ import * as z from 'zod';
 
 import { Form, FormField } from 'components/shadcn/ui/form';
 import { toast } from 'components/shadcn/ui/use-toast';
-import FileDropzone from './Filedropzone';
-
-const FormSchema = z.object({
-  file: z.string({
-    required_error: 'Twitter is required.',
-  }),
-});
+import { useDropzone } from 'react-dropzone';
+import Icon from 'utils/Icon';
+import { processError } from 'helper/error';
 interface Iprops {
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export default function UploadImageForm() {
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const [uploading, setUploading] = React.useState(false);
+  const [file, setFile] = React.useState<any>(null);
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null); // New state for image URL
+  const handleFileDrop = async (files: any) => {
+    setUploading(true);
+    setFile(files);
+    const fileUrl = URL.createObjectURL(files);
+    setImageUrl(fileUrl); // Store the URL in state
+
+    const formdata = new FormData();
+    formdata.append('file', files);
+
+    try {
+      console.log('====================================');
+      console.log('file', files);
+      console.log('====================================');
+    } catch (error) {
+      processError(error);
+    }
+
+    setUploading(false);
+  };
+  const onDrop = (acceptedFiles: any) => {
+    handleFileDrop(acceptedFiles[0]);
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/jpeg': [],
+      'image/png': [],
+      'image/gif': [],
+    },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-
-    toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  }
-
-  // const handleFileDrop = (files: any, setFieldValue: any) => {
-  //   setFieldValue('file', files[0]);
-  // };
   return (
     <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='w-fit space-y-6'>
-          <section className=' rounded-xl    '>
-            <FormField
-              name='file'
-              control={form.control}
-              render={({ field }) => (
-                <FileDropzone
-                  onDrop={(acceptedFiles: any) => field.onChange(acceptedFiles[0])}
-                  file={field.value}
-                />
-              )}
-            />
-          </section>
-        </form>
-      </Form>
+      <section className=' rounded-xl    '>
+        <section {...getRootProps()}>
+          <input {...getInputProps()} />
+          {imageUrl ? (
+            <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
+              <img
+                src={imageUrl}
+                alt='Selected'
+                className=' h-full w-full rounded-full object-cover object-center '
+              />{' '}
+              {/* Display the selected image */}
+              <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
+                <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
+              </div>
+            </div>
+          ) : isDragActive ? (
+            <p>Drop the files here ...</p>
+          ) : (
+            <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
+              <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
+            </div>
+          )}
+        </section>
+      </section>
     </div>
   );
 }

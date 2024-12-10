@@ -17,7 +17,6 @@ yarn.lock
 
 # misc
 .DS_Store
-.vscode
 .idea
 .env.local
 .env.development.local

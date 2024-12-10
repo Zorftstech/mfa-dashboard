@@ -73,3 +73,76 @@ export function filterStringsContainingDoc(strings: string[]): string[] {
 export function filterStringsContainingImageExtensions(strings: string[]): string[] {
   return strings?.filter((str) => str?.includes('.png') || str.includes('.jpg'));
 }
+function getCurrentDateTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const day = now.getDate();
+  const month = now.toLocaleString('default', { month: 'short' }); // Get month name in short form
+  const year = now.getFullYear();
+
+  // Format hours for AM/PM
+  const formattedHours = hours % 12 || 12; // Convert 0 to 12 for 12AM
+  const ampm = hours < 12 ? 'am' : 'pm';
+
+  // Format minutes to always be two digits
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+  // Construct the formatted date string
+  const formattedDate = `${formattedHours}:${formattedMinutes}${ampm}, ${day}th ${month} ${year}`;
+
+  return formattedDate;
+}
+export function generateCouponCode(couponName: string): string {
+  // Remove non-alphanumeric characters and convert to uppercase
+  const sanitizedCouponName = couponName.replace(/\W/g, '').toUpperCase();
+
+  // Get current timestamp
+  const timestamp = Date.now();
+
+  // Combine sanitized coupon name and timestamp
+  const couponCode = `${sanitizedCouponName}_${timestamp}`;
+
+  return couponCode;
+}
+
+export function formatCurrentDateTime() {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  const currentDate = new Date();
+
+  let hours = currentDate.getHours();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const minutes =
+    currentDate.getMinutes() < 10 ? '0' + currentDate.getMinutes() : currentDate.getMinutes();
+
+  const day = currentDate.getDate();
+  const month = months[currentDate.getMonth()];
+  const year = currentDate.getFullYear();
+
+  return `${hours}:${minutes}${ampm}, ${day}th ${month} ${year}`;
+}
+
+interface FirebaseTimestamp {
+  seconds: number;
+  nanoseconds: number;
+}
+
+export function convertFirebaseTimestampToDate(timestamp: FirebaseTimestamp): Date {
+  const dateInMilliseconds = timestamp?.seconds * 1000 + timestamp?.nanoseconds / 1000000;
+  return new Date(dateInMilliseconds);
+}
