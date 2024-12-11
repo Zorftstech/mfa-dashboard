@@ -29,24 +29,24 @@ const ForgotPassword = () => {
     mode: 'all',
   });
 
-  const { mutate, isLoading } = useMutation<authDetailsInterface, any, customerLoginFormInterface>({
-    mutationFn: ({ email, password }) =>
-      customerService.customerLogin({
-        email,
-        password,
-      }),
-    onSuccess: (data) => {
-      setAuthDetails(data);
-      setLoggedIn(true);
-      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
-    },
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  // const { mutate, isLoading } = useMutation<authDetailsInterface, any, customerLoginFormInterface>({
+  //   mutationFn: ({ email, password }) =>
+  //     customerService.customerLogin({
+  //       email,
+  //       password,
+  //     }),
+  //   onSuccess: (data) => {
+  //     setAuthDetails(data);
+  //     setLoggedIn(true);
+  //     navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+  //   },
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
   const onSubmit: SubmitHandler<customerLoginFormInterface> = (data) => {
-    mutate(data);
+  //  mutate(data);
   };
 
   return (

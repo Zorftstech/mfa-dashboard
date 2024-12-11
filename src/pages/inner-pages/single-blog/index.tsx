@@ -26,38 +26,38 @@ const SingleBlog = () => {
 
   const { id } = useParams();
 
-  const { data, isLoading } = useQuery<any, any, apiInterfaceV2<contentApiItemInterface>>({
-    queryKey: ['get-blogs', id],
-    queryFn: () =>
-      contentService.getSingleContent({
-        organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-        id,
-      }),
+  // const { data, isLoading } = useQuery<any, any, apiInterfaceV2<contentApiItemInterface>>({
+  //   queryKey: ['get-blogs', id],
+  //   queryFn: () =>
+  //     contentService.getSingleContent({
+  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
+  //       id,
+  //     }),
 
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
-  const { data: similar, isLoading: similarLoading } = useQuery<
-    any,
-    any,
-    apiInterface<contentApiItemInterface[]>
-  >({
-    queryKey: ['get-blogs'],
-    queryFn: () =>
-      contentService.getContent({
-        organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-        category: CONSTANTS.TIMBU_KEYS.BLOG_ID,
-      }),
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  // const { data: similar, isLoading: similarLoading } = useQuery<
+  //   any,
+  //   any,
+  //   apiInterface<contentApiItemInterface[]>
+  // >({
+  //   queryKey: ['get-blogs'],
+  //   queryFn: () =>
+  //     contentService.getContent({
+  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
+  //       category: CONSTANTS.TIMBU_KEYS.BLOG_ID,
+  //     }),
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
   return (
     <main className='relative w-full px-container-base '>
-      <div className='my-[1.5rem] flex w-full flex-col rounded-[1rem] bg-white px-4 py-[1rem] sm:px-[2.5rem] sm:py-[2.25rem] '>
+      {/* <div className='my-[1.5rem] flex w-full flex-col rounded-[1rem] bg-white px-4 py-[1rem] sm:px-[2.5rem] sm:py-[2.25rem] '>
         <div
           onClick={() => navigate(-1)}
           className='mb-[1.37rem] flex w-max cursor-pointer items-center gap-1 rounded-[8px] px-[2px] py-1  transition-colors duration-300 ease-in-out hover:bg-slate-100 active:bg-slate-200'
@@ -158,7 +158,7 @@ const SingleBlog = () => {
         >
           <ContentLoader isLoading={similarLoading}>
             <div className='grid grid-cols-1 gap-x-[1.5rem] gap-y-[2.5rem]  sm:grid-cols-2 md:grid-cols-3'>
-              {/* {similar?.items
+              {similar?.items
                 ?.filter((i) => i?.id !== id)
                 ?.map((i, idx) => (
                   <div key={idx} className='h-full w-full'>
@@ -174,11 +174,11 @@ const SingleBlog = () => {
                       link={`/app/blogs/${i?.id}`}
                     />
                   </div>
-                ))} */}
+                ))}
             </div>
           </ContentLoader>
         </EmptyContentWrapper>
-      </div>
+      </div> */}
     </main>
   );
 };
