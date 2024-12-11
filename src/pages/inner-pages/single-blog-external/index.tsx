@@ -25,37 +25,37 @@ const SingleBlogExternal = () => {
 
   const { id } = useParams();
 
-  const { data, isLoading } = useQuery<any, any, apiInterfaceV2<contentApiItemInterface>>({
-    queryKey: ['get-blogs', id],
-    queryFn: () =>
-      contentService.getSingleContent({
-        organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-        id,
-      }),
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  // const { data, isLoading } = useQuery<any, any, apiInterfaceV2<contentApiItemInterface>>({
+  //   queryKey: ['get-blogs', id],
+  //   queryFn: () =>
+  //     contentService.getSingleContent({
+  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
+  //       id,
+  //     }),
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
-  const { data: similar, isLoading: similarLoading } = useQuery<
-    any,
-    any,
-    apiInterface<contentApiItemInterface[]>
-  >({
-    queryKey: ['get-blogs'],
-    queryFn: () =>
-      contentService.getContent({
-        organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
-        category: CONSTANTS.TIMBU_KEYS.BLOG_ID,
-      }),
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  // const { data: similar, isLoading: similarLoading } = useQuery<
+  //   any,
+  //   any,
+  //   apiInterface<contentApiItemInterface[]>
+  // >({
+  //   queryKey: ['get-blogs'],
+  //   queryFn: () =>
+  //     contentService.getContent({
+  //       organization_id: import.meta.env.VITE_TIMBU_ORG_ID,
+  //       category: CONSTANTS.TIMBU_KEYS.BLOG_ID,
+  //     }),
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
   return (
     <main className='container flex h-full w-full flex-col'>
-      <div className='min-h-[16.5rem] w-full bg-primary-19 px-container-base pb-[7.44rem] md:pb-[4.875rem] lg:px-container-lg'>
+      {/* <div className='min-h-[16.5rem] w-full bg-primary-19 px-container-base pb-[7.44rem] md:pb-[4.875rem] lg:px-container-lg'>
         <div className='flex flex-col justify-between gap-[1.69rem] lg:flex-row'>
           <div className='mt-[2rem] flex flex-col'>
             <div
@@ -180,7 +180,7 @@ const SingleBlogExternal = () => {
         >
           <ContentLoader isLoading={similarLoading}>
             <div className='mb-[6.94rem] grid grid-cols-1 gap-x-[1.5rem] gap-y-[2.5rem] sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'>
-              {/* {similar?.items
+              {similar?.items
                 ?.filter((i) => i?.id !== id)
                 ?.map((i, idx) => (
                   <div key={idx} className='h-full w-full'>
@@ -196,11 +196,11 @@ const SingleBlogExternal = () => {
                       link={`/blogs/${i?.id}`}
                     />
                   </div>
-                ))} */}
+                ))}
             </div>
           </ContentLoader>
         </EmptyContentWrapper>
-      </div>
+      </div> */}
     </main>
   );
 };

@@ -29,24 +29,24 @@ const ResetPassword = () => {
     mode: 'all',
   });
 
-  const { mutate, isLoading } = useMutation<authDetailsInterface, any, resetPasswordInterface>({
-    mutationFn: ({ password, confirmPassword }) =>
-      customerService.customerLogin({
-        email: confirmPassword,
-        password,
-      }),
-    onSuccess: (data) => {
-      setAuthDetails(data);
-      setLoggedIn(true);
-      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
-    },
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  // const { mutate, isLoading } = useMutation<authDetailsInterface, any, resetPasswordInterface>({
+  //   mutationFn: ({ password, confirmPassword }) =>
+  //     customerService.customerLogin({
+  //       email: confirmPassword,
+  //       password,
+  //     }),
+  //   onSuccess: (data) => {
+  //     setAuthDetails(data);
+  //     setLoggedIn(true);
+  //     navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
+  //   },
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
   const onSubmit: SubmitHandler<resetPasswordInterface> = (data) => {
-    mutate(data);
+    ///mutate(data);
   };
 
   return (
