@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { processError } from 'helper/error';
 import { useState, useEffect } from 'react';
-import { axiosRequest } from 'services';
+//import { axiosRequest } from 'services';
 import useUserStore from 'store/globalUserStore';
 
 export function useCreate<T extends object>(params: string) {
@@ -52,12 +52,19 @@ export function useCreate<T extends object>(params: string) {
 export function useGetData<TData>(endpoint: string, enable = true) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<TData | null>(null);
+  const { user } = useUserStore();
 
   async function fetchData() {
     if (!enable) return;
     try {
       setLoading(true);
-      const response = await axiosRequest.get(endpoint);
+      const response = await axios.get(`https://api0.loystar.co/api/v2/${endpoint}`, {
+        headers: {
+          client: user?.client,
+          'access-token': user?.access_token,
+          uid: user?.uid,
+        },
+      });
 
       setData(response?.data);
       //   const total = Math.ceil(response?.data?.totalItems / 20);
@@ -82,11 +89,18 @@ export function useGetData<TData>(endpoint: string, enable = true) {
 export function useLoystarGetRequest<TData>(endpoint: string, payload: any) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<TData | null>(null);
+  const { user } = useUserStore();
 
   async function fetchData() {
     try {
       setLoading(true);
-      const response = await axiosRequest.post({ url: endpoint, payload });
+      const response = await axios.post(`https://api0.loystar.co/api/v2/${endpoint}`, payload, {
+        headers: {
+          client: user?.client,
+          'access-token': user?.access_token,
+          uid: user?.uid,
+        },
+      });
 
       setData(response?.data);
     } catch (error: any) {
@@ -99,7 +113,13 @@ export function useLoystarGetRequest<TData>(endpoint: string, payload: any) {
 
   async function queryData() {
     try {
-      const response = await axiosRequest.post({ url: endpoint, payload });
+      const response = await axios.post(`https://api0.loystar.co/api/v2/${endpoint}`, payload, {
+        headers: {
+          client: user?.client,
+          'access-token': user?.access_token,
+          uid: user?.uid,
+        },
+      });
 
       return response?.data;
     } catch (error: any) {
@@ -108,8 +128,6 @@ export function useLoystarGetRequest<TData>(endpoint: string, payload: any) {
       return [];
     }
   }
-
-
 
   useEffect(() => {
     fetchData();
@@ -126,13 +144,12 @@ export function useDelete() {
   const [loading, setLoading] = useState(false);
   const { user } = useUserStore();
 
-
   async function deletes(params: string) {
     try {
       setLoading(true);
       await axios.delete(
         `https://api0.loystar.co/api/v2/${params}`,
-        
+
         {
           headers: {
             client: user?.client,
@@ -147,7 +164,6 @@ export function useDelete() {
       setLoading(false);
     }
   }
-
 
   async function postDeletes(params: string) {
     try {
@@ -170,9 +186,9 @@ export function useDelete() {
     }
   }
   return {
-    deleteLoading :loading,
+    deleteLoading: loading,
     postDeletes,
-    deletes
+    deletes,
   };
 }
 
