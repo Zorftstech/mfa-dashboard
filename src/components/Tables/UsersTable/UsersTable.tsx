@@ -189,7 +189,7 @@ function UserTableComponent() {
       ),
     },
     {
-      accessorKey: 'city',
+      accessorKey: 'address',
       header: ({ column }) => {
         return (
           <Button
@@ -197,13 +197,13 @@ function UserTableComponent() {
             variant='ghost'
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            City
+            Address
             <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
       cell: ({ row }) => {
-        const city = row.original.addressDetails?.city;
+        const city = row.original.addressDetails?.address;
         return (
           <div className='flex w-fit items-center   gap-2 rounded-lg'>
             <p className='text-center text-[0.71rem]  '>{city}</p>
