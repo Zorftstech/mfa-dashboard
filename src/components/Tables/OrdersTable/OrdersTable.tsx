@@ -117,6 +117,7 @@ function OrderTableComponent() {
     queryKey: ['get-orders'],
     queryFn: () => fetchOrders(),
     onSuccess: (data) => {
+
       setOrders(data);
     },
 

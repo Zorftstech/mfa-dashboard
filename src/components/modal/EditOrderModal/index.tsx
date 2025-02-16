@@ -21,6 +21,13 @@ import {
 } from 'components/shadcn/ui/table';
 import { formatToNaira } from 'lib/utils';
 import Spinner from 'components/shadcn/ui/spinner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'components/shadcn/ui/select';
 
 interface Iprop {
   trigger: JSX.Element;
@@ -39,6 +46,8 @@ const ViewOrderDetailsModal = ({
 }: Iprop) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [orderStatus, setOrderStatus] = useState<string>('');
+
   const navigate = useNavigate();
 
   const fetchSingleOrder = async () => {
@@ -63,14 +72,19 @@ const ViewOrderDetailsModal = ({
   const { isLoading, data, refetch } = useQuery<any, any, Order>({
     queryKey: ['get-single-order', orderId],
     queryFn: () => fetchSingleOrder(),
+    onSuccess: (data) => {
+      setOrderStatus(data.status?.toLowerCase());
+    },
     onError: (err) => {
       processError(err);
     },
   });
 
   const order = data as Order;
+
   const TableHeadings = ['Product', 'Price', 'Quantity', 'Subtotal'];
-  const [orderStatus, setOrderStatus] = useState(order?.status);
+
+
 
   const updateOrderStatus = useMutation(
     async (newStatus: string) => {
@@ -90,9 +104,9 @@ const ViewOrderDetailsModal = ({
     },
   );
 
-  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setOrderStatus(event.target.value);
-    updateOrderStatus.mutate(event.target.value);
+  const handleStatusChange = (value: string) => {
+    setOrderStatus(value);
+    updateOrderStatus.mutate(value);
   };
 
   return (
@@ -150,15 +164,35 @@ const ViewOrderDetailsModal = ({
                   {updating ? (
                     <Spinner />
                   ) : (
-                    <select
+                    <>
+                      <div className='w-[180px]'>
+                        <Select
+                          onValueChange={handleStatusChange}
+                          value={orderStatus}
+                          defaultValue={order?.status?.toLowerCase()}
+                        >
+                          <SelectTrigger className='w-full text-zinc-700'>
+                            <SelectValue placeholder='Select Status' className='text-zinc-700' />
+                          </SelectTrigger>
+
+                          <SelectContent>
+                            <SelectItem value='pending'>Pending</SelectItem>
+                            <SelectItem value='en route'>En route</SelectItem>
+                            <SelectItem value='delivered'>Delivered</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {/* <select
                       value={orderStatus}
                       onChange={handleStatusChange}
+                    
                       className='mt-2 rounded border p-2'
                     >
                       <option value='Pending'>Pending</option>
                       <option value='En route'>En route</option>
                       <option value='Delivered'>Delivered</option>
-                    </select>
+                    </select> */}
+                    </>
                   )}
                 </div>
               </div>

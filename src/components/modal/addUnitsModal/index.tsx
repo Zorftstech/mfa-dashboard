@@ -25,7 +25,6 @@ import { Input } from 'components/shadcn/input';
 import { cn } from 'lib/utils';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useDropzone } from 'react-dropzone';
 import toast from 'helper';
@@ -110,6 +109,12 @@ const AddUnitsModal = ({
   });
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setUploading(true);
+
+    // marked up price must be lesser
+    if (data?.markedUpPrice >= data?.price) {
+      setUploading(false)
+      return toast.error('Marked up price must be lesser than price');
+    }
     try {
       let unitData = {
         ...editData,
