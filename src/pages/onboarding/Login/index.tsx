@@ -63,7 +63,7 @@ const Login = () => {
       const user = await signInWithEmailAndPassword(authFirebase, email, password);
 
       const response = await axios.post(
-        "https://mtier0.loystar.co/auth/login",
+        "https://mtier2.loystar.co/auth/login",
         { email, password },
         {
           headers: {

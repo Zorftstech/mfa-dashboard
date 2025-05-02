@@ -102,7 +102,7 @@ function UserTableComponent() {
   console.log(userData);
 
   async function fetchAllUsers() {
-    //await axios.get(`https://api0.loystar.co/api/v2/customers_list`)
+    //await axios.get(`https://api.loystar.co/api/v2/customers_list`)
     // Create a reference to the 'users' collection
     const usersCollectionRef = collection(db, 'users');
 

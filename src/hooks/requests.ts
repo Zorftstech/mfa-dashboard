@@ -13,7 +13,7 @@ export function useCreate<T extends object>(params: string) {
       setLoading(true);
       //    await axiosRequest.post({ url: params, payload: payload });
 
-      const response = await axios.post(`https://api0.loystar.co/api/v2/${params}`, payload, {
+      const response = await axios.post(`https://api.loystar.co/api/v2/${params}`, payload, {
         headers: {
           client: user?.client,
           'access-token': user?.access_token,
@@ -58,7 +58,7 @@ export function useGetData<TData>(endpoint: string, enable = true) {
     if (!enable) return;
     try {
       setLoading(true);
-      const response = await axios.get(`https://api0.loystar.co/api/v2/${endpoint}`, {
+      const response = await axios.get(`https://api.loystar.co/api/v2/${endpoint}`, {
         headers: {
           client: user?.client,
           'access-token': user?.access_token,
@@ -94,7 +94,7 @@ export function useLoystarGetRequest<TData>(endpoint: string, payload: any) {
   async function fetchData() {
     try {
       setLoading(true);
-      const response = await axios.post(`https://api0.loystar.co/api/v2/${endpoint}`, payload, {
+      const response = await axios.post(`https://api.loystar.co/api/v2/${endpoint}`, payload, {
         headers: {
           client: user?.client,
           'access-token': user?.access_token,
@@ -113,7 +113,7 @@ export function useLoystarGetRequest<TData>(endpoint: string, payload: any) {
 
   async function queryData() {
     try {
-      const response = await axios.post(`https://api0.loystar.co/api/v2/${endpoint}`, payload, {
+      const response = await axios.post(`https://api.loystar.co/api/v2/${endpoint}`, payload, {
         headers: {
           client: user?.client,
           'access-token': user?.access_token,
@@ -148,7 +148,7 @@ export function useDelete() {
     try {
       setLoading(true);
       await axios.delete(
-        `https://api0.loystar.co/api/v2/${params}`,
+        `https://api.loystar.co/api/v2/${params}`,
 
         {
           headers: {
@@ -169,7 +169,7 @@ export function useDelete() {
     try {
       setLoading(true);
       await axios.post(
-        `https://api0.loystar.co/api/v2/${params}`,
+        `https://api.loystar.co/api/v2/${params}`,
         {},
         {
           headers: {
@@ -202,7 +202,7 @@ export function useMutate<T extends object>(params: string) {
       //    await axiosRequest.post({ url: params, payload: payload });
 
       const response = await axios.put(
-        `https://api0.loystar.co/api/v2/${infunctionParam || params}`,
+        `https://api.loystar.co/api/v2/${infunctionParam || params}`,
         payload,
         {
           headers: {

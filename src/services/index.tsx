@@ -9,7 +9,7 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
 
 export const services = () => {
   const service = axios.create({
-    baseURL: 'https://api0.loystar.co/api/v2/',
+    baseURL: 'https://api.loystar.co/api/v2/',
     headers: {
       'Content-Type': 'application/json',
 
