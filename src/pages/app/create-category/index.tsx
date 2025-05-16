@@ -83,7 +83,7 @@ const CreateCategory = () => {
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
   const { create } = useCreate('add_product_category');
-  const { queryData } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories', {
+  const { queryData } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories?page[number]=1&page[size]=500', {
     data: {
       time_stamp: 0,
     },

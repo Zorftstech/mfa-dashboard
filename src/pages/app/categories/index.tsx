@@ -71,7 +71,7 @@ const Categories = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoystarUpdated, setIsLoystarUpdated] = useState(false);
   const { create } = useCreate('add_product_category');
-  const { data, refetch } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories', {
+  const { data, refetch } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories?page[number]=1&page[size]=500', {
     data: {
       time_stamp: 0,
     },
