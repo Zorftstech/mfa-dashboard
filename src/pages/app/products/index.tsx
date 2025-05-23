@@ -52,7 +52,17 @@ interface TLoystarProduct {
   bundles: [];
   cost_price: string | null;
   created_at: string;
-  custom_quantities: any[];
+  custom_quantities: {
+    barcode: string;
+    created_at: string;
+    id: number;
+    merchant_id: number;
+    name: string;
+    price: string;
+    product_id: number;
+    quantity: string;
+    updated_at: string;
+  }[];
   deleted: boolean;
   description: string | null;
   dimensions: string | null;
@@ -101,7 +111,7 @@ interface TFirebaseProduct {
   id: string;
   slug: string;
   loystarId: number;
-  created_date: FieldValue,
+  created_date: FieldValue;
   costprice: number;
   createdDate: string;
   merchant_id: number;
@@ -113,11 +123,13 @@ interface TFirebaseProduct {
     loystarId: number;
   };
   units: {
-    image: string;
-    isDiscounted: boolean;
     price: number;
     unit: string;
-    markedUpPrice: number;
+    markedUpPrice?: number;
+    image?: string | undefined;
+    isDiscounted?: boolean;
+    quantity: number;
+    loystarId?: number;
   }[];
 }
 
@@ -127,6 +139,8 @@ const ProductsPage = () => {
   const [categories, setCategories] = useState<TFirebaseProduct['category'][]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const { create } = useCreate('add_product');
   const { data, refetch } = useGetData<TLoystarProduct[]>(
     'get_latest_merchant_products?page[number]=1&page[size]=1000',
@@ -134,6 +148,7 @@ const ProductsPage = () => {
   const { create: createCustomQuantity } = useCreate('products/custom_quantity');
 
   async function fetchCategories() {
+    setIsLoadingCategories(true);
     const categoriesCollectionRef = collection(db, 'categories');
     const categoryQuery = query(categoriesCollectionRef);
 
@@ -150,24 +165,27 @@ const ProductsPage = () => {
       });
     });
 
-    return categoryArray;
+    setIsLoadingCategories(false);
+
+    setCategories(categoryArray);
   }
 
-  const { isLoading: isLoadingCategories } = useQuery({
-    queryKey: ['get-categories'],
-    queryFn: () => fetchCategories(),
-    onSuccess: (data) => {
-      //  setAllProducts(data);
-      // console.log('data', data)
-      setCategories(data);
-    },
+  // const { isLoading: isLoadingCategories } = useQuery({
+  //   queryKey: ['get-categories'],
+  //   queryFn: () => ,
+  //   onSuccess: (data) => {
+  //     //  setAllProducts(data);
+  //     // console.log('data', data)
+  //     setCategories(data);
+  //   },
 
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
   async function fetchProducts() {
+    setIsLoading(true);
     const productsCollectionRef = collection(db, 'newProducts');
     const productsQuery = query(productsCollectionRef, orderBy('created_date', 'desc'));
 
@@ -184,21 +202,23 @@ const ProductsPage = () => {
       });
     });
 
-    return products;
+    setIsLoading(false);
+
+    setAllProducts(products);
   }
 
-  const { isLoading } = useQuery({
-    queryKey: ['get-products'],
-    queryFn: () => fetchProducts(),
-    onSuccess: (data) => {
-      console.log(data, "sefsfe");
-      setAllProducts(data);
-    },
+  // const { isLoading } = useQuery({
+  //   queryKey: ['get-products'],
+  //   queryFn: () => ,
+  //   onSuccess: (data) => {
+  //     console.log(data, "sefsfe");
+  //     setAllProducts(data);
+  //   },
 
-    onError: (err) => {
-      processError(err);
-    },
-  });
+  //   onError: (err) => {
+  //     processError(err);
+  //   },
+  // });
 
   const updateProductsOnFirebase = async () => {
     if (Array.isArray(allProducts) && Array.isArray(data) && data?.length > allProducts?.length) {
@@ -208,37 +228,57 @@ const ProductsPage = () => {
         const remainingProducts = data?.filter((prod) => !firebaseProductsId.includes(prod?.id));
         const availableProducts = data?.filter((prod) => firebaseProductsId.includes(prod.id));
 
-        console.log(remainingProducts, "rem")
-        console.log(availableProducts, "ava")
+        console.log(remainingProducts, 'rem');
+        console.log(availableProducts, 'ava');
 
         // Process the products and create/update them on Firebase
-      if (remainingProducts.length > 0){  await Promise.all(
-          remainingProducts.map(async (prod) => {
-            const payload: Partial<TFirebaseProduct> = {
-              name: prod.name,
-              desc: prod?.description || '',
-              image: prod?.picture,
-              inStock: Number(prod?.quantity) > 0,
-              nameYourPrice: false,
-              price: Number(prod?.price) || 0,
-              quantity: Number(prod?.quantity || 0),
-              rating: 0,
-              ratingCount: 0,
-              slug: prod?.product_sku,
-              loystarId: prod?.id,
-              costprice: Number(prod?.cost_price || 0),
-              createdDate: prod?.created_at,
-              merchant_id: prod?.merchant_id,
-              created_date: serverTimestamp(),
-              category: categories?.find(
-                (c) => c?.loystarId === prod?.merchant_product_category_id,
-              ),
-            };
+        if (remainingProducts.length > 0) {
+          await Promise.all(
+            remainingProducts.map(async (prod) => {
+              let payload: Partial<TFirebaseProduct> = {
+                name: prod.name,
+                desc: prod?.description || '',
+                image: prod?.picture,
+                inStock: Number(prod?.quantity) > 0,
+                nameYourPrice: false,
+                price: Number(prod?.price) || 0,
+                quantity: Number(prod?.quantity || 0),
+                rating: 0,
+                ratingCount: 0,
+                slug: prod?.product_sku,
+                loystarId: prod?.id,
+                costprice: Number(prod?.cost_price || 0),
+                createdDate: prod?.created_at,
+                merchant_id: prod?.merchant_id,
+                created_date: serverTimestamp(),
+                category: categories?.find(
+                  (c) => c?.loystarId === prod?.merchant_product_category_id,
+                ),
+                units: Array.isArray(prod?.custom_quantities) && prod?.custom_quantities?.length > 0 ? prod?.custom_quantities?.map((ctmqty) => {
+                  return {
+                    price: Number(ctmqty?.price || 0),
+                    quantity: Number(ctmqty?.quantity || 0),
+                    loystarId: ctmqty?.id,
+                    loystarProductId: ctmqty?.product_id,
+                    image: "",
+                    unit: ctmqty?.name,
+                    isDiscounted: false,
+                    markedUpPrice: 0,
+                  };
+                }): []
+              };
 
-            const productsCollectionRef = collection(db, 'newProducts');
-            await addDoc(productsCollectionRef, payload);
-          }),
-        );}
+          
+
+              console.log("payload for uploading rem product", payload)
+
+              const productsCollectionRef = collection(db, 'newProducts');
+
+              console.log("ref", productsCollectionRef)
+              await addDoc(productsCollectionRef, payload).then((res) => console.log(res.id)).catch((err) => console.log("error adding", err));
+            }),
+          );
+        }
 
         if (availableProducts.length > 0) {
           await Promise.all(
@@ -250,11 +290,28 @@ const ProductsPage = () => {
                 const productDocSnap = await getDoc(productDocRef);
                 if (productDocSnap.exists()) {
                   // const productDocData = productDocSnap.data();
-                  await updateDoc(productDocRef, {
+                  let payload: Partial<TFirebaseProduct> = {
                     costprice: Number(item?.cost_price || 0),
                     price: Number(item?.price || 0),
                     quantity: Number(item?.quantity || 0),
-                  });
+                    units: Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0 ? item?.custom_quantities?.map((ctmqty) => {
+                      return {
+                        price: Number(ctmqty?.price || 0),
+                        quantity: Number(ctmqty?.quantity || 0),
+                        loystarId: ctmqty?.id,
+                        loystarProductId: ctmqty?.product_id,
+                        image: "",
+                        unit: ctmqty?.name,
+                        isDiscounted: false,
+                        markedUpPrice: 0,
+                      };
+                    }): []
+                  }
+               
+
+                  console.log("payload for uploading ava product", payload)
+
+                  await updateDoc(productDocRef, payload);
                 } else {
                   console.warn(`Product document with does not exist.`);
                 }
@@ -263,8 +320,8 @@ const ProductsPage = () => {
           );
         }
 
-        window.location.reload()
-      
+        //window.location.reload()
+
         console.log('Products uploaded successfully!');
       } catch (error) {
         console.error('Error updating products on Firebase:', error);
@@ -281,14 +338,31 @@ const ProductsPage = () => {
 
           if (findProduct) {
             const productDocRef = doc(db, 'newProducts', findProduct.id);
+            console.log("findProduct", findProduct?.loystarId === 106215)
             const productDocSnap = await getDoc(productDocRef);
             if (productDocSnap.exists()) {
+                let payload: Partial<TFirebaseProduct> = {
+                  costprice: Number(item?.cost_price || 0),
+                  price: Number(item?.price || 0),
+                  quantity: Number(item?.quantity || 0),
+                  units: Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0 ? item?.custom_quantities?.map((ctmqty) => {
+                    return {
+                      price: Number(ctmqty?.price || 0),
+                      quantity: Number(ctmqty?.quantity || 0),
+                      loystarId: ctmqty?.id,
+                      loystarProductId: ctmqty?.product_id,
+                      image: "",
+                      unit: ctmqty?.name,
+                      isDiscounted: false,
+                      markedUpPrice: 0,
+                    };
+                  }): []
+                };
+           
+
+              console.log(payload["units"]?.length)
               // const productDocData = productDocSnap.data();
-              await updateDoc(productDocRef, {
-                costprice: Number(item?.cost_price || 0),
-                price: Number(item?.price || 0),
-                quantity: Number(item?.quantity || 0),
-              });
+              await updateDoc(productDocRef, payload);
             } else {
               console.warn(`Product document with does not exist.`);
             }
@@ -296,13 +370,15 @@ const ProductsPage = () => {
         }),
       );
 
-      window.location.reload()
+      // window.location.reload()
     }
   };
 
   useEffect(() => {
-     updateProductsOnFirebase();
-  }, [allProducts, data, categories]);
+    fetchProducts();
+    fetchCategories();
+  updateProductsOnFirebase();
+  }, [data]);
 
   // staging testing // remove loystarId from all the products
 
@@ -339,7 +415,7 @@ const ProductsPage = () => {
 
   const sortedAndFilteredProducts = useSortAndSearch(allProducts, searchTerm, sortCriterion);
 
-
+  console.log(data?.find((p) => p?.id === 106215), {sortedAndFilteredProducts: sortedAndFilteredProducts?.find((p) => p?.loystarId === 106215)});
   if (allProducts.length < 2) return null;
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 overflow-auto  px-container-base pb-[2.1rem] md:px-container-md'>

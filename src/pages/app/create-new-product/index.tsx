@@ -80,7 +80,7 @@ interface Iprops {
 export interface Units {
   price: number;
   unit: string;
-  markedUpPrice: number;
+  markedUpPrice?: number;
   image?: string | undefined;
   isDiscounted: boolean;
   quantity: number;
@@ -439,7 +439,7 @@ const CreateNewProduct = () => {
           {!deleteLoading && isEditing && (
             <DeleteModal
               btnText='Delete Product'
-              collectionName='products'
+              collectionName='newProducts'
               documentId={editData?.id}
               deleteFn={deleteProduct}
             />
