@@ -200,8 +200,6 @@ const CreateNewProduct = () => {
     },
   });
 
-  // console.log(editData);
-
   async function onSubmit(data: z.infer<typeof FormSchema>) {
 
     setFormIsLoading(true);
@@ -377,9 +375,7 @@ const CreateNewProduct = () => {
           image: string;
         };
       }
-     // console.log('product data ref', productData);
 
-     // return  console.log(data, unitsArrary, editData)
 
       if (isEditing) {
         // Assuming `editData` contains the ID of the product to be edited
