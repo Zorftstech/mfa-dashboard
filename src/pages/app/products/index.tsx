@@ -47,7 +47,7 @@ import { useCreate, useGetData } from 'hooks/requests';
 
 //> convert image url to file
 
-interface TLoystarProduct {
+export interface TLoystarProduct {
   bundle_products: any[];
   bundles: [];
   cost_price: string | null;
@@ -97,7 +97,7 @@ interface TLoystarProduct {
   weight: string | null;
 }
 
-interface TFirebaseProduct {
+export interface TFirebaseProduct {
   desc: string;
   image: string;
   inStock: boolean;
@@ -125,11 +125,10 @@ interface TFirebaseProduct {
   units: {
     price: number;
     unit: string;
-    markedUpPrice?: number;
     image?: string | undefined;
-    isDiscounted?: boolean;
     quantity: number;
     loystarId?: number;
+    loystarProductId?: number;
   }[];
 }
 
@@ -254,28 +253,30 @@ const ProductsPage = () => {
                 category: categories?.find(
                   (c) => c?.loystarId === prod?.merchant_product_category_id,
                 ),
-                units: Array.isArray(prod?.custom_quantities) && prod?.custom_quantities?.length > 0 ? prod?.custom_quantities?.map((ctmqty) => {
-                  return {
-                    price: Number(ctmqty?.price || 0),
-                    quantity: Number(ctmqty?.quantity || 0),
-                    loystarId: ctmqty?.id,
-                    loystarProductId: ctmqty?.product_id,
-                    image: "",
-                    unit: ctmqty?.name,
-                    isDiscounted: false,
-                    markedUpPrice: 0,
-                  };
-                }): []
+                units:
+                  Array.isArray(prod?.custom_quantities) && prod?.custom_quantities?.length > 0
+                    ? prod?.custom_quantities?.map((ctmqty) => {
+                        return {
+                          price: Number(ctmqty?.price || 0),
+                          quantity: Number(ctmqty?.quantity || 0),
+                          loystarId: ctmqty?.id,
+                          loystarProductId: ctmqty?.product_id,
+                          image: '',
+                          unit: ctmqty?.name,
+                        
+                        };
+                      })
+                    : [],
               };
 
-          
-
-              console.log("payload for uploading rem product", payload)
+              console.log('payload for uploading rem product', payload);
 
               const productsCollectionRef = collection(db, 'newProducts');
 
-              console.log("ref", productsCollectionRef)
-              await addDoc(productsCollectionRef, payload).then((res) => console.log(res.id)).catch((err) => console.log("error adding", err));
+              console.log('ref', productsCollectionRef);
+              await addDoc(productsCollectionRef, payload)
+                .then((res) => console.log(res.id))
+                .catch((err) => console.log('error adding', err));
             }),
           );
         }
@@ -294,22 +295,23 @@ const ProductsPage = () => {
                     costprice: Number(item?.cost_price || 0),
                     price: Number(item?.price || 0),
                     quantity: Number(item?.quantity || 0),
-                    units: Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0 ? item?.custom_quantities?.map((ctmqty) => {
-                      return {
-                        price: Number(ctmqty?.price || 0),
-                        quantity: Number(ctmqty?.quantity || 0),
-                        loystarId: ctmqty?.id,
-                        loystarProductId: ctmqty?.product_id,
-                        image: "",
-                        unit: ctmqty?.name,
-                        isDiscounted: false,
-                        markedUpPrice: 0,
-                      };
-                    }): []
-                  }
-               
+                    units:
+                      Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0
+                        ? item?.custom_quantities?.map((ctmqty) => {
+                            return {
+                              price: Number(ctmqty?.price || 0),
+                              quantity: Number(ctmqty?.quantity || 0),
+                              loystarId: ctmqty?.id,
+                              loystarProductId: ctmqty?.product_id,
+                              image: '',
+                              unit: ctmqty?.name,
+                           
+                            };
+                          })
+                        : [],
+                  };
 
-                  console.log("payload for uploading ava product", payload)
+                  console.log('payload for uploading ava product', payload);
 
                   await updateDoc(productDocRef, payload);
                 } else {
@@ -338,29 +340,30 @@ const ProductsPage = () => {
 
           if (findProduct) {
             const productDocRef = doc(db, 'newProducts', findProduct.id);
-            console.log("findProduct", findProduct?.loystarId === 106215)
+
             const productDocSnap = await getDoc(productDocRef);
             if (productDocSnap.exists()) {
-                let payload: Partial<TFirebaseProduct> = {
-                  costprice: Number(item?.cost_price || 0),
-                  price: Number(item?.price || 0),
-                  quantity: Number(item?.quantity || 0),
-                  units: Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0 ? item?.custom_quantities?.map((ctmqty) => {
-                    return {
-                      price: Number(ctmqty?.price || 0),
-                      quantity: Number(ctmqty?.quantity || 0),
-                      loystarId: ctmqty?.id,
-                      loystarProductId: ctmqty?.product_id,
-                      image: "",
-                      unit: ctmqty?.name,
-                      isDiscounted: false,
-                      markedUpPrice: 0,
-                    };
-                  }): []
-                };
-           
+              let payload: Partial<TFirebaseProduct> = {
+                costprice: Number(item?.cost_price || 0),
+                price: Number(item?.price || 0),
+                quantity: Number(item?.quantity || 0),
+                units:
+                  Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0
+                    ? item?.custom_quantities?.map((ctmqty) => {
+                        return {
+                          price: Number(ctmqty?.price || 0),
+                          quantity: Number(ctmqty?.quantity || 0),
+                          loystarId: ctmqty?.id,
+                          loystarProductId: ctmqty?.product_id,
+                          image: '',
+                          unit: ctmqty?.name,
+                       
+                        };
+                      })
+                    : [],
+              };
 
-              console.log(payload["units"]?.length)
+              console.log(payload['units']?.length);
               // const productDocData = productDocSnap.data();
               await updateDoc(productDocRef, payload);
             } else {
@@ -377,7 +380,7 @@ const ProductsPage = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-  updateProductsOnFirebase();
+    updateProductsOnFirebase();
   }, [data]);
 
   // staging testing // remove loystarId from all the products
@@ -415,7 +418,10 @@ const ProductsPage = () => {
 
   const sortedAndFilteredProducts = useSortAndSearch(allProducts, searchTerm, sortCriterion);
 
-  console.log(data?.find((p) => p?.id === 106215), {sortedAndFilteredProducts: sortedAndFilteredProducts?.find((p) => p?.loystarId === 106215)});
+  console.log(
+    data?.find((p) => p?.id === 106215),
+    { sortedAndFilteredProducts: sortedAndFilteredProducts?.find((p) => p?.loystarId === 106215) },
+  );
   if (allProducts.length < 2) return null;
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 overflow-auto  px-container-base pb-[2.1rem] md:px-container-md'>

@@ -50,13 +50,16 @@ const FormSchema = z.object({
     message: 'Please enter a valid unit',
   }),
   image: z.string().optional(),
-  markedUpPrice: z.number().min(1, {
-    message: 'Please enter a valid discount price',
-  }),
+  // markedUpPrice: z.number().min(1, {
+  //   message: 'Please enter a valid discount price',
+  // }),
   isDiscounted: z.boolean().default(false),
   quantity: z.number({
     required_error: 'quantity is required.',
   }),
+  loystarId: z.any(),
+  loystarProductId: z.any()
+
 });
 
 const AddUnitsModal = ({
@@ -103,18 +106,22 @@ const AddUnitsModal = ({
       isDiscounted: editData?.isDiscounted === undefined ? false : editData?.isDiscounted,
       unit: editData?.unit || '',
       image: editData?.image || '',
-      markedUpPrice: editData?.markedUpPrice || 0,
+      // markedUpPrice: editData?.markedUpPrice || 0,
       quantity: Number(editData?.quantity || 0),
+      loystarId: editData?.loystarId,
+      loystarProductId: editData?.loystarProductId
+
+      
     },
   });
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setUploading(true);
 
     // marked up price must be lesser
-    if (data?.markedUpPrice >= data?.price) {
-      setUploading(false)
-      return toast.error('Marked up price must be lesser than price');
-    }
+    // if (data?.markedUpPrice >= data?.price) {
+    //   setUploading(false)
+    //   return toast.error('Marked up price must be lesser than price');
+    // }
     try {
       let unitData = {
         ...editData,
@@ -207,7 +214,7 @@ const AddUnitsModal = ({
           <Form {...unitForm}>
             <form onSubmit={unitForm.handleSubmit(onSubmit)} className={cn('flex flex-col gap-8')}>
               <section className=' grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6  '>
-                <FormField
+                {/* <FormField
                   control={unitForm.control}
                   name='isDiscounted'
                   render={({ field }) => (
@@ -223,7 +230,7 @@ const AddUnitsModal = ({
                       </FormControl>
                     </FormItem>
                   )}
-                />
+                /> */}
                 <FormField
                   control={unitForm.control}
                   name='price'
@@ -250,7 +257,7 @@ const AddUnitsModal = ({
                     </FormItem>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   control={unitForm.control}
                   name='markedUpPrice'
                   render={({ field }) => (
@@ -275,7 +282,7 @@ const AddUnitsModal = ({
                       <FormMessage className='mt-1 text-sm' />
                     </FormItem>
                   )}
-                />
+                /> */}
 
                 <FormField
                   control={unitForm.control}

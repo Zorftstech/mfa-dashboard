@@ -68,6 +68,7 @@ import AddUnitsModal from 'components/modal/addUnitsModal';
 import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useCreate, useDelete, useMutate } from 'hooks/requests';
+import { TFirebaseProduct, TLoystarProduct } from '../products';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -85,6 +86,7 @@ export interface Units {
   isDiscounted: boolean;
   quantity: number;
   loystarId?: number;
+  loystarProductId?: number
 }
 interface ErrorMessages {
   [key: string]: string[];
@@ -204,8 +206,8 @@ const CreateNewProduct = () => {
 
     setFormIsLoading(true);
 
-    let loystarAddedUnits: any[] = [];
-    let firebaseAddedUnits: any[] = [];
+    let loystarAddedUnits: TLoystarProduct['custom_quantities'][0][] = [];
+    let firebaseAddedUnits: TFirebaseProduct['units'][0][] = [];
 
     let responseData: any;
 
@@ -262,7 +264,9 @@ const CreateNewProduct = () => {
         responseData = await mutating({ data: { ...payload } });
 
         if (responseData && unitsArrary?.length > 0) {
-          const customQuantityPayload = unitsArrary.map((item) => {
+          const alreadyExisting = unitsArrary?.filter((d) => d?.loystarId )
+          const newUnits = unitsArrary?.filter((d) => !d?.loystarId)
+          const customQuantityPayload = newUnits.map((item) => {
             return {
               product_id: responseData?.id,
               merchant_id: responseData?.merchant_id,
@@ -270,16 +274,45 @@ const CreateNewProduct = () => {
               name: item?.unit,
               quantity: item?.quantity,
               barcode: '',
-              loystarId: item?.loystarId,
+              
             };
           });
+
+          const payloadForAlreadyExisting = alreadyExisting.map((item) => {
+            return {
+              product_id: responseData?.id,
+              merchant_id: responseData?.merchant_id,
+              price: Number(item?.price),
+              name: item?.unit,
+              quantity: item?.quantity,
+              barcode: '',
+              loystarId: item?.loystarId
+              
+            };
+          });
+
+          console.log(customQuantityPayload, responseData)
+
+
 
        
 
           // custom quantity
           loystarAddedUnits = await Promise.all(
             customQuantityPayload.map(async (custom) => {
-              const { loystarId, ...rest } = custom;
+              const {  ...rest } = custom;
+              const addedUnits = await createCustomQuantity(
+                { data: { ...rest } },
+                
+              );
+
+              return addedUnits;
+            }),
+          );
+
+          const updatingExisting = await Promise.all(
+            payloadForAlreadyExisting.map(async (custom) => {
+              const { loystarId ,...rest } = custom;
               const addedUnits = await mutatingCustomQuantity(
                 { data: { ...rest } },
                 `products/custom_quantity/${loystarId}`,
@@ -288,6 +321,8 @@ const CreateNewProduct = () => {
               return addedUnits;
             }),
           );
+
+          loystarAddedUnits = [...updatingExisting, loystarAddedUnits ]
         }
       }
 
@@ -299,6 +334,7 @@ const CreateNewProduct = () => {
           return {
             ...unit,
             loystarId: matchedItem?.id,
+            loystarProductId: matchedItem?.product_id
           };
         });
       }
@@ -348,8 +384,10 @@ const CreateNewProduct = () => {
       if (isEditing) {
         // Assuming `editData` contains the ID of the product to be edited
         const productRef = doc(db, 'products', editData.id);
-        await setDoc(productRef, productData, { merge: true });
+        console.log(productData, "productData")
+        //await setDoc(productRef, productData, { merge: true });
         toast.success('Product updated successfully');
+       
       } else {
         if (!file) {
           toast.error('Please upload an image for the new product');
@@ -365,7 +403,9 @@ const CreateNewProduct = () => {
 
         const productsCollectionRef = collection(db, 'products');
         await addDoc(productsCollectionRef, productData);
+        
         toast.success('Product created successfully');
+   
       }
 
       // Cleanup and navigate back or to another page as needed
@@ -750,7 +790,7 @@ const CreateNewProduct = () => {
           <div key={index} className='my-2 flex items-center gap-4'>
             <span className='font- text-sm'>Unit - {unit.unit}</span>
             <span className='text-sm '>Price - {formatToNaira(unit.price)}</span>
-            <AddUnitsModal
+            {/* <AddUnitsModal
               units={unitsArrary}
               setUnits={updateUnitsArray}
               isEditing={true}
@@ -765,8 +805,8 @@ const CreateNewProduct = () => {
                   />
                 </button>
               }
-            />
-            <button
+            /> */}
+            {/* <button
               type='button'
               disabled={deleteLoading}
               onClick={async () => {
@@ -777,11 +817,11 @@ const CreateNewProduct = () => {
               className=' text-red-600'
             >
               <X className='h-6 w-6' />
-            </button>
+            </button> */}
           </div>
         ))}
 
-        <AddUnitsModal
+        {/* <AddUnitsModal
           units={unitsArrary}
           setUnits={updateUnitsArray}
           trigger={
@@ -792,9 +832,9 @@ const CreateNewProduct = () => {
               </span>
             </button>
           }
-        />
+        /> */}
       </div>
-      <button
+      {/* <button
         type='button'
         onClick={form.handleSubmit(onSubmit)}
         className={cn(
@@ -815,7 +855,7 @@ const CreateNewProduct = () => {
             {isEditing ? 'Update Product' : 'Create Product'}
           </span>
         )}
-      </button>
+      </button> */}
       <p className='invisible'>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo dolore?
         Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores unde, corrupti
