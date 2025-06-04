@@ -263,7 +263,6 @@ const ProductsPage = () => {
                           loystarProductId: ctmqty?.product_id,
                           image: '',
                           unit: ctmqty?.name,
-                        
                         };
                       })
                     : [],
@@ -295,6 +294,11 @@ const ProductsPage = () => {
                     costprice: Number(item?.cost_price || 0),
                     price: Number(item?.price || 0),
                     quantity: Number(item?.quantity || 0),
+                    name: item.name,
+                    desc: item?.description || '',
+                    image: item?.picture,
+                    slug: item?.product_sku,
+                    inStock: Number(item?.quantity) > 0,
                     units:
                       Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0
                         ? item?.custom_quantities?.map((ctmqty) => {
@@ -305,7 +309,6 @@ const ProductsPage = () => {
                               loystarProductId: ctmqty?.product_id,
                               image: '',
                               unit: ctmqty?.name,
-                           
                             };
                           })
                         : [],
@@ -347,6 +350,11 @@ const ProductsPage = () => {
                 costprice: Number(item?.cost_price || 0),
                 price: Number(item?.price || 0),
                 quantity: Number(item?.quantity || 0),
+                name: item.name,
+                desc: item?.description || '',
+                image: item?.picture,
+                slug: item?.product_sku,
+                inStock: Number(item?.quantity) > 0,
                 units:
                   Array.isArray(item?.custom_quantities) && item?.custom_quantities?.length > 0
                     ? item?.custom_quantities?.map((ctmqty) => {
@@ -357,13 +365,12 @@ const ProductsPage = () => {
                           loystarProductId: ctmqty?.product_id,
                           image: '',
                           unit: ctmqty?.name,
-                       
                         };
                       })
                     : [],
               };
 
-              console.log(payload['units']?.length);
+              //  console.log(payload['units']?.length);
               // const productDocData = productDocSnap.data();
               await updateDoc(productDocRef, payload);
             } else {
