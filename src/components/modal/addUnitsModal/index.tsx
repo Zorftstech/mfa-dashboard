@@ -57,8 +57,7 @@ const FormSchema = z.object({
   quantity: z.number({
     required_error: 'quantity is required.',
   }),
-  loystarId: z.any(),
-  loystarProductId: z.any()
+
 
 });
 
@@ -108,8 +107,6 @@ const AddUnitsModal = ({
       image: editData?.image || '',
       // markedUpPrice: editData?.markedUpPrice || 0,
       quantity: Number(editData?.quantity || 0),
-      loystarId: editData?.loystarId,
-      loystarProductId: editData?.loystarProductId
 
       
     },

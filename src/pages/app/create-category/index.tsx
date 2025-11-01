@@ -50,7 +50,6 @@ import { useDropzone } from 'react-dropzone';
 import useStore from 'store';
 import DeleteModal from 'components/modal/DeleteModal';
 import { getAuth } from 'firebase/auth';
-import { useCreate, useLoystarGetRequest, useMutate } from 'hooks/requests';
 
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
@@ -82,13 +81,6 @@ const CreateCategory = () => {
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<any>(null);
-  const { create } = useCreate('add_product_category');
-  const { queryData } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories?page[number]=1&page[size]=500', {
-    data: {
-      time_stamp: 0,
-    },
-  });
-  const { mutating } = useMutate(`merchant_product_categories/${editData?.loystarId}`);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
 
   const handleFileDrop = async (files: any) => {
@@ -136,22 +128,11 @@ const CreateCategory = () => {
         }
       }
   
-      if (isEditing && editData?.loystarId) {
-        await mutating({
-          data: { name: data?.categoryName, id: editData?.loystarId },
-        });
-      } else {
-        await create({ data: { name: data?.categoryName } });
-      }
   
-      const categories = await queryData();
   
-      const loystarCategories = categories?.find((v: any) => v?.name === data?.categoryName);
+   
   
-      if (!loystarCategories) {
-        toast.error('ERP not responding');
-        return;
-      }
+   
   
       if (file) {
         const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
@@ -170,8 +151,8 @@ const CreateCategory = () => {
         name: data.categoryName,
         desc: data.description,
         image: downloadURL,
-        loystarId: loystarCategories?.id,
         slug: splitStringBySpaceAndReplaceWithDash(data.categoryName),
+        loystarId: new Date().getMilliseconds()
       };
 
       if (isEditing && editData?.id) {

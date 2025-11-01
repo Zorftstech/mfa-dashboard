@@ -51,9 +51,9 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import useStore from 'store';
 import { getCreatedDateFromDocument } from 'lib/utils';
 import useSortAndSearch from 'hooks/useSearchAndSort';
-import { collection, doc, getDoc, getDocs, query, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from 'firebase';
-import { useCreate, useGetData, useLoystarGetRequest } from 'hooks/requests';
+
 
 interface Product {
   id: string;
@@ -69,13 +69,7 @@ const Categories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriterion, setSortCriterion] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
-  const [isLoystarUpdated, setIsLoystarUpdated] = useState(false);
-  const { create } = useCreate('add_product_category');
-  const { data, refetch } = useLoystarGetRequest<any[]>('get_latest_merchant_product_categories?page[number]=1&page[size]=500', {
-    data: {
-      time_stamp: 0,
-    },
-  });
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
@@ -110,8 +104,6 @@ const Categories = () => {
     queryKey: ['get-categories'],
     queryFn: () => fetchCategories(),
     onSuccess: (data) => {
-      //  setAllProducts(data);
-      // console.log('data', data)
       setCategories(data);
     },
 
@@ -119,152 +111,6 @@ const Categories = () => {
       processError(err);
     },
   });
-
-  useEffect(() => {
-    (async () => {
-      if (
-        Array.isArray(categories) &&
-        categories?.length > 0 &&
-        Array.isArray(data) &&
-        data?.length < categories?.length
-      ) {
-        await Promise.all(
-          categories?.map(async (category) => {
-            const payload = {
-              name: category?.name,
-            };
-            await create({ data: payload });
-          }),
-        );
-        await refetch();
-      
-      }
-      setIsLoystarUpdated(true);
-    })();
-  }, [categories, data]);
-
-
-  // deprecated for now - but maybe the needed later
-  
-  // useEffect(() => {
-  //   if (
-  //     isLoystarUpdated &&
-  //     Array.isArray(data) &&
-  //     Array.isArray(categories) &&
-  //     categories.length > 0 &&
-  //     data?.length > 0
-  //   ) {
-  //     const allCategoryNamesMatch = categories.every((category) => {
-  //       return data.some((item) => category.name === item.name);
-  //     });
-  
-  //     if (allCategoryNamesMatch) {
-  //       const batch = writeBatch(db);
-  
-  //       const checkAndUpdateCategories = async () => {
-  //         for (const category of categories) {
-  //           const matchingData = data.find((item) => item.name === category.name);
-  
-  //           if (matchingData) {
-  //             const categoryDocRef = doc(db, "categories", category.id);
-  
-  //             try {
-  //               
-  //               const categoryDocSnap = await getDoc(categoryDocRef);
-  
-  //               if (categoryDocSnap.exists()) {
-  //                 const categoryDocData = categoryDocSnap.data();
-  
-  //                 if (!categoryDocData.loystarId) {
-  //                   // Add to batch only if `loystarId` is not already present
-  //                   batch.update(categoryDocRef, {
-  //                     loystarId: matchingData.id,
-  //                   });
-  //                   console.log(
-  //                     `loystarId: ${matchingData.id} will be added to category ${category.name}`
-  //                   );
-  //                 } else {
-  //                   console.log(
-  //                     `Category ${category.name} already has a loystarId.`
-  //                   );
-  //                 }
-  //               } else {
-  //                 console.warn(
-  //                   `Category document with ID ${category.id} does not exist.`
-  //                 );
-  //               }
-  //             } catch (error) {
-  //               console.error(
-  //                 `Error checking loystarId for category ${category.name}:`,
-  //                 error
-  //               );
-  //             }
-  //           }
-  //         }
-  
-  //        
-  //         try {
-  //           await batch.commit();
-  //           console.log("Batch update completed!");
-  //         } catch (error) {
-  //           console.error("Batch update failed:", error);
-  //         }
-  //       };
-  
-  //       checkAndUpdateCategories();
-  //     }
-  //   }
-  // }, [isLoystarUpdated, data, categories]);
-
-
-  /** updating product category */
-
-  // useEffect(() => {
-  //   const updateProductsWithCategories = async () => {
-      
-    
-  //     try {
-
-        
-  //       const categoriesSnapshot = await getDocs(collection(db, "categories"));
-  //       const productsSnapshot = await getDocs(collection(db, "products"));
-    
-      
-  //       const categories = categoriesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  //       const products = productsSnapshot.docs.map((doc) => ({ 
-  //         id: doc.id, 
-  //         ...doc.data() 
-  //       } as Product));
-    
-      
-  //       const batch = writeBatch(db);
-    
-  //       products.forEach((product) => {
-       
-  //         const matchingCategory = categories.find((category) => category.id === product.category?.id);
-    
-  //         if (matchingCategory) {
-        
-  //           const productRef = doc(db, "products", product.id);
-    
-      
-  //           batch.update(productRef, {
-  //             category: matchingCategory,
-  //           });
-  //         }
-  //       });
-    
-  //       // Step 3: Commit the batch
-  //       await batch.commit();
-  //       console.log("Products updated with category data successfully.");
-  //     } catch (error) {
-  //       console.error("Error updating products with category data:", error);
-  //     }
-  //   };
-    
-  //   updateProductsWithCategories();
-
-  // },[])
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 px-container-base  pb-[5.1rem] md:overflow-auto md:px-container-md'>

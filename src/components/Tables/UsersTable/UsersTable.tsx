@@ -65,8 +65,6 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { Filter } from 'lucide-react';
 import SearchComboBox from 'components/general/SearchComboBox';
 import axios from 'axios';
-import { useCreate, useGetData } from 'hooks/requests';
-import useUserStore from 'store/globalUserStore';
 export type User = {
   id: string;
   number: string;
@@ -82,7 +80,7 @@ export type User = {
 function UserTableComponent() {
   const navigate = useNavigate();
   const [users, setUsers] = React.useState<any[]>([]);
-  const { data: userData } = useGetData('customers_list');
+
 
   // refactor this
   const deletePage = async (id: string) => {
@@ -99,10 +97,10 @@ function UserTableComponent() {
     // setIsLoading(false);
   };
 
-  console.log(userData);
+
 
   async function fetchAllUsers() {
-    //await axios.get(`https://api.loystar.co/api/v2/customers_list`)
+
     // Create a reference to the 'users' collection
     const usersCollectionRef = collection(db, 'users');
 
@@ -285,9 +283,6 @@ function UserTableComponent() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [position, setPosition] = React.useState('bottom');
-  const { user } = useUserStore();
-  const { create } = useCreate(`add_user_for_merchant/${user?.id}`);
-
   const table = useReactTable({
     data: users,
     columns,
@@ -323,64 +318,7 @@ function UserTableComponent() {
 
   console.log("users", users)
 
-  const updateProductsOnFirebase = async () => {
-    if (
-      Array.isArray(users) &&
-      users?.length > 0 &&
-      Array.isArray(userData) &&
-      userData?.length < users?.length
-    ) {
-      try {
-        // Process all products and create/update them on Firebase
-        await Promise.all(
-          users.slice(0, 3).map(async (user) => {
-            const payload = {
-              first_name: user?.firstName,
-              last_name: user?.lastName,
-              email: user?.email,
-              phone_number: user?.phone || "+2340000000000",
-              date_of_birth: '01-01-1980',
-              sex: 'M',
-              local_db_created_at: 'NIL',
-              address_line1: user?.addressDetails?.address || "NIL",
-              address_line2: 'NIL',
-              postcode: Number(user?.addressDetails?.zipcode) || 111111,
-              state: user?.addressDetails?.state,
-              country: user?.addressDetails?.country,
-            };
-            // push to loystar
-            const responseData = await create({ data: payload });
 
-            if (responseData){
-              // Update Firebase with the loystarId
-            const userDocRef = doc(db, 'users', user.id);
-            const userDocSnap = await getDoc(userDocRef);
-
-            if (userDocSnap.exists()) {
-              const productDocData = userDocSnap.data();
-              if (!productDocData.loystarId) {
-                await updateDoc(userDocRef, { loystarId: responseData.id });
-                console.log(`Updated loystarId for user: ${user.name}`);
-              } else {
-                console.log(`User ${user.name} already has a loystarId.`);
-              }
-            } else {
-              console.warn(`User document with ID ${user.id} does not exist.`);
-            }
-            }
-          }),
-        );
-
-        console.log('User updated successfully!');
-      } catch (error) {
-        console.error('Error updating products on Firebase:', error);
-      }
-    }
-  };
-
-  React.useEffect(() => {
- //  updateProductsOnFirebase()
-  },[userData, users])
 
   return (
     <div className='flex w-full flex-col gap-2 rounded-xl   '>

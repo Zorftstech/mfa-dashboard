@@ -67,8 +67,7 @@ import AddUnitsModal from 'components/modal/addUnitsModal';
 
 import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useCreate, useDelete, useMutate } from 'hooks/requests';
-import { TFirebaseProduct, TLoystarProduct } from '../products';
+import { TFirebaseProduct } from '../products';
 // fix for phone input build error
 const PhoneInput: React.FC<PhoneInputProps> = (PI as any).default || PI;
 interface Iprops {
@@ -85,8 +84,7 @@ export interface Units {
   image?: string | undefined;
   isDiscounted: boolean;
   quantity: number;
-  loystarId?: number;
-  loystarProductId?: number
+
 }
 interface ErrorMessages {
   [key: string]: string[];
@@ -119,17 +117,12 @@ const CreateNewProduct = () => {
   const { location } = useUserLocation();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<any[]>([]);
-  const { create } = useCreate('add_product');
-  const { create: createCustomQuantity } = useCreate('products/custom_quantity');
-  const { mutating: mutatingCustomQuantity } = useMutate('');
   const { isEditing, editData, setEditData, setIsEditing } = useStore((state: StoreType) => state);
 
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [file, setFile] = React.useState<any>(null);
   const [imageUrl, setImageUrl] = React.useState<string | null>(editData?.image || null); // New state for image URL
   const [unitsArrary, setUnitsArray] = useState<Units[]>(editData?.units || []);
-  const { mutating } = useMutate(`products/${editData?.loystarId}`);
-  const { deletes, deleteLoading, postDeletes } = useDelete();
   const handleFileDrop = async (files: any) => {
     setFile(files);
     const fileUrl = URL.createObjectURL(files);
@@ -201,13 +194,11 @@ const CreateNewProduct = () => {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-
     setFormIsLoading(true);
 
-    let loystarAddedUnits: TLoystarProduct['custom_quantities'][0][] = [];
     let firebaseAddedUnits: TFirebaseProduct['units'][0][] = [];
 
-    let responseData: any;
+
 
     try {
       if (!isEditing) {
@@ -222,117 +213,12 @@ const CreateNewProduct = () => {
         }
       }
 
-      const payload = {
-        name: data?.productName,
-        description: data?.description,
-        price: data?.price,
-        cost_price: data?.costprice,
-        picture: null,
-        merchant_product_category_id: Number(data?.category),
+    
 
-        track_inventory: true,
-        unit: 'units',
-        quantity: data?.quantity,
-      };
-      if (!isEditing) {
-        responseData = await create({ data: { ...payload } });
-
-        if (responseData && unitsArrary?.length > 0) {
-          const customQuantityPayload = unitsArrary.map((item) => {
-            return {
-              product_id: responseData?.id,
-              merchant_id: responseData?.merchant_id,
-              price: item?.price,
-              name: item?.unit,
-              quantity: item?.quantity,
-              barcode: '',
-            };
-          });
-
-          // custom quantity
-          loystarAddedUnits = await Promise.all(
-            customQuantityPayload.map(async (custom) => {
-              const addedUnits = await createCustomQuantity({ data: { ...custom } });
-
-              return addedUnits;
-            }),
-          );
-        }
-      } else {
-        responseData = await mutating({ data: { ...payload } });
-
-        if (responseData && unitsArrary?.length > 0) {
-          const alreadyExisting = unitsArrary?.filter((d) => d?.loystarId )
-          const newUnits = unitsArrary?.filter((d) => !d?.loystarId)
-          const customQuantityPayload = newUnits.map((item) => {
-            return {
-              product_id: responseData?.id,
-              merchant_id: responseData?.merchant_id,
-              price: Number(item?.price),
-              name: item?.unit,
-              quantity: item?.quantity,
-              barcode: '',
-              
-            };
-          });
-
-          const payloadForAlreadyExisting = alreadyExisting.map((item) => {
-            return {
-              product_id: responseData?.id,
-              merchant_id: responseData?.merchant_id,
-              price: Number(item?.price),
-              name: item?.unit,
-              quantity: item?.quantity,
-              barcode: '',
-              loystarId: item?.loystarId
-              
-            };
-          });
-
-          console.log(customQuantityPayload, responseData)
-
-
-
-       
-
-          // custom quantity
-          loystarAddedUnits = await Promise.all(
-            customQuantityPayload.map(async (custom) => {
-              const {  ...rest } = custom;
-              const addedUnits = await createCustomQuantity(
-                { data: { ...rest } },
-                
-              );
-
-              return addedUnits;
-            }),
-          );
-
-          const updatingExisting = await Promise.all(
-            payloadForAlreadyExisting.map(async (custom) => {
-              const { loystarId ,...rest } = custom;
-              const addedUnits = await mutatingCustomQuantity(
-                { data: { ...rest } },
-                `products/custom_quantity/${loystarId}`,
-              );
-
-              return addedUnits;
-            }),
-          );
-
-          loystarAddedUnits = [...updatingExisting, loystarAddedUnits ]
-        }
-      }
-
-      if (unitsArrary?.length > 0 && loystarAddedUnits) {
+      if (unitsArrary?.length > 0) {
         firebaseAddedUnits = unitsArrary.map((unit) => {
-          const matchedItem = loystarAddedUnits.find(
-            (item) => item.name === unit.unit && Number(item.price) === Number(unit.price),
-          );
           return {
             ...unit,
-            loystarId: matchedItem?.id,
-            loystarProductId: matchedItem?.product_id
           };
         });
       }
@@ -354,8 +240,6 @@ const CreateNewProduct = () => {
         rating: Number(editData?.rating || 0),
         ratingCount: Number(editData?.ratingCount || 0),
         created_date: serverTimestamp(),
-        loystarId: responseData?.id,
-        merchant_id: responseData?.merchant_id,
       };
 
       // console.log({ firebaseAddedUnits , productData });
@@ -376,14 +260,12 @@ const CreateNewProduct = () => {
         };
       }
 
-
       if (isEditing) {
         // Assuming `editData` contains the ID of the product to be edited
         const productRef = doc(db, 'products', editData.id);
-        console.log(productData, "productData")
+        console.log(productData, 'productData');
         //await setDoc(productRef, productData, { merge: true });
         toast.success('Product updated successfully');
-       
       } else {
         if (!file) {
           toast.error('Please upload an image for the new product');
@@ -399,9 +281,8 @@ const CreateNewProduct = () => {
 
         const productsCollectionRef = collection(db, 'products');
         await addDoc(productsCollectionRef, productData);
-        
+
         toast.success('Product created successfully');
-   
       }
 
       // Cleanup and navigate back or to another page as needed
@@ -421,13 +302,10 @@ const CreateNewProduct = () => {
     }
   }
 
-  async function deleteProduct() {
-    await postDeletes(`products/set_delete_flag_to_true/${editData?.loystarId}`);
-  }
+  
 
   function updateUnitsArray(unit: Units, index?: number) {
-
-    if (typeof index === "number" && index !== -1) {
+    if (typeof index === 'number' && index !== -1) {
       setUnitsArray(
         unitsArrary.map((item, i) => {
           if (i === index) {
@@ -472,12 +350,11 @@ const CreateNewProduct = () => {
         </div>
 
         <div className='flex  gap-4'>
-          {!deleteLoading && isEditing && (
+          {isEditing && (
             <DeleteModal
               btnText='Delete Product'
               collectionName='newProducts'
               documentId={editData?.id}
-              deleteFn={deleteProduct}
             />
           )}
           <button
@@ -786,7 +663,7 @@ const CreateNewProduct = () => {
           <div key={index} className='my-2 flex items-center gap-4'>
             <span className='font- text-sm'>Unit - {unit.unit}</span>
             <span className='text-sm '>Price - {formatToNaira(unit.price)}</span>
-            {/* <AddUnitsModal
+            <AddUnitsModal
               units={unitsArrary}
               setUnits={updateUnitsArray}
               isEditing={true}
@@ -801,23 +678,21 @@ const CreateNewProduct = () => {
                   />
                 </button>
               }
-            /> */}
-            {/* <button
+            />
+            <button
               type='button'
-              disabled={deleteLoading}
               onClick={async () => {
-                const newUnits = unitsArrary.filter((item, i) => i !== index);
+                const newUnits = unitsArrary.filter((_, i) => i !== index);
                 setUnitsArray(newUnits);
-                if (unit?.loystarId) await deletes(`products/custom_quantity/${unit?.loystarId}`);
               }}
               className=' text-red-600'
             >
               <X className='h-6 w-6' />
-            </button> */}
+            </button>
           </div>
         ))}
 
-        {/* <AddUnitsModal
+        <AddUnitsModal
           units={unitsArrary}
           setUnits={updateUnitsArray}
           trigger={
@@ -828,9 +703,9 @@ const CreateNewProduct = () => {
               </span>
             </button>
           }
-        /> */}
+        />
       </div>
-      {/* <button
+      <button
         type='button'
         onClick={form.handleSubmit(onSubmit)}
         className={cn(
@@ -851,12 +726,7 @@ const CreateNewProduct = () => {
             {isEditing ? 'Update Product' : 'Create Product'}
           </span>
         )}
-      </button> */}
-      <p className='invisible'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo dolore?
-        Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores unde, corrupti
-        iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores, eos!
-      </p>
+      </button>
     </div>
   );
 };

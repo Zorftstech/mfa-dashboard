@@ -353,12 +353,3 @@ interface NameYourPriceField {
   namedPrice: number;
 }
 
-export interface TLoystarUser {
-  access_token: string;
-  business_name: string;
-  client: string;
-  uid: string;
-  email: string;
-  mtierToken: string;
-  id: number;
-}

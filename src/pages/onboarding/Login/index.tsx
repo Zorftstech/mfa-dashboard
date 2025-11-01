@@ -16,7 +16,6 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import InputErrorWrapper from 'components/Hocs/InputError';
 import BtnLoader from 'components/Hocs/BtnLoader';
-import { authDetailsInterface } from 'types';
 import useStore from 'store';
 // import {
 //   Form,
@@ -32,15 +31,11 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { authFirebase } from 'firebase';
 import { db } from 'firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { set } from 'date-fns';
-import axios from 'axios';
-import useUserStore from 'store/globalUserStore';
 
 const Login = () => {
   const navigate = useNavigate();
   const [emailVerifiedOpen, setEmailVerifiedOpen] = useState(false);
   const { setAuthDetails, setLoggedIn, setCurrentUser, currentUser } = useStore((store) => store);
-  const {setUser}   = useUserStore()
   const [showPassword, setShowPassword] = useState(true);
   const [params] = useSearchParams();
   const [checked, setChecked] = useState(false);
@@ -62,19 +57,7 @@ const Login = () => {
     mutationFn: async ({ email, password }) => {
       const user = await signInWithEmailAndPassword(authFirebase, email, password);
 
-      const response = await axios.post(
-        "https://mtier2.loystar.co/auth/login",
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json", 
-            "Accept": "application/json",          
-          },
-        
-        },
-        
-      );
-      setUser(response.data.data)
+    
       return user;
     },
     onSuccess: async (data) => {

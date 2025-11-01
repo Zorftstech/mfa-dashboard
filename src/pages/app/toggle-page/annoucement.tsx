@@ -73,16 +73,22 @@ export default function AnnouncementToggle() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
+
+
+
   function onSubmit(values: z.infer<typeof FormSchema>) {
     setformIsLoading(true);
+    console.log(values)
     const { showAnnouncement, duration, text } = values;
     const announcementRef = collection(db, 'announcement');
+    console.log("ref", announcementRef)
     const announcementDoc = doc(announcementRef, data[0].id);
     const announcementData = {
       showAnnouncement,
       duration: duration,
       announcementText: text,
     };
+    console.log(announcementData, announcementDoc)
     updateDoc(announcementDoc, announcementData)
       .then(() => {
         setformIsLoading(false);
@@ -103,6 +109,9 @@ export default function AnnouncementToggle() {
       form.setValue('duration', createdDate);
     }
   }, [isFetched]);
+  console.log(form.getValues())
+  console.log("errorws", form.formState.errors)
+  
   return (
     <section className='flex flex-col  gap-4   '>
       <Form {...form}>
