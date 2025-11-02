@@ -84,6 +84,8 @@ export interface Units {
   image?: string | undefined;
   isDiscounted: boolean;
   quantity: number;
+  loystarId?: number;
+  loystarProductId?: number;
 
 }
 interface ErrorMessages {
@@ -175,7 +177,6 @@ const CreateNewProduct = () => {
     },
   });
 
-  console.log('unitsArrary', unitsArrary);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -188,6 +189,7 @@ const CreateNewProduct = () => {
       price: Number(editData?.price || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
       quantity: Number(editData?.quantity || 0),
+      
 
       // rating: Number(editData?.rating || 0),
     },
@@ -198,7 +200,7 @@ const CreateNewProduct = () => {
 
     let firebaseAddedUnits: TFirebaseProduct['units'][0][] = [];
 
-
+    const productId = editData?.loystarId ?? new Date().getMilliseconds()
 
     try {
       if (!isEditing) {
@@ -219,6 +221,8 @@ const CreateNewProduct = () => {
         firebaseAddedUnits = unitsArrary.map((unit) => {
           return {
             ...unit,
+            loystarProductId: productId,
+           
           };
         });
       }

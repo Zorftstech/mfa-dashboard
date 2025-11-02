@@ -36,7 +36,7 @@ interface Iprop {
   img?: string;
   desc?: string;
   units: Units[];
-  setUnits: (unit: Units, index?:number) => void;
+  setUnits: (unit: Units, index?: number) => void;
   item?: any;
   isEditing?: boolean;
   editData?: Units;
@@ -50,6 +50,7 @@ const FormSchema = z.object({
     message: 'Please enter a valid unit',
   }),
   image: z.string().optional(),
+  loystarId: z.number().optional(),
   // markedUpPrice: z.number().min(1, {
   //   message: 'Please enter a valid discount price',
   // }),
@@ -57,8 +58,6 @@ const FormSchema = z.object({
   quantity: z.number({
     required_error: 'quantity is required.',
   }),
-
-
 });
 
 const AddUnitsModal = ({
@@ -107,8 +106,7 @@ const AddUnitsModal = ({
       image: editData?.image || '',
       // markedUpPrice: editData?.markedUpPrice || 0,
       quantity: Number(editData?.quantity || 0),
-
-      
+      loystarId: editData?.loystarId || new Date().getMilliseconds(),
     },
   });
   async function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -140,12 +138,11 @@ const AddUnitsModal = ({
       }
 
       if (isEditing) {
-        
         // Assuming `UnitData` contains the ID of the unit to be edited
         const index = units?.findIndex((unit) => unit.unit === editData?.unit) || 0;
-      
-       // units[index] = unitData;
-      //  console.log(index, units, setUnits)
+
+        // units[index] = unitData;
+        //  console.log(index, units, setUnits)
         setUnits(unitData, index);
       } else {
         if (!file) {

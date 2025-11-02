@@ -51,12 +51,12 @@ export interface TFirebaseProduct {
   quantity: number;
   rating: number;
   ratingCount: number;
+  loystarId: number;
   id: string;
   slug: string;
   created_date: FieldValue;
   costprice: number;
   createdDate: string;
-  merchant_id: number;
   category: {
     desc: string;
     image: string;
@@ -69,6 +69,8 @@ export interface TFirebaseProduct {
     unit: string;
     image?: string | undefined;
     quantity: number;
+    loystarId?: number;
+    loystarProductId?: number
   }[];
 }
 
