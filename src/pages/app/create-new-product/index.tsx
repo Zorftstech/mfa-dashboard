@@ -266,9 +266,9 @@ const CreateNewProduct = () => {
 
       if (isEditing) {
         // Assuming `editData` contains the ID of the product to be edited
-        const productRef = doc(db, 'products', editData.id);
-        console.log(productData, 'productData');
-        //await setDoc(productRef, productData, { merge: true });
+        const productRef = doc(db, 'newProducts', editData.id);
+        console.log(productData, 'productData', productRef);
+        await setDoc(productRef, productData, { merge: true });
         toast.success('Product updated successfully');
       } else {
         if (!file) {
@@ -283,7 +283,7 @@ const CreateNewProduct = () => {
           image: string;
         };
 
-        const productsCollectionRef = collection(db, 'products');
+        const productsCollectionRef = collection(db, 'newProducts');
         await addDoc(productsCollectionRef, productData);
 
         toast.success('Product created successfully');
@@ -324,6 +324,8 @@ const CreateNewProduct = () => {
       setUnitsArray((prev) => [...prev, unit]);
     }
   }
+
+  console.log("categories", categories)
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 px-container-base pb-[2.1rem] md:px-container-md'>
