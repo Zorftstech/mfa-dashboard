@@ -24,7 +24,7 @@ import { Input } from 'components/shadcn/input';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash, uploadFile } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -144,9 +144,10 @@ const CreateFoodBundle = () => {
 
       // Check if editing and a new file is provided
       if (isEditing && file) {
-        const storageRef = ref(getStorage(), `foodBundles/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(getStorage(), `foodBundles/${file.name}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await uploadFile(file, "image")
 
         // Add or update the image URL in foodBundleData
         foodBundleData = { ...foodBundleData, image: downloadURL } as typeof foodBundleData & {
@@ -163,9 +164,10 @@ const CreateFoodBundle = () => {
       } else {
         if (!file) throw new Error('Please upload an image for the new food bundle');
         // Proceed with new food bundle creation, including initial image upload
-        const storageRef = ref(getStorage(), `foodBundles/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(getStorage(), `foodBundles/${file.name}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await uploadFile(file, "image")
         foodBundleData = { ...foodBundleData, image: downloadURL } as typeof foodBundleData & {
           image: string;
         };

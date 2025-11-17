@@ -25,7 +25,7 @@ import { Input } from 'components/shadcn/input';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash, uploadFile } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -135,10 +135,11 @@ const CreateCategory = () => {
    
   
       if (file) {
-        const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const storageRef = ref(getStorage(), `categories/${refinedFileName}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        downloadURL = await getDownloadURL(snapshot.ref);
+         downloadURL = await uploadFile(file, "image")
+        // const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        // const storageRef = ref(getStorage(), `categories/${refinedFileName}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // downloadURL = await getDownloadURL(snapshot.ref);
       }
   
       if (!downloadURL) {

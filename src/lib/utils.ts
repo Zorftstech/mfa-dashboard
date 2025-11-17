@@ -49,3 +49,46 @@ export const formatToNaira = (amount: number) => {
     .format(amount)
     .replace('NGN', '₦');
 };
+
+
+//? upload images asset-folder 
+export async function uploadFile(file: File | Blob | string, type: string) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("cloud_name", "dbka31fuy");
+  formData.append("upload_preset", "myfoodangels");
+  formData.append("folder", "product_images");
+  if (type === "video") {
+    formData.append("resource_type", "video");
+  } else if (type === "pdf") {
+    formData.append("resource_type", "raw");
+  } else if (type === "audio") {
+    formData.append("resource_type", "audio");
+  } else {
+    formData.append("resource_type", "image");
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/dbka31fuy/${
+        type === "pdf" ? "raw" : type
+      }/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+
+      return data.secure_url;
+    } else {
+      console.error("Failed to upload image");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return null;
+  }
+}

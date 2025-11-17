@@ -22,7 +22,7 @@ import {
   FormLabel,
 } from 'components/shadcn/ui/form';
 import { Input } from 'components/shadcn/input';
-import { cn } from 'lib/utils';
+import { cn, uploadFile } from 'lib/utils';
 import { Switch } from 'components/shadcn/switch';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from 'firebase';
@@ -124,12 +124,14 @@ const AddUnitsModal = ({
         image: imageUrl || '',
       };
       if (isEditing && file) {
-        const storageRef = ref(
-          getStorage(),
-          `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
-        );
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+
+        const downloadURL = await uploadFile(file, "image")
+        // const storageRef = ref(
+        //   getStorage(),
+        //   `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
+        // );
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
 
         // Add or update the image URL in product data
         unitData = { ...unitData, image: downloadURL } as typeof unitData & {
@@ -149,13 +151,14 @@ const AddUnitsModal = ({
           toast.error('Please upload an image for the new unit');
           throw new Error('Please upload an image for the new unit');
         }
+        const downloadURL = await uploadFile(file, "image")
         // Proceed with new unit creation, including initial image upload
-        const storageRef = ref(
-          getStorage(),
-          `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
-        );
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(
+        //   getStorage(),
+        //   `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
+        // );
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
         unitData = { ...unitData, image: downloadURL } as typeof unitData & {
           image: string;
         };

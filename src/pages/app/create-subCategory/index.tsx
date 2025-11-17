@@ -25,7 +25,7 @@ import { Input } from 'components/shadcn/input';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash, uploadFile } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -138,10 +138,11 @@ const CreateSubCategory = () => {
 
       // Only attempt upload if a new file is selected
       if (file) {
-        const storageRef = ref(getStorage(), 'categories/' + file.name);
-        const snapshot = await uploadBytes(storageRef, file);
-        downloadURL = await getDownloadURL(snapshot.ref); // Update downloadURL with new image URL
-        console.log('Uploaded a blob or file!', snapshot);
+         downloadURL = await uploadFile(file, "image")
+        // const storageRef = ref(getStorage(), 'categories/' + file.name);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // downloadURL = await getDownloadURL(snapshot.ref); 
+        // console.log('Uploaded a blob or file!', snapshot);
         console.log('File available at', downloadURL);
       }
 

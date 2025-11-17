@@ -24,7 +24,7 @@ import { Input } from 'components/shadcn/input';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn } from 'lib/utils';
+import { cn, uploadFile } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -101,9 +101,10 @@ const UserProfilePage = () => {
     let downloadURL = imageUrl;
 
     if (file) {
-      const storageRef = ref(getStorage(), `users/${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      downloadURL = await getDownloadURL(snapshot.ref);
+       downloadURL = await uploadFile(file, "image")
+      // const storageRef = ref(getStorage(), `users/${file.name}`);
+      // const snapshot = await uploadBytes(storageRef, file);
+      // downloadURL = await getDownloadURL(snapshot.ref);
     }
 
     if (!downloadURL) {

@@ -29,6 +29,7 @@ import {
   formatToNaira,
   getCreatedDateFromDocument,
   splitStringBySpaceAndReplaceWithDash,
+  uploadFile,
 } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
@@ -254,10 +255,10 @@ const CreateNewProduct = () => {
       // }
       // Check if editing and a new file is provided
       if (isEditing && file) {
-        const storageRef = ref(getStorage(), `products/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-
+        // const storageRef = ref(getStorage(), `products/${file.name}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await uploadFile(file, "image")
         // Add or update the image URL in product data
         productData = { ...productData, image: downloadURL } as typeof productData & {
           image: string;
@@ -276,9 +277,10 @@ const CreateNewProduct = () => {
           throw new Error('Please upload an image for the new product');
         }
         // Proceed with new product creation, including initial image upload
-        const storageRef = ref(getStorage(), `products/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(getStorage(), `products/${file.name}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await uploadFile(file, "image")
         productData = { ...productData, image: downloadURL } as typeof productData & {
           image: string;
         };

@@ -24,7 +24,7 @@ import { Input } from 'components/shadcn/input';
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
-import { cn, splitStringBySpaceAndReplaceWithDash } from 'lib/utils';
+import { cn, splitStringBySpaceAndReplaceWithDash, uploadFile } from 'lib/utils';
 import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
@@ -155,9 +155,10 @@ const CreateFlashSale = () => {
 
       // Check if editing and a new file is provided
       if (isEditing && file) {
-        const storageRef = ref(getStorage(), `flashSales/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(getStorage(), `flashSales/${file.name}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await uploadFile(file, "image")
 
         // Add or update the image URL in flash sale data
         flashSaleData = { ...flashSaleData, image: downloadURL } as typeof flashSaleData & {
@@ -174,9 +175,10 @@ const CreateFlashSale = () => {
       } else {
         if (!file) throw new Error('Please upload an image for the new flash sale');
         // Proceed with new flash sale creation, including initial image upload
-        const storageRef = ref(getStorage(), `flashSales/${file.name}`);
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(getStorage(), `flashSales/${file.name}`);
+        // const snapshot = await uploadBytes(storageRef, file);
+        // const downloadURL = await getDownloadURL(snapshot.ref);
+        const downloadURL = await uploadFile(file, "image")
         flashSaleData = { ...flashSaleData, image: downloadURL } as typeof flashSaleData & {
           image: string;
         };
