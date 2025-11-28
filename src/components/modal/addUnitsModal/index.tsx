@@ -145,10 +145,10 @@ const AddUnitsModal = ({
         //  console.log(index, units, setUnits)
         setUnits(unitData, index);
       } else {
-        if (!file) {
-          toast.error('Please upload an image for the new unit');
-          throw new Error('Please upload an image for the new unit');
-        }
+        // if (!file) {
+        //   toast.error('Please upload an image for the new unit');
+        //   throw new Error('Please upload an image for the new unit');
+        // }
         // const downloadURL = await uploadFile(file, "image")
         // Proceed with new unit creation, including initial image upload
         // const storageRef = ref(
