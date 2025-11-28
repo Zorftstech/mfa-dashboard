@@ -103,7 +103,7 @@ const AddUnitsModal = ({
       price: editData?.price || 0,
       isDiscounted: editData?.isDiscounted === undefined ? false : editData?.isDiscounted,
       unit: editData?.unit || '',
-      image: editData?.image || '',
+      // image: editData?.image || '',
       // markedUpPrice: editData?.markedUpPrice || 0,
       quantity: Number(editData?.quantity || 0),
       loystarId: editData?.loystarId || new Date().getMilliseconds(),
@@ -121,11 +121,11 @@ const AddUnitsModal = ({
       let unitData = {
         ...editData,
         ...data,
-        image: imageUrl || '',
+        image: '',
       };
       if (isEditing && file) {
 
-        const downloadURL = await uploadFile(file, "image")
+        // const downloadURL = await uploadFile(file, "image")
         // const storageRef = ref(
         //   getStorage(),
         //   `products/units/${file.name}${Date.now().toLocaleString()}${unitData.unit}`,
@@ -134,9 +134,7 @@ const AddUnitsModal = ({
         // const downloadURL = await getDownloadURL(snapshot.ref);
 
         // Add or update the image URL in product data
-        unitData = { ...unitData, image: downloadURL } as typeof unitData & {
-          image: string;
-        };
+        unitData = { ...unitData }
       }
 
       if (isEditing) {
@@ -151,7 +149,7 @@ const AddUnitsModal = ({
           toast.error('Please upload an image for the new unit');
           throw new Error('Please upload an image for the new unit');
         }
-        const downloadURL = await uploadFile(file, "image")
+        // const downloadURL = await uploadFile(file, "image")
         // Proceed with new unit creation, including initial image upload
         // const storageRef = ref(
         //   getStorage(),
@@ -159,9 +157,7 @@ const AddUnitsModal = ({
         // );
         // const snapshot = await uploadBytes(storageRef, file);
         // const downloadURL = await getDownloadURL(snapshot.ref);
-        unitData = { ...unitData, image: downloadURL } as typeof unitData & {
-          image: string;
-        };
+        unitData = { ...unitData } 
 
         setUnits(unitData);
       }
@@ -182,32 +178,7 @@ const AddUnitsModal = ({
       </DialogTrigger>
       <DialogContent className=' overflow-auto overflow-x-hidden bg-white      md:!max-w-[900px]'>
         <section className='flex flex-col  gap-4 px-8  '>
-          <div className='flex items-end justify-between'>
-            <section className=' rounded-xl    '>
-              <section {...getRootProps()}>
-                <input {...getInputProps()} />
-                {imageUrl ? (
-                  <div className='relative h-[10rem] w-[10rem] rounded-full  hover:cursor-pointer'>
-                    <img
-                      src={imageUrl}
-                      alt='Selected'
-                      className=' h-full w-full rounded-full object-cover object-center '
-                    />{' '}
-                    {/* Display the selected image */}
-                    <div className='absolute bottom-[5%] right-0 h-fit rounded-full  bg-slate-100 p-2'>
-                      <Icon name='Camera' svgProp={{ className: 'w-6 h-6' }}></Icon>
-                    </div>
-                  </div>
-                ) : isDragActive ? (
-                  <p>Drop the files here ...</p>
-                ) : (
-                  <div className='flex items-center justify-center gap-3 rounded-full border-2 border-dashed bg-gray-100 px-14 py-12 outline-dashed outline-2  outline-gray-500 hover:cursor-pointer'>
-                    <Icon name='Camera' svgProp={{ className: 'w-12' }}></Icon>
-                  </div>
-                )}
-              </section>
-            </section>
-          </div>
+          
           <Form {...unitForm}>
             <form onSubmit={unitForm.handleSubmit(onSubmit)} className={cn('flex flex-col gap-8')}>
               <section className=' grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6  '>

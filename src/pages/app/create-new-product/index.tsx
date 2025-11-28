@@ -87,7 +87,6 @@ export interface Units {
   quantity: number;
   loystarId?: number;
   loystarProductId?: number;
-
 }
 interface ErrorMessages {
   [key: string]: string[];
@@ -152,13 +151,16 @@ const CreateNewProduct = () => {
 
     const categoryArray: any = [];
     querySnapshot.forEach((doc) => {
+      const data = doc?.data();
       const createdDate = getCreatedDateFromDocument(doc as any);
       // console.log("doc", doc.data())
-      categoryArray.push({
-        id: doc.id,
-        ...doc.data(),
-        createdDate,
-      });
+      if (!data?.isAnnouncement) {
+        categoryArray.push({
+          id: doc.id,
+          ...doc.data(),
+          createdDate,
+        });
+      }
     });
 
     return categoryArray;
@@ -190,7 +192,6 @@ const CreateNewProduct = () => {
       price: Number(editData?.price || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
       quantity: Number(editData?.quantity || 0),
-      
 
       // rating: Number(editData?.rating || 0),
     },
@@ -201,7 +202,7 @@ const CreateNewProduct = () => {
 
     let firebaseAddedUnits: TFirebaseProduct['units'][0][] = [];
 
-    const productId = editData?.loystarId ?? new Date().getMilliseconds()
+    const productId = editData?.loystarId ?? new Date().getMilliseconds();
 
     try {
       if (!isEditing) {
@@ -216,14 +217,11 @@ const CreateNewProduct = () => {
         }
       }
 
-    
-
       if (unitsArrary?.length > 0) {
         firebaseAddedUnits = unitsArrary.map((unit) => {
           return {
             ...unit,
             loystarProductId: productId,
-           
           };
         });
       }
@@ -258,7 +256,7 @@ const CreateNewProduct = () => {
         // const storageRef = ref(getStorage(), `products/${file.name}`);
         // const snapshot = await uploadBytes(storageRef, file);
         // const downloadURL = await getDownloadURL(snapshot.ref);
-        const downloadURL = await uploadFile(file, "image")
+        const downloadURL = await uploadFile(file, 'image');
         // Add or update the image URL in product data
         productData = { ...productData, image: downloadURL } as typeof productData & {
           image: string;
@@ -280,7 +278,7 @@ const CreateNewProduct = () => {
         // const storageRef = ref(getStorage(), `products/${file.name}`);
         // const snapshot = await uploadBytes(storageRef, file);
         // const downloadURL = await getDownloadURL(snapshot.ref);
-        const downloadURL = await uploadFile(file, "image")
+        const downloadURL = await uploadFile(file, 'image');
         productData = { ...productData, image: downloadURL } as typeof productData & {
           image: string;
         };
@@ -308,8 +306,6 @@ const CreateNewProduct = () => {
     }
   }
 
-  
-
   function updateUnitsArray(unit: Units, index?: number) {
     if (typeof index === 'number' && index !== -1) {
       setUnitsArray(
@@ -327,7 +323,7 @@ const CreateNewProduct = () => {
     }
   }
 
-  console.log("categories", categories)
+  console.log('categories', categories);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 px-container-base pb-[2.1rem] md:px-container-md'>

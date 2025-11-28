@@ -88,13 +88,16 @@ const Categories = () => {
 
     const categoryArray: any = [];
     querySnapshot.forEach((doc) => {
+      const data = doc.data()
       const createdDate = getCreatedDateFromDocument(doc as any);
       // console.log("doc", doc.data())
+     if (!data?.isAnnouncement) {
       categoryArray.push({
         id: doc.id,
         ...doc.data(),
         createdDate,
       });
+     }
     });
 
     return categoryArray;

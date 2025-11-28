@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { processError } from 'helper/error';
 import AnnouncementToggle from './annoucement';
 import ShowSections from './showSections';
+import AnnouncementsPage from './AnnouncementPage';
 type filterTypes = 'All' | 'Upcoming' | 'Completed';
 
 const generalFilters: filterTypes[] = ['All', 'Upcoming', 'Completed'];
@@ -18,16 +19,7 @@ const TogglePage = () => {
   const [currFilter, setCurrFilter] = useState<filterTypes>('All');
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 overflow-auto px-container-md pb-[2.1rem]'>
-      <FunkyPagesHero
-        description='List of settings and configurations for the web app'
-        title='Toggle Web App Sections'
-      />
-      <h3 className='text-lg font-bold'>Announcement Bar</h3>
-      <AnnouncementToggle />
-      <h3 className='text-lg font-bold'>Sections</h3>
-      <ShowSections />
-    </div>
+    <AnnouncementsPage/>
   );
 };
 

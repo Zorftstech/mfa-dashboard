@@ -108,52 +108,43 @@ const CreateCategory = () => {
     },
   });
 
-
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
     let downloadURL = imageUrl;
-  
 
     try {
-
       if (!isEditing) {
         const categoriesRef = collection(db, 'categories');
         const q = query(categoriesRef, where('name', '==', data.categoryName));
-  
+
         const querySnapshot = await getDocs(q);
-  
+
         if (!querySnapshot.empty) {
           toast.error('Category name already exists!');
           return setFormIsLoading(false);
         }
       }
-  
-  
-  
-   
-  
-   
-  
+
       if (file) {
-         downloadURL = await uploadFile(file, "image")
+        downloadURL = await uploadFile(file, 'image');
         // const refinedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         // const storageRef = ref(getStorage(), `categories/${refinedFileName}`);
         // const snapshot = await uploadBytes(storageRef, file);
         // downloadURL = await getDownloadURL(snapshot.ref);
       }
-  
+
       if (!downloadURL) {
         toast.error('Image is required.');
         setFormIsLoading(false);
         return;
       }
-      
+
       const categoryData = {
         name: data.categoryName,
         desc: data.description,
         image: downloadURL,
         slug: splitStringBySpaceAndReplaceWithDash(data.categoryName),
-        loystarId: new Date().getMilliseconds()
+        loystarId: new Date().getMilliseconds(),
       };
 
       if (isEditing && editData?.id) {
