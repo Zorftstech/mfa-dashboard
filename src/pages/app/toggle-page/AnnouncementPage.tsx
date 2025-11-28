@@ -114,8 +114,9 @@ export default function AnnouncementsPage() {
   };
 
   const handleModalClose = () => {
-    setIsCreateModalOpen(false);
     setEditingAnnouncement(null);
+    setIsCreateModalOpen(false);
+   
   };
 
   const handleSuccess = () => {

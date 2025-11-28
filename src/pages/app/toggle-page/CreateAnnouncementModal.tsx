@@ -81,7 +81,7 @@ export default function CreateAnnouncementModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
 
-  console.log(selectedProducts, 'erer');
+  console.log(selectedProducts, 'erer', editData);
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['get-products'],
@@ -157,7 +157,6 @@ export default function CreateAnnouncementModal({
     }
   }, [editData]);
 
-
   const toggleProductSelection = (productId: number) => {
     setSelectedProducts((prev) =>
       prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId],
@@ -214,7 +213,7 @@ export default function CreateAnnouncementModal({
         availableDate: data.availableDate,
         expiryDate: data.expiryDate,
         products: selectedProducts,
-        createdAt: isEditing ? editData.createdAt : new Date(),
+
         updatedAt: new Date(),
       };
 
@@ -225,7 +224,7 @@ export default function CreateAnnouncementModal({
       } else {
         const collectionRef = collection(db, 'categories');
         const docRef = doc(collectionRef);
-        await setDoc(docRef, announcementData);
+        await setDoc(docRef, { ...announcementData, createdAt: new Date() });
         toast.success('Announcement created successfully');
       }
 
