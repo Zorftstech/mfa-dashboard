@@ -21,7 +21,7 @@ import { CalendarIcon, Search, X } from 'lucide-react';
 import { Calendar } from 'components/shadcn/ui/calendar';
 import { format } from 'date-fns';
 import { processError } from 'helper/error';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'helper';
 import {
   Dialog,
@@ -77,13 +77,12 @@ export default function CreateAnnouncementModal({
   const [formIsLoading, setFormIsLoading] = useState(false);
   const [file, setFile] = useState<any>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(editData?.image || null);
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(editData?.products || []);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>(editData?.products || []);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
 
   console.log(selectedProducts, 'erer');
 
-  // Fetch products from newProducts collection
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['get-products'],
     queryFn: async () => {
@@ -158,20 +157,19 @@ export default function CreateAnnouncementModal({
     }
   }, [editData]);
 
-  console.log(editData);
 
-  const toggleProductSelection = (productId: string) => {
+  const toggleProductSelection = (productId: number) => {
     setSelectedProducts((prev) =>
       prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId],
     );
   };
 
-  const removeProduct = (productId: string) => {
+  const removeProduct = (productId: number) => {
     setSelectedProducts((prev) => prev.filter((id) => id !== productId));
   };
 
   const getSelectedProductDetails = () => {
-    return products.filter((product) => selectedProducts.includes(product.id));
+    return products.filter((product) => selectedProducts.includes(product.loystarId));
   };
 
   const filteredProducts = products.filter((product) =>
@@ -245,7 +243,9 @@ export default function CreateAnnouncementModal({
     }
   }
 
-  const selectedProductDetails = getSelectedProductDetails();
+  const selectedProductDetails = useMemo(() => {
+    return getSelectedProductDetails();
+  }, [selectedProducts]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -304,7 +304,7 @@ export default function CreateAnnouncementModal({
                     <span className='max-w-[100px] truncate'>{product.name}</span>
                     <button
                       type='button'
-                      onClick={() => removeProduct(product.id)}
+                      onClick={() => removeProduct(product.loystarId)}
                       className='text-gray-500 hover:text-red-500'
                     >
                       <X className='h-3 w-3' />
@@ -417,15 +417,15 @@ export default function CreateAnnouncementModal({
                             <div
                               key={product.id}
                               className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
-                                selectedProducts.includes(product.id)
+                                selectedProducts.includes(product.loystarId)
                                   ? 'border-primary bg-blue-50'
                                   : 'border-gray-200 hover:border-gray-300'
                               }`}
-                              onClick={() => toggleProductSelection(product.id)}
+                              onClick={() => toggleProductSelection(product.loystarId)}
                             >
                               <Checkbox
-                                checked={selectedProducts.includes(product.id)}
-                                onCheckedChange={() => toggleProductSelection(product.id)}
+                                checked={selectedProducts.includes(product.loystarId)}
+                                onCheckedChange={() => toggleProductSelection(product.loystarId)}
                               />
                               <img
                                 src={product.image}
