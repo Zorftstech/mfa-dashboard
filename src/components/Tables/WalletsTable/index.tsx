@@ -66,6 +66,7 @@ import FeaturedLoader from 'components/Loaders/FeaturedLoader';
 import { Filter } from 'lucide-react';
 import SearchComboBox from 'components/general/SearchComboBox';
 import { Check } from 'lucide-react';
+import * as XLSX from 'xlsx';
 export type User = {
   id: string;
   number: string;
@@ -81,6 +82,23 @@ export type User = {
 function WalletsTableComponent() {
   const navigate = useNavigate();
   const [users, setUsers] = React.useState<any[]>([]);
+
+  const handleExport = () => {
+    if (users.length === 0) return;
+    const exportData = users.map((user) => ({
+      Name: user.name,
+      Email: user.email,
+      'Total Deposit': formatToNaira(user.totalDeposit),
+      'Total Spent': formatToNaira(user.totalSpent),
+      'Remaining Balance': formatToNaira(user.balance),
+      Created: user.created,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'User Wallets');
+    XLSX.writeFile(workbook, 'User_Wallets.xlsx');
+  };
 
   // refactor this
   const deletePage = async (id: string) => {
@@ -320,7 +338,12 @@ function WalletsTableComponent() {
         <h3 className=' mb-6  text-base font-semibold md:mb-16 md:text-2xl'>User Wallets</h3>
         <div>
           <p className='mb-6 hidden text-end text-[0.75rem] text-gray-400 md:block'>
-            {formatCurrentDateTime()}
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </p>
           <div className='flex items-center  gap-3'>
             <SearchComboBox
@@ -378,6 +401,12 @@ function WalletsTableComponent() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+             <button
+        onClick={handleExport}
+        className=' w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '
+      >
+        Export
+      </button>
           </div>
         </div>
       </div>
@@ -457,9 +486,7 @@ function WalletsTableComponent() {
           </Button>
         </div>
       </div>
-      <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
-        Export
-      </button>
+     
     </div>
   );
 }

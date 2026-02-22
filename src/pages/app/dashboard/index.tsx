@@ -149,7 +149,7 @@ const Dashboard = () => {
         <div>
           <h3 className=' mb-16 text-base font-semibold md:text-2xl'>
             Welcome
-            {authDetails?.displayName ? ` ${authDetails?.displayName}` : ' Edmund'}
+            {authDetails?.displayName ? ` ${authDetails?.displayName}` : ' Admin'}
           </h3>
           <InlineLoader isLoading={isLoading}>
             <div
@@ -183,7 +183,12 @@ const Dashboard = () => {
         </div>
         <div className='flex flex-col gap-4'>
           <p className='hidden text-end text-[0.75rem] text-gray-400 md:block'>
-            Today: 10:23am, 30th Oct 2023
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </p>
           <div className='mb-12 hidden gap-3  md:flex'>
             <DropdownMenu>

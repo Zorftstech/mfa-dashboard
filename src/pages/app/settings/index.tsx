@@ -1,46 +1,17 @@
-import { TabsContent } from 'components/shadcn/ui/tabs';
-import { Button } from 'components/shadcn/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormDescription,
-  FormLabel,
-} from 'components/shadcn/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from 'components/shadcn/ui/select';
-import { Input } from 'components/shadcn/input';
-// 
-import { ChevronLeft, ChevronRightIcon } from 'lucide-react';
-import React, { useState } from 'react';
-import { CountryDropdown, RegionDropdown, CountryRegionData } from 'react-country-region-selector';
+
+import { useState } from 'react';
 import { cn } from 'lib/utils';
-import { Checkbox } from 'components/shadcn/ui/checkbox';
 import 'react-phone-input-2/lib/style.css';
 import InlineLoader from 'components/Loaders/InlineLoader';
-import useUserLocation from 'hooks/useUserLoction';
-import { useEffect } from 'react';
-import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import toast from 'helper';
-import Spinner from 'components/shadcn/ui/spinner';
 import { processError } from 'helper/error';
-import CONSTANTS from 'constant';
-import { Switch } from 'components/shadcn/switch';
 import useStore from 'store';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db, authFirebase } from 'firebase';
 
 const FormSchema = z.object({
@@ -50,7 +21,7 @@ const FormSchema = z.object({
 });
 
 const AccountSettingPage = () => {
-  const { location } = useUserLocation();
+
   const navigate = useNavigate();
   const { currentUser, authDetails, setAuthDetails } = useStore((state) => state);
 
@@ -62,6 +33,8 @@ const AccountSettingPage = () => {
       fullName: authDetails?.displayName,
     },
   });
+
+
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     setFormIsLoading(true);
@@ -93,7 +66,7 @@ const AccountSettingPage = () => {
   const resetPassword = async () => {
     setFormIsLoading(true);
     try {
-      const data = await sendPasswordResetEmail(authFirebase, authDetails.email ?? ' ');
+      const data = await sendPasswordResetEmail(authFirebase, currentUser.user?.email ?? ' ');
       toast.success('Password reset link sent successfully');
     } catch (error) {
       processError(error);
@@ -101,8 +74,7 @@ const AccountSettingPage = () => {
 
     setFormIsLoading(false);
   };
-  console.log('currentUser', currentUser);
-  console.log('authDetails', authDetails);
+
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6  overflow-auto px-container-base pb-[2.1rem] md:px-container-md'>
@@ -128,7 +100,42 @@ const AccountSettingPage = () => {
         </div>
       </div>
 
-      <Form {...form}>
+    
+      <p className='text-lg font-semibold'>Password changes</p>
+      <button
+        onClick={resetPassword}
+        type='button'
+        className={cn(
+          `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
+            form.formState.isSubmitting || formIsLoading
+              ? 'cursor-not-allowed bg-gray-500 font-[700]'
+              : 'cursor-pointer'
+          } `,
+        )}
+        disabled={form.formState.isSubmitting || formIsLoading}
+      >
+        {form.formState.isSubmitting || formIsLoading ? (
+          <div className='px-5 py-1'>
+            <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
+          </div>
+        ) : (
+          <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
+            Request Password Change Link
+          </span>
+        )}
+      </button>
+    
+    </div>
+  );
+};
+
+export default AccountSettingPage;
+
+
+
+/**
+ 
+  <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className={cn(
@@ -197,36 +204,4 @@ const AccountSettingPage = () => {
           </button>
         </form>
       </Form>
-      <p className='text-lg font-semibold'>Password changes</p>
-      <button
-        onClick={resetPassword}
-        type='button'
-        className={cn(
-          `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
-            form.formState.isSubmitting || formIsLoading
-              ? 'cursor-not-allowed bg-gray-500 font-[700]'
-              : 'cursor-pointer'
-          } `,
-        )}
-        disabled={form.formState.isSubmitting || formIsLoading}
-      >
-        {form.formState.isSubmitting || formIsLoading ? (
-          <div className='px-5 py-1'>
-            <div className='h-4 w-4 animate-spin  rounded-full border-t-4 border-white'></div>
-          </div>
-        ) : (
-          <span className='text-sm font-[400] leading-[24px]  tracking-[0.4px] text-white '>
-            Request Password Change Link
-          </span>
-        )}
-      </button>
-      <p className='invisible'>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus quam nulla illo dolore?
-        Voluptatibus in blanditiis deleniti quasi a ex culpa quae, aliquid, dolores unde, corrupti
-        iusto. Asperiores ipsa dignissimos temporibus error possimus. Asperiores, eos!
-      </p>
-    </div>
-  );
-};
-
-export default AccountSettingPage;
+ */

@@ -113,7 +113,7 @@ const CreateBlog = () => {
     let downloadURL = imageUrl;
 
     if (file) {
-       downloadURL = await uploadFile(file, "image")
+      downloadURL = await uploadFile(file, "image")
       // const storageRef = ref(getStorage(), `posts/${file.name}`);
       // const snapshot = await uploadBytes(storageRef, file);
       // downloadURL = await getDownloadURL(snapshot.ref);
@@ -188,7 +188,7 @@ const CreateBlog = () => {
           {isEditing && (
             <DeleteModal
               btnText='Delete Post'
-              collectionName='categories'
+              collectionName='posts'
               documentId={editData?.id}
             />
           )}
@@ -266,10 +266,9 @@ const CreateBlog = () => {
           <button
             type='submit'
             className={cn(
-              `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${
-                form.formState.isSubmitting
-                  ? 'cursor-not-allowed bg-gray-500 font-[700]'
-                  : 'cursor-pointer'
+              `group flex w-fit items-center justify-center gap-2 rounded-lg bg-primary-1 px-4 py-3 transition-all duration-300 ease-in-out hover:opacity-90 xm:px-6 xm:py-3 ${form.formState.isSubmitting
+                ? 'cursor-not-allowed bg-gray-500 font-[700]'
+                : 'cursor-pointer'
               } `,
             )}
             disabled={form.formState.isSubmitting}

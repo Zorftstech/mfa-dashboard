@@ -102,15 +102,15 @@ const AppNav = () => {
             </button>
             <DropdownMenu>
               <DropdownMenuTrigger
-                className={`focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}
+                className={`border rounded-full focus-within:outline-0 focus-within:ring-0 focus:ring-0 active:ring-0`}
               >
                 <Avatar>
                   <AvatarImage
-                    src={authDetails?.photoURL || 'https://github.com/shadcn.png'}
+                    src={Logo}
                     alt='user'
                     className='h-full w-full rounded-full object-cover'
                   />
-                  <AvatarFallback>AU</AvatarFallback>
+                  <AvatarFallback>AD</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
 
@@ -118,11 +118,11 @@ const AppNav = () => {
                 <DropdownMenuLabel className='flex items-center gap-[0.625rem] !px-[1.25rem] !py-[0.875rem]'>
                   <Avatar>
                     <AvatarImage
-                      src={authDetails?.photoURL || 'https://github.com/shadcn.png'}
+                      src={Logo}
                       alt='user'
                       className='h-full w-full rounded-full object-cover'
                     />
-                    <AvatarFallback>AU</AvatarFallback>
+                    <AvatarFallback>AD</AvatarFallback>
                   </Avatar>
                   <div className='flex flex-col text-[14px] tracking-[0.15px]'>
                     <h6 className='font-inter font-[600] text-textColor-primary'>
@@ -133,7 +133,7 @@ const AppNav = () => {
                     </span>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className='border-b border-b-extraColor-divider' />
+                {/* <DropdownMenuSeparator className='border-b border-b-extraColor-divider' />
                 {menuLinks['level1']?.map((i, idx) => (
                   <DropdownMenuItem
                     onClick={() => {
@@ -149,7 +149,7 @@ const AppNav = () => {
                       {tags[i?.title]}
                     </div>
                   </DropdownMenuItem>
-                ))}
+                ))} */}
 
                 <DropdownMenuSeparator className='border-b border-b-extraColor-divider' />
 

@@ -34,7 +34,7 @@ type ISideNavTitles =
   | 'Farm Off-Take'
   | 'FAQ'
   | 'Wallets'
-  | 'Toggle Page'
+  | 'Announcements'
   | 'Delivery Fees';
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
@@ -234,7 +234,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
   // },
   {
     link: 'toggle',
-    title: 'Toggle Page',
+    title: 'Announcements',
     icons: (
       <Icon
         svgProp={{
