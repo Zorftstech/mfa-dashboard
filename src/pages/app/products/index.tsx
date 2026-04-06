@@ -48,6 +48,7 @@ export interface TFirebaseProduct {
   name: string;
   nameYourPrice: boolean;
   price: number;
+  maximumPrice?: number;
   quantity: number;
   rating: number;
   ratingCount: number;
@@ -175,7 +176,6 @@ const ProductsPage = () => {
 
   const sortedAndFilteredProducts = useSortAndSearch(allProducts, searchTerm, sortCriterion);
 
-  
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 overflow-auto  px-container-base pb-[2.1rem] md:px-container-md'>
       <div className='justify-between md:flex '>

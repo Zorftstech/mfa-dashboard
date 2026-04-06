@@ -64,7 +64,6 @@ const Login = () => {
       // setAuthDetails(data);
       setLoggedIn(true);
       setCurrentUser(data);
-      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
       // Create a reference to the document
       const docRef = doc(db, 'users', data.user.uid);
 
@@ -72,17 +71,24 @@ const Login = () => {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         // Document exists, use the data
+
+        console.log("admin", docSnap.data())
         setAuthDetails({
           ...docSnap.data(),
           ...data['_tokenResponse'],
+          uid: data.user.uid,
           id: data.user.uid,
         });
-        return docSnap.data(); // Return the document data
       } else {
         // Document does not exist
         console.log('No such document!');
-        return null;
+        setAuthDetails({
+          ...data['_tokenResponse'],
+          uid: data.user.uid,
+          id: data.user.uid,
+        });
       }
+      navigate(`/app/${CONSTANTS.ROUTES['dashboard']}`);
     },
     onError: (err) => {
       processError(err);

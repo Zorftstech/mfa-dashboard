@@ -8,6 +8,7 @@ import { Checkbox } from 'components/shadcn/checkbox';
 import { db } from 'firebase';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { processError } from 'helper/error';
+import toast from 'helper';
 import { useQuery } from '@tanstack/react-query';
 import ContentLoader from 'components/general/ContentLoader';
 import { Order } from 'types';
@@ -86,23 +87,26 @@ const ViewOrderDetailsModal = ({
 
 
 
-  const updateOrderStatus = useMutation(
-    async (newStatus: string) => {
+  const updateOrderStatus = useMutation({
+    mutationFn: async (newStatus: string) => {
       if (order?.id) {
         setUpdating(true);
         const orderRef = doc(db, 'orders', order.id);
-        await updateDoc(orderRef, { status: newStatus });
-        refetch();
-        refetchAllOrders();
-        setUpdating(false);
+        await updateDoc(orderRef, { status: newStatus.toLowerCase() });
+        return newStatus;
       }
     },
-    {
-      onError: (err) => {
-        processError(err);
-      },
+    onSuccess: () => {
+      toast.success('Order status updated successfully');
+      refetch();
+      refetchAllOrders();
+      setUpdating(false);
     },
-  );
+    onError: (err) => {
+      setUpdating(false);
+      processError(err);
+    },
+  });
 
   const handleStatusChange = (value: string) => {
     setOrderStatus(value);
@@ -176,6 +180,7 @@ const ViewOrderDetailsModal = ({
                           </SelectTrigger>
 
                           <SelectContent>
+                            <SelectItem value='success'>Success</SelectItem>
                             <SelectItem value='pending'>Pending</SelectItem>
                             <SelectItem value='en route'>En route</SelectItem>
                             <SelectItem value='delivered'>Delivered</SelectItem>

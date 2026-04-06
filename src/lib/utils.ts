@@ -22,8 +22,8 @@ export function getCreatedDateFromDocument(documentData: DocumentData): string {
   return formatDate(createdDate.toDateString());
 }
 export const checkStatus = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'order received':
+  switch (status?.toLowerCase()) {
+    case 'success':
       return 'text-green-600';
     case 'pending':
       return 'text-yellow-400';

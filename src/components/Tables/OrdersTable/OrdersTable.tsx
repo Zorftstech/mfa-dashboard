@@ -79,6 +79,7 @@ export type User = {
 function OrderTableComponent() {
   const navigate = useNavigate();
   const [orders, setOrders] = React.useState<any[]>([]);
+  const { authDetails } = useStore();
 
   // refactor this
   const deletePage = async (id: string) => {
@@ -113,11 +114,13 @@ function OrderTableComponent() {
 
     return orders;
   }
-  const { isLoading, data, refetch } = useQuery({
-    queryKey: ['get-orders'],
-    queryFn: () => fetchOrders(),
-    onSuccess: (data) => {
 
+  const { isLoading, data, refetch } = useQuery({
+    queryKey: ['get-orders', authDetails?.uid],
+    queryFn: () => fetchOrders(),
+    enabled: !!authDetails?.uid,
+    onSuccess: (data) => {
+      console.log("data resp",data)
       setOrders(data);
     },
 

@@ -112,8 +112,33 @@ const FormSchema = z.object({
   }),
 
   minimumPrice: z.number().optional(),
+  maximumPrice: z.number().optional(),
   nameYourPrice: z.boolean().default(false).optional(),
   inStock: z.boolean().default(true).optional(),
+}).superRefine((data, ctx) => {
+  if (data.nameYourPrice) {
+    if (data.minimumPrice === undefined || data.minimumPrice <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['minimumPrice'],
+        message: 'Minimum price is required',
+      });
+    }
+    if (data.maximumPrice === undefined || data.maximumPrice <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['maximumPrice'],
+        message: 'Maximum price is required',
+      });
+    }
+    if (data.minimumPrice !== undefined && data.maximumPrice !== undefined && data.minimumPrice > data.maximumPrice) {
+      ctx.addIssue({
+         code: z.ZodIssueCode.custom,
+         path: ['minimumPrice'],
+         message: 'Minimum price cannot be greater than maximum price',
+      });
+    }
+  }
 });
 const CreateNewProduct = () => {
   const { location } = useUserLocation();
@@ -188,6 +213,7 @@ const CreateNewProduct = () => {
       productName: editData?.name || '',
       description: editData?.desc || '',
       minimumPrice: Number(editData?.minimumPrice || 0),
+      maximumPrice: Number(editData?.maximumPrice || 0),
       costprice: Number(editData?.costprice || 0),
       price: Number(editData?.price || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
@@ -236,6 +262,7 @@ const CreateNewProduct = () => {
         costprice: Number(data.costprice),
         quantity: Number(data.quantity),
         minimumPrice: Number(data.minimumPrice),
+        maximumPrice: Number(data.maximumPrice),
         nameYourPrice: data.nameYourPrice ? true : false,
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
         units: firebaseAddedUnits,
@@ -629,34 +656,63 @@ const CreateNewProduct = () => {
               )}
             />
 
-            {form.getValues('nameYourPrice') && (
-              <FormField
-                control={form.control}
-                name='minimumPrice'
-                render={({ field }) => (
-                  <FormItem>
-                    <div className='relative'>
-                      <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
-                        Minimum Price (NGN)
-                      </label>
-                      <FormControl>
-                        <Input
-                          className='py-6 text-base placeholder:text-sm  '
-                          {...field}
-                          placeholder='Set minimum price'
-                          type='number'
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value === '' ? '' : Number(value));
-                          }}
-                          value={field.value}
-                        />
-                      </FormControl>
-                    </div>
-                    <FormMessage className='mt-1 text-sm' />
-                  </FormItem>
-                )}
-              />
+            {form.watch('nameYourPrice') && (
+              <>
+                <FormField
+                  control={form.control}
+                  name='minimumPrice'
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className='relative'>
+                        <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                          Minimum Price (NGN)
+                        </label>
+                        <FormControl>
+                          <Input
+                            className='py-6 text-base placeholder:text-sm  '
+                            {...field}
+                            placeholder='Set minimum price'
+                            type='number'
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === '' ? '' : Number(value));
+                            }}
+                            value={field.value}
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage className='mt-1 text-sm' />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='maximumPrice'
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className='relative'>
+                        <label className='mb-2 inline-block rounded-full bg-white px-1 text-sm font-semibold   '>
+                          Maximum Price (NGN)
+                        </label>
+                        <FormControl>
+                          <Input
+                            className='py-6 text-base placeholder:text-sm  '
+                            {...field}
+                            placeholder='Set maximum price'
+                            type='number'
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value === '' ? '' : Number(value));
+                            }}
+                            value={field.value}
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage className='mt-1 text-sm' />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
           </section>
         </form>
