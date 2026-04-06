@@ -39,6 +39,7 @@ export type routePathTypes =
   | 'toggle'
   | 'wallets'
   | 'analytics'
+  | 'subscriptions'
   | 'delivery-fee';
 
 export interface routesInterface<T> {
@@ -127,6 +128,7 @@ export interface productInterface {
   categories: Array<string>;
   date_created: string;
   last_updated: string;
+  is_subscription_enabled?: boolean;
   user_id: string;
   photos: Array<{
     model_name: string;
@@ -214,6 +216,23 @@ export interface Order {
   status: string;
   createdDate?: string;
   created_date?: string | { seconds: number; nanoseconds: number };
+  isSubscriptionOrder?: boolean;
+  subscriptionId?: string;
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  userEmail?: string;
+  userName?: string;
+  productId: string;
+  productName: string;
+  productImage?: string;
+  status: 'active' | 'paused' | 'stopped' | 'failed';
+  nextBillingDate: any; // Firestore Timestamp
+  nextDeliveryDate: any; // Firestore Timestamp
+  amount: number;
+  created_date: any; // Firestore Timestamp
 }
 
 export interface Category {

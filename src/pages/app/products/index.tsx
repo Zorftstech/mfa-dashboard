@@ -58,6 +58,7 @@ export interface TFirebaseProduct {
   created_date: FieldValue;
   costprice: number;
   createdDate: string;
+  is_subscription_enabled?: boolean;
   category: {
     desc: string;
     image: string;

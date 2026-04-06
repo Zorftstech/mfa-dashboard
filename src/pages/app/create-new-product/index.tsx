@@ -115,6 +115,7 @@ const FormSchema = z.object({
   maximumPrice: z.number().optional(),
   nameYourPrice: z.boolean().default(false).optional(),
   inStock: z.boolean().default(true).optional(),
+  isSubscriptionEnabled: z.boolean().default(false).optional(),
 }).superRefine((data, ctx) => {
   if (data.nameYourPrice) {
     if (data.minimumPrice === undefined || data.minimumPrice <= 0) {
@@ -217,6 +218,7 @@ const CreateNewProduct = () => {
       costprice: Number(editData?.costprice || 0),
       price: Number(editData?.price || 0),
       inStock: editData?.inStock === undefined ? true : editData?.inStock,
+      isSubscriptionEnabled: editData?.is_subscription_enabled === undefined ? false : editData?.is_subscription_enabled,
       quantity: Number(editData?.quantity || 0),
 
       // rating: Number(editData?.rating || 0),
@@ -267,6 +269,7 @@ const CreateNewProduct = () => {
         slug: splitStringBySpaceAndReplaceWithDash(data.productName),
         units: firebaseAddedUnits,
         inStock: data.inStock,
+        is_subscription_enabled: data.isSubscriptionEnabled,
         rating: Number(editData?.rating || 0),
         ratingCount: Number(editData?.ratingCount || 0),
         created_date: serverTimestamp(),
@@ -466,6 +469,22 @@ const CreateNewProduct = () => {
                 <FormItem className='flex flex-row items-center justify-between rounded-lg  p-3 shadow-sm'>
                   <div className=''>
                     <FormLabel className='font-semibold text-black'> In Stock?</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name='isSubscriptionEnabled'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-center justify-between rounded-lg  p-3 shadow-sm'>
+                  <div className=''>
+                    <FormLabel className='font-semibold text-black'>Enable Subscription</FormLabel>
+                    <FormDescription className='text-xs'>Allow users to subscribe to this product monthly</FormDescription>
                   </div>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />

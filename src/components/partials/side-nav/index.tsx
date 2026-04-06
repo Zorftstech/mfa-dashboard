@@ -36,6 +36,7 @@ type ISideNavTitles =
   | 'FAQ'
   | 'Wallets'
   | 'Announcements'
+  | 'Subscribed Products'
   | 'Delivery Fees';
 
 interface extendedRouteInterface extends ItitleLinks<ISideNavTitles, routePathTypes> {
@@ -107,6 +108,20 @@ export const sideNavLinks: extendedRouteInterface[] = [
   {
     link: 'orders',
     title: 'Orders',
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 20.75,
+          className: 'text-current',
+        }}
+        name='OrderIcon'
+      />
+    ),
+  },
+  {
+    link: 'subscriptions',
+    title: 'Subscribed Products',
     icons: (
       <Icon
         svgProp={{
