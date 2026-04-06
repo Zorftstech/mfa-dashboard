@@ -21,16 +21,31 @@ export function getCreatedDateFromDocument(documentData: DocumentData): string {
   const createdDate = new Date(createTime.seconds * 1000); // Convert seconds to milliseconds
   return formatDate(createdDate.toDateString());
 }
+export const statusColor = (status: string) => {
+  switch (status?.toLowerCase()) {
+    case 'success':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    case 'pending':
+      return 'bg-amber-50 text-amber-700 border-amber-100';
+    case 'en route':
+      return 'bg-blue-50 text-blue-700 border-blue-100';
+    case 'delivered':
+      return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    default:
+      return 'bg-gray-50 text-gray-700 border-gray-100';
+  }
+};
+
 export const checkStatus = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'success':
-      return 'text-green-600';
+      return 'text-emerald-600';
     case 'pending':
-      return 'text-yellow-400';
+      return 'text-amber-500';
     case 'en route':
-      return 'text-green-600';
+      return 'text-blue-600';
     case 'delivered':
-      return 'text-blue-500';
+      return 'text-indigo-600';
     default:
       return 'text-red-500';
   }

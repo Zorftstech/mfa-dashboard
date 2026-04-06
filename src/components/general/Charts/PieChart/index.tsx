@@ -28,9 +28,15 @@ const renderCustomizedLabel = ({
     </text>
   );
 };
-export default function PieChartComponent() {
+interface IProps {
+  data: any[];
+  width?: number;
+  height?: number;
+}
+
+export default function PieChartComponent({ data, width = 190, height = 190 }: IProps) {
   return (
-    <PieChart width={190} height={190} className='mx-auto ml-10 text-xs'>
+    <PieChart width={width} height={height} className='mx-auto ml-10 text-xs'>
       <Pie
         data={data}
         cx={100}
@@ -42,7 +48,7 @@ export default function PieChartComponent() {
         dataKey='value'
       >
         {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
         ))}
         <Tooltip />
       </Pie>

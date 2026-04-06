@@ -21,6 +21,7 @@ type ISideNavTitles =
   | 'Master Classes'
   | 'Bi-annual Bootcamps'
   | 'Dashboard'
+  | 'Analytics'
   | 'Users'
   | 'Orders'
   | 'Products'
@@ -57,6 +58,20 @@ export const sideNavLinks: extendedRouteInterface[] = [
           className: 'text-current',
         }}
         name='dashboardIcon'
+      />
+    ),
+  },
+  {
+    link: 'analytics',
+    title: 'Analytics',
+    icons: (
+      <Icon
+        svgProp={{
+          width: 22.75,
+          height: 22.75,
+          className: 'text-current',
+        }}
+        name='FlashSale'
       />
     ),
   },

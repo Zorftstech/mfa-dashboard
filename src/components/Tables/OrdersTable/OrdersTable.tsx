@@ -50,7 +50,7 @@ import { processError } from 'helper/error';
 import Spinner from 'components/shadcn/ui/spinner';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
-import { cn, checkStatus, formatDate, getCreatedDateFromDocument, formatToNaira } from 'lib/utils';
+import { cn, checkStatus, formatDate, getCreatedDateFromDocument, formatToNaira, statusColor } from 'lib/utils';
 import DeleteModal from 'components/modal/DeleteModal';
 import NormalTableInfoCard from 'components/general/tableInfoCard/NormalTableInfoCard';
 import DoubleTableInfoCard from 'components/general/tableInfoCard/DoubleTableInfoCard';
@@ -229,13 +229,14 @@ function OrderTableComponent() {
         );
       },
       cell: ({ row }) => (
-        <div
-          className={`flex w-fit items-center  rounded-2xl    text-[0.71rem] capitalize ${checkStatus(
-            row.getValue('status'),
-          )}`}
+        <span
+          className={cn(
+            'flex w-fit items-center justify-center rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase border shadow-sm',
+            statusColor(row.getValue('status')),
+          )}
         >
-          {row.getValue('status')}
-        </div>
+          {row.getValue('status') || 'Pending'}
+        </span>
       ),
       enableSorting: false,
     },

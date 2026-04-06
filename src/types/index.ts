@@ -38,6 +38,7 @@ export type routePathTypes =
   | 'categories'
   | 'toggle'
   | 'wallets'
+  | 'analytics'
   | 'delivery-fee';
 
 export interface routesInterface<T> {
@@ -211,24 +212,8 @@ export interface Order {
   cartItems: CartItem[];
   email: string;
   status: string;
-  createdDate: string;
-}
-export interface Order {
-  id: string;
-  totalAmount: number;
-  address: string;
-  paymentReference: string;
-  message: string;
-  userId: string;
-  name: string;
-  phone: string;
-  lastName: string;
-  firstName: string;
-  orderId: string;
-  cartItems: CartItem[];
-  email: string;
-  status: string;
-  createdDate: string;
+  createdDate?: string;
+  created_date?: string | { seconds: number; nanoseconds: number };
 }
 
 export interface Category {

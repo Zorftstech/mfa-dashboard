@@ -45,6 +45,11 @@ import { db } from 'firebase';
 import TextContentLoader from 'components/Loaders/TextContentLoader';
 import useStore from 'store';
 import InlineLoader from 'components/Loaders/InlineLoader';
+import { getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { formatToNaira, statusColor } from 'lib/utils';
+import { Order } from 'types';
+import { DateRangePicker } from 'components/general/DateRangePicker';
+import moment from 'moment';
 
 type filterTypes = 'All' | 'Adverts' | 'Blog Posts' | 'BTS' | 'Assets' | 'Upcoming Events';
 
@@ -58,58 +63,138 @@ const generalFilters: filterTypes[] = [
 ];
 
 const Dashboard = () => {
-  const [currFilter, setCurrFilter] = useState<filterTypes>('All');
+  const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null,
+  });
   const [position, setPosition] = useState('bottom');
   //TODO: handle key searchparam of type filterTypes
 
   const { currentUser, authDetails } = useStore((state) => state);
   const navigate = useNavigate();
 
-  async function fetchCountAndPrepareData(
-    collectionName: string,
-    iconName: iconTypes,
-    subHeadingText: string,
-    link: string,
-  ) {
-    const collectionRef = collection(db, collectionName);
-    const snapshot = await getCountFromServer(collectionRef); // Assuming getCountFromServer works as expected
-    return {
-      subHeading: subHeadingText,
-      count: snapshot.data().count,
-      link: link,
-      icons: (
-        <Icon
-          svgProp={{
-            width: 18,
-            height: 18,
-            className: 'text-white color-white fill-white stroke-white  ',
-          }}
-          name={iconName}
-        />
-      ),
-    };
-  }
-
   const { data: counts, isLoading } = useQuery({
     queryKey: ['get-counts'],
     queryFn: async () => {
-      // Define an array of collections and their corresponding UI info
-      const collectionsInfo: { name: string; icon: iconTypes; text: string; link: string }[] = [
-        { name: 'users', icon: 'RegUsers', text: 'Registered Users', link: 'users' },
-        { name: 'userOrders', icon: 'Orders', text: 'Orders', link: 'orders' },
-        { name: 'flashsales', icon: 'FlashSale', text: 'Flash sale products', link: 'flash-sales' },
-        { name: 'products', icon: 'Products', text: 'Products', link: 'products' },
-        { name: 'categories', icon: 'Categories', text: 'Categories', link: 'categories' },
+      const collectionsInfo = [
+        { name: 'users', text: 'Registered Users', link: 'users', icon: 'RegUsers', color: 'blue' },
+        { name: 'orders', text: 'Orders', link: 'orders', icon: 'OrderIcon', color: 'indigo' },
+        { name: 'products', text: 'Products', link: 'products', icon: 'ProductIcon', color: 'amber' },
+        { name: 'categories', text: 'Categories', link: 'categories', icon: 'CategoryIcon', color: 'emerald' },
       ];
 
-      // Use Promise.all to fetch all counts concurrently
       const countsData = await Promise.all(
-        collectionsInfo.map((info) =>
-          fetchCountAndPrepareData(info.name, info.icon, info.text, info.link),
-        ),
+        collectionsInfo.map(async (info) => {
+          const snapshot = await getCountFromServer(collection(db, info.name));
+          return { ...info, count: snapshot.data().count };
+        }),
       );
 
       return countsData;
+    },
+    onError: (err) => {
+      processError(err);
+    },
+  });
+
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard-stats', dateRange],
+    queryFn: async () => {
+      const ordersRef = collection(db, 'orders');
+      const ordersSnap = await getDocs(ordersRef);
+      const allOrders = ordersSnap.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as unknown as Order),
+      );
+
+      const filteredOrders = allOrders.filter((order) => {
+        const rawDate = order.created_date || (order as any).createdDate;
+        if (!rawDate) return false;
+        
+        // Handle Firestore Timestamp or String
+        const orderDate = (rawDate as any)?.seconds 
+          ? new Date((rawDate as any).seconds * 1000) 
+          : new Date(rawDate);
+          
+        if (isNaN(orderDate.getTime())) return false;
+
+        if (dateRange.start && orderDate < dateRange.start) return false;
+        if (dateRange.end && orderDate > dateRange.end) return false;
+        return true;
+      });
+
+      const totalRevenue = filteredOrders.reduce(
+        (acc, order) => acc + (Number(order.totalAmount) || 0),
+        0,
+      );
+      const totalOrdersCount = filteredOrders.length;
+      const avgOrderValue = totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0;
+
+      // Recent Orders (Filtered by timeframe if applicable, but limited to 5)
+      const recentOrders = [...filteredOrders]
+        .sort((a, b) => {
+          const dateA = (a.created_date as any)?.seconds 
+            ? (a.created_date as any).seconds * 1000 
+            : new Date(a.created_date as string).getTime();
+          const dateB = (b.created_date as any)?.seconds 
+            ? (b.created_date as any).seconds * 1000 
+            : new Date(b.created_date as string).getTime();
+          return (dateB || 0) - (dateA || 0);
+        })
+        .slice(0, 5);
+
+      // Chart Data: Daily Revenue with Zero-Filling for specific ranges
+      const dailyRevenue: Record<string, number> = {};
+      
+      if (dateRange.start && dateRange.end) {
+        // Fill zeroes for the entire selected range
+        let current = moment(dateRange.start);
+        const end = moment(dateRange.end);
+        while (current.isSameOrBefore(end)) {
+          dailyRevenue[current.format('YYYY-MM-DD')] = 0;
+          current = current.add(1, 'days');
+        }
+      }
+
+      filteredOrders.forEach((order) => {
+        const rawDate = order.created_date || (order as any).createdDate;
+        const dateKey = (rawDate as any)?.seconds 
+          ? moment((rawDate as any).seconds * 1000).format('YYYY-MM-DD')
+          : moment(rawDate).format('YYYY-MM-DD');
+        dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + (Number(order.totalAmount) || 0);
+      });
+
+      const chartData = Object.entries(dailyRevenue)
+        .map(([date, pv]) => ({ 
+          date, 
+          name: moment(date).format('MMM D'), 
+          pv 
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      // Pie Chart: Status distribution (Reflecting filtered range with standardized colors)
+      const statusCounts: Record<string, number> = {};
+      filteredOrders.forEach((order) => {
+        const status = order.status?.toLowerCase() || 'pending';
+        statusCounts[status] = (statusCounts[status] || 0) + 1;
+      });
+      const pieData = Object.entries(statusCounts).map(([name, value]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value,
+        color:
+          name.toLowerCase() === 'success' ? '#10B981' :
+          name.toLowerCase() === 'pending' ? '#F59E0B' :
+          name.toLowerCase() === 'en route' ? '#3B82F6' : 
+          name.toLowerCase() === 'delivered' ? '#6366F1' : '#94A3B8'
+      }));
+
+      return {
+        totalRevenue,
+        totalOrdersCount,
+        avgOrderValue,
+        recentOrders,
+        chartData,
+        pieData,
+      };
     },
     onError: (err) => {
       processError(err);
@@ -147,42 +232,173 @@ const Dashboard = () => {
       </div> */}
       <section className=' grid gap-[4rem]  rounded-lg md:grid-cols-[2fr_1fr] '>
         <div>
-          <h3 className=' mb-16 text-base font-semibold md:text-2xl'>
-            Welcome
-            {authDetails?.displayName ? ` ${authDetails?.displayName}` : ' Admin'}
-          </h3>
-          <InlineLoader isLoading={isLoading}>
+          <div className='mb-16 flex items-center justify-between'>
+            <h3 className='text-base font-bold md:text-2xl'>
+              Welcome, {authDetails?.displayName ? authDetails.displayName : 'Admin'}
+            </h3>
+            <DateRangePicker onRangeChange={(range) => setDateRange(range)} />
+          </div>
+          <InlineLoader isLoading={isLoading || statsLoading}>
             <div
               className={cn(
-                `}   grid cursor-pointer grid-cols-[1fr] gap-[2rem] rounded-lg rounded-lg  transition-all  duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr]  xxl:grid-cols-[1fr_1fr_1fr]`,
+                'grid cursor-pointer grid-cols-[1fr] gap-[2rem] rounded-lg transition-all duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr] xxl:grid-cols-[1fr_1fr_1fr]',
               )}
             >
+              <div
+                onClick={() => navigate('/app/orders')}
+                className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md'
+              >
+                <div className='flex items-center justify-center rounded-xl bg-emerald-50 px-5 py-5 '>
+                  <Icon
+                    svgProp={{ width: 24, height: 24, className: 'text-emerald-600' }}
+                    name='cashIcon'
+                  />
+                </div>
+                <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                  <p className='text-xl font-black text-emerald-950'>
+                    {formatToNaira(dashboardStats?.totalRevenue || 0)}
+                  </p>
+                  <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>
+                    Total Revenue
+                  </h3>
+                </div>
+              </div>
+
+              <div
+                onClick={() => navigate('/app/orders')}
+                className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md'
+              >
+                <div className='flex items-center justify-center rounded-xl bg-blue-50 px-5 py-5 '>
+                  <Icon
+                    svgProp={{ width: 24, height: 24, className: 'text-blue-600' }}
+                    name='OrderIcon'
+                  />
+                </div>
+                <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                  <p className='text-xl font-black text-blue-950'>
+                    {dashboardStats?.totalOrdersCount || 0}
+                  </p>
+                  <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>
+                    Total Orders
+                  </h3>
+                </div>
+              </div>
+
+              <div className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md'>
+                <div className='flex items-center justify-center rounded-xl bg-amber-50 px-5 py-5 '>
+                  <Icon
+                    svgProp={{ width: 24, height: 24, className: 'text-amber-600' }}
+                    name='billing'
+                  />
+                </div>
+                <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                  <p className='text-xl font-black text-amber-950'>
+                    {formatToNaira(dashboardStats?.avgOrderValue || 0)}
+                  </p>
+                  <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>
+                    Avg. Order Value
+                  </h3>
+                </div>
+              </div>
+
               {counts?.map((item, key) => {
+                const colorMap: Record<string, string> = {
+                  blue: 'bg-blue-50 text-blue-600',
+                  indigo: 'bg-indigo-50 text-indigo-600',
+                  amber: 'bg-amber-50 text-amber-600',
+                  emerald: 'bg-emerald-50 text-emerald-600',
+                };
                 return (
                   <div
                     onClick={() => navigate(`/app/${item.link}`)}
-                    className=' flex items-center  gap-4 rounded-lg  px-4  py-3 shadow-md'
+                    className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md focus:outline-none'
                     key={key}
                   >
-                    <div className='flex items-center justify-center rounded-lg bg-primary-3 px-4 py-4 '>
-                      {item.icons}
+                    <div className={cn('flex items-center justify-center rounded-xl px-5 py-5', colorMap[item.color] || 'bg-gray-50 text-gray-600')}>
+                      <Icon
+                        svgProp={{ width: 24, height: 24, className: ' ' }}
+                        name={item.icon as iconTypes}
+                      />
                     </div>
-                    <div className='  flex-col gap-1'>
-                      <p className='font-bold md:text-[0.9rem]'>{item.count}</p>
-                      <h3 className='text-[0.65rem]'>{item.subHeading}</h3>
+                    <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                      <p className='text-xl font-black'>{item.count}</p>
+                      <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>
+                        {item.text}
+                      </h3>
                     </div>
                   </div>
                 );
               })}
             </div>
           </InlineLoader>
+
           <div className='mt-12 hidden md:block'>
-            <p className='mb-10 text-lg font-medium text-primary-1'>Statistical Chart</p>
-            <LineChartComponent />
+            <p className='mb-10 text-lg font-bold text-primary-1'>Sales Overview</p>
+            {dashboardStats?.chartData && dashboardStats.chartData.length > 0 ? (
+              <div className='rounded-xl border p-4 shadow-sm'>
+                <LineChartComponent data={dashboardStats.chartData} dataKey='pv' width={800} />
+              </div>
+            ) : (
+              <div className='flex h-[300px] items-center justify-center rounded-xl border bg-gray-50'>
+                <p className='text-gray-400 font-medium italic text-sm'>No sales data available for this range.</p>
+              </div>
+            )}
+          </div>
+
+          <div className='mt-12'>
+            <div className='mb-6 flex items-center justify-between'>
+              <p className='text-lg font-bold text-primary-1'>Recent Orders</p>
+              <Button
+                variant='ghost'
+                className='text-xs text-primary-1'
+                onClick={() => navigate('/app/orders')}
+              >
+                See all
+              </Button>
+            </div>
+            <div className='overflow-x-auto rounded-lg border shadow-sm'>
+              <table className='w-full text-left text-sm'>
+                <thead className='bg-gray-50 text-xs uppercase text-gray-700'>
+                  <tr>
+                    <th className='px-4 py-3'>Order ID</th>
+                    <th className='px-4 py-3'>Customer</th>
+                    <th className='px-4 py-3'>Amount</th>
+                    <th className='px-4 py-3'>Status</th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y'>
+                  {dashboardStats?.recentOrders.map((order) => (
+                    <tr key={order.id} className='hover:bg-gray-50 transition-colors'>
+                      <td className='px-4 py-3 font-medium text-primary-1'>{order.orderId}</td>
+                      <td className='px-4 py-3 capitalize'>{order.name}</td>
+                      <td className='px-4 py-3 font-medium'>{formatToNaira(order.totalAmount)}</td>
+                      <td className='px-4 py-3'>
+                        <span
+                          className={cn(
+                            'rounded-full px-3 py-1 text-[10px] font-bold uppercase border',
+                            statusColor(order.status),
+                          )}
+                        >
+                          {order.status || 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {(!dashboardStats?.recentOrders || dashboardStats.recentOrders.length === 0) && (
+                    <tr>
+                      <td colSpan={4} className='py-10 text-center text-gray-500'>
+                        No recent orders found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
         <div className='flex flex-col gap-4'>
-          <p className='hidden text-end text-[0.75rem] text-gray-400 md:block'>
+          <p className='text-xs font-semibold uppercase text-gray-500 md:text-right'>
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
               year: 'numeric',
@@ -190,76 +406,50 @@ const Dashboard = () => {
               day: 'numeric',
             })}
           </p>
-          <div className='mb-12 hidden gap-3  md:flex'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='outline'
-                  className='group flex w-8/12 items-center justify-center gap-2 rounded-[5px]  border-0   px-2 py-4 text-base  font-semibold shadow-md transition-all duration-300 ease-in-out hover:opacity-90'
-                >
-                  <Filter className='w-4 cursor-pointer fill-primary-4 stroke-primary-4   transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
-                  <p className='text-[0.65rem] font-[500]'>Filter by</p>
-                  <ChevronDown className='w-4 cursor-pointer  transition-opacity duration-300 ease-in-out hover:opacity-95 active:opacity-100' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className='w-56 text-[0.65rem]'>
-                <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value='top'>Year</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='bottom'>Month</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value='right'>Day</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <SearchComboBox />
-          </div>
-          <p className=' text-lg  font-medium text-primary-1'>Today’s activity</p>
-          <p className=' text-xs'>Today</p>
-          <PieChartComponent />
-          <div className='mt-6 space-y-4'>
-            <div className=' flex  items-center gap-2 '>
-              <div className='h-5 w-5 rounded-sm bg-[#00BABA]'></div>
-              <p className='text-[0.65rem]'>Products ordered</p>
+
+          
+
+          <div className='rounded-xl border p-6 shadow-sm'>
+            <p className='mb-1 text-lg font-bold text-primary-1'>Order Mix</p>
+            <p className='mb-4 text-xs text-gray-500 lowercase'>Current distribution by status</p>
+            <div className='flex justify-center'>
+              {dashboardStats?.pieData && (
+                <PieChartComponent data={dashboardStats.pieData} width={220} height={220} />
+              )}
             </div>
-            <div className=' flex items-center gap-2 '>
-              <div className='h-5 w-5 rounded-sm bg-[#EADB55]'></div>
-              <p className='text-[0.65rem]'>Transactions</p>
+            <div className='mt-6 grid grid-cols-2 gap-4'>
+              {dashboardStats?.pieData.map((item, idx) => (
+                <div key={idx} className='flex items-center gap-2'>
+                  <div
+                    className='h-3 w-3 rounded-full'
+                    style={{ 
+                      backgroundColor: 
+                        item.name.toLowerCase() === 'success' ? '#10B981' :
+                        item.name.toLowerCase() === 'pending' ? '#F59E0B' :
+                        item.name.toLowerCase() === 'en route' ? '#3B82F6' : 
+                        item.name.toLowerCase() === 'delivered' ? '#6366F1' : '#94A3B8'
+                    }}
+                  ></div>
+                  <p className='text-[0.7rem] font-medium text-gray-700'>
+                    {item.name}: <span className='text-primary-1'>{item.value}</span>
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-          <div className='mt-8 flex flex-col gap-3 border-t-2 border-t-gray-100 pt-6'>
-            <p className=' text-lg font-medium text-primary-1'>Recent Activity</p>
 
-            <section className='justify-between space-y-4 md:flex md:space-y-0'>
-              <div>
-                <p className=' text-xs font-medium'>Registered users</p>
-
-                <div className='mt-6 space-y-4'>
-                  <div className=' flex  items-center gap-2 '>
-                    <p className='text-[0.65rem]'>5:08 AM</p>
-                    <p className='text-[0.65rem]'>Yemi lawal new user</p>
-                  </div>
-                  <div className=' flex  items-center gap-2 '>
-                    <p className='text-[0.65rem]'>5:08 AM</p>
-                    <p className='text-[0.65rem]'>Yemi lawal new user</p>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className='text-xs font-medium md:text-end'>Recent orders</p>
-
-                <div className='mt-6 space-y-4'>
-                  <div className=' flex  items-center gap-2 '>
-                    <p className='text-[0.65rem]'>5:08 AM</p>
-                    <p className='text-[0.65rem]'>Products ordered</p>
-                  </div>
-                  <div className=' flex  items-center gap-2 '>
-                    <p className='text-[0.65rem]'>5:08 AM</p>
-                    <p className='text-[0.65rem]'>Products ordered</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+          <div className='mt-4 flex flex-col gap-3 rounded-xl border bg-primary-1/5 p-6 shadow-sm'>
+            <p className='text-lg font-bold italic text-primary-1'>Analytics Deep Dive</p>
+            <p className='text-[0.7rem] text-gray-600'>
+              Discover top-selling products by quantity and revenue, and track your customer growth
+              trends.
+            </p>
+            <button
+              onClick={() => navigate('/app/analytics')}
+              className='mt-2 rounded-md bg-primary-1 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-95'
+            >
+              Go to Analytics
+            </button>
           </div>
         </div>
       </section>

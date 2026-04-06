@@ -46,11 +46,25 @@ const data = [
   },
 ];
 
-export default function LineChartComponent() {
+interface IProps {
+  data: any[];
+  width?: number;
+  height?: number;
+  dataKey?: string;
+  xKey?: string;
+}
+
+export default function LineChartComponent({
+  data,
+  width = 550,
+  height = 300,
+  dataKey = 'pv',
+  xKey = 'name',
+}: IProps) {
   return (
     <LineChart
-      width={550}
-      height={300}
+      width={width}
+      height={height}
       data={data}
       margin={{
         top: 5,
@@ -60,11 +74,11 @@ export default function LineChartComponent() {
       className=' -ml-4  text-xs'
     >
       {/* <CartesianGrid strokeDasharray='0 0' /> */}
-      <XAxis dataKey='name' />
+      <XAxis dataKey={xKey} />
       <YAxis />
       <Tooltip />
       <Legend />
-      <Line type='monotone' dataKey='pv' stroke='#204D88' activeDot={{ r: 8 }} />
+      <Line type='monotone' dataKey={dataKey} stroke='#204D88' activeDot={{ r: 8 }} />
       {/* <Line type='monotone' dataKey='uv' stroke='#82ca9d' /> */}
     </LineChart>
   );

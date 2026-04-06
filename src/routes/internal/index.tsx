@@ -29,6 +29,7 @@ import CreateDeliveryFee from 'pages/app/create-delivery-fee';
 import CreateFarmOfftake from 'pages/app/create-farm-offtake';
 import AllBlogs from 'pages/app/blogs';
 import CreateBlog from 'pages/app/create-blog';
+import Analytics from 'pages/app/analytics';
 
 const internalRoute: routeTypes = [
   {
@@ -146,6 +147,10 @@ const internalRoute: routeTypes = [
   {
     element: <CreateDeliveryFee />,
     path: 'create-delivery-fee',
+  },
+  {
+    element: <Analytics />,
+    path: 'analytics',
   },
 ];
 

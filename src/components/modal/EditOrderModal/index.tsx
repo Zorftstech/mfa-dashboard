@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogTrigger } from 'components/shadcn/dialog';
-import Icon from 'utils/Icon';
 import { useNavigate } from 'react-router-dom';
-import TextInfoSTack from 'components/general/InfoStack/InfoStack';
-import { Checkbox } from 'components/shadcn/checkbox';
 import { db } from 'firebase';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { processError } from 'helper/error';
