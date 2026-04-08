@@ -125,6 +125,22 @@ function SubscriptionsTable() {
       },
     },
     {
+      accessorKey: 'paymentStatus',
+      header: 'Payment Status',
+      cell: ({ row }) => {
+        const pStatus = row.getValue('paymentStatus') as string;
+        const colors: Record<string, string> = {
+          success: 'bg-green-100 text-green-700 border-green-200',
+          failed: 'bg-red-100 text-red-700 border-red-200',
+        };
+        return (
+          <span className={cn('px-2 py-1 rounded-full text-[0.65rem] font-bold uppercase border', colors[pStatus?.toLowerCase()] || 'bg-gray-100 text-gray-700')}>
+            {pStatus || 'N/A'}
+          </span>
+        );
+      },
+    },
+    {
       accessorKey: 'amount',
       header: 'Monthly Amount',
       cell: ({ row }) => (

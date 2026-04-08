@@ -232,6 +232,8 @@ export interface Subscription {
   nextBillingDate: any; // Firestore Timestamp
   nextDeliveryDate: any; // Firestore Timestamp
   amount: number;
+  paymentStatus?: 'success' | 'failed';
+  paymentMethod?: 'wallet' | 'paystack';
   created_date: any; // Firestore Timestamp
 }
 
