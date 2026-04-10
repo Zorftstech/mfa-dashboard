@@ -38,6 +38,8 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'create-blog': 'create-blog',
   toggle: 'toggle',
   'delivery-fee': 'delivery-fee',
+  analytics: 'analytics',
+  subscriptions: 'subscriptions',
 };
 
 const TIMBU_KEYS = {
