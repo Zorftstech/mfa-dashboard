@@ -40,7 +40,7 @@ import {
 } from 'components/shadcn/dropdown-menu';
 import { Button } from 'components/shadcn/ui/button';
 import { ChevronDown, Filter } from 'lucide-react';
-import { collection, getCountFromServer } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 import { db } from 'firebase';
 import TextContentLoader from 'components/Loaders/TextContentLoader';
 import useStore from 'store';
@@ -73,38 +73,47 @@ const Dashboard = () => {
   const { currentUser, authDetails } = useStore((state) => state);
   const navigate = useNavigate();
 
-  const { data: counts, isLoading } = useQuery({
-    queryKey: ['get-counts'],
-    queryFn: async () => {
-      const collectionsInfo = [
-        { name: 'users', text: 'Registered Users', link: 'users', icon: 'RegUsers', color: 'blue' },
-        { name: 'orders', text: 'Orders', link: 'orders', icon: 'OrderIcon', color: 'indigo' },
-        { name: 'products', text: 'Products', link: 'products', icon: 'ProductIcon', color: 'amber' },
-        { name: 'categories', text: 'Categories', link: 'categories', icon: 'CategoryIcon', color: 'emerald' },
-      ];
 
-      const countsData = await Promise.all(
-        collectionsInfo.map(async (info) => {
-          const snapshot = await getCountFromServer(collection(db, info.name));
-          return { ...info, count: snapshot.data().count };
-        }),
-      );
-
-      return countsData;
-    },
-    onError: (err) => {
-      processError(err);
-    },
-  });
 
   const { data: dashboardStats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats', dateRange],
     queryFn: async () => {
-      const ordersRef = collection(db, 'orders');
-      const ordersSnap = await getDocs(ordersRef);
+      // Helper: filter any collection's docs by the selected date range
+      const filterByDateRange = (docs: any[], dateFields: string[]) => {
+        if (!dateRange.start && !dateRange.end) return docs;
+        return docs.filter((doc) => {
+          const rawDate = dateFields.map((f) => doc[f]).find((v) => v != null);
+          if (!rawDate) return false;
+          const date = (rawDate as any)?.seconds
+            ? new Date((rawDate as any).seconds * 1000)
+            : new Date(rawDate);
+          if (isNaN(date.getTime())) return false;
+          if (dateRange.start && date < dateRange.start) return false;
+          if (dateRange.end && date > dateRange.end) return false;
+          return true;
+        });
+      };
+
+      // --- Orders ---
+      const ordersSnap = await getDocs(collection(db, 'orders'));
       const allOrders = ordersSnap.docs.map(
         (doc) => ({ id: doc.id, ...doc.data() } as unknown as Order),
       );
+
+      // --- Users ---
+      const usersSnap = await getDocs(collection(db, 'users'));
+      const allUsers = usersSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const filteredUsers = filterByDateRange(allUsers, ['createdAt', 'created_at', 'created_date', 'createdDate']);
+
+      // --- Products ---
+      const productsSnap = await getDocs(collection(db, 'newProducts'));
+      const allProducts = productsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const filteredProducts = filterByDateRange(allProducts, ['createdAt', 'created_at', 'created_date', 'createdDate']);
+
+      // --- Categories ---
+      const categoriesSnap = await getDocs(collection(db, 'categories'));
+      const allCategories = categoriesSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const filteredCategories = filterByDateRange(allCategories, ['createdAt', 'created_at', 'created_date', 'createdDate']);
 
       const filteredOrders = allOrders.filter((order) => {
         const rawDate = order.created_date || (order as any).createdDate;
@@ -164,10 +173,10 @@ const Dashboard = () => {
       });
 
       const chartData = Object.entries(dailyRevenue)
-        .map(([date, pv]) => ({ 
+        .map(([date, revenue]) => ({ 
           date, 
           name: moment(date).format('MMM D'), 
-          pv 
+          revenue 
         }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
@@ -191,6 +200,9 @@ const Dashboard = () => {
         totalRevenue,
         totalOrdersCount,
         avgOrderValue,
+        usersCount: filteredUsers.length,
+        productsCount: filteredProducts.length,
+        categoriesCount: filteredCategories.length,
         recentOrders,
         chartData,
         pieData,
@@ -238,7 +250,7 @@ const Dashboard = () => {
             </h3>
             <DateRangePicker onRangeChange={(range) => setDateRange(range)} />
           </div>
-          <InlineLoader isLoading={isLoading || statsLoading}>
+          <InlineLoader isLoading={statsLoading}>
             <div
               className={cn(
                 'grid cursor-pointer grid-cols-[1fr] gap-[2rem] rounded-lg transition-all duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr] xxl:grid-cols-[1fr_1fr_1fr]',
@@ -301,34 +313,44 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {counts?.map((item, key) => {
-                const colorMap: Record<string, string> = {
-                  blue: 'bg-blue-50 text-blue-600',
-                  indigo: 'bg-indigo-50 text-indigo-600',
-                  amber: 'bg-amber-50 text-amber-600',
-                  emerald: 'bg-emerald-50 text-emerald-600',
-                };
-                return (
-                  <div
-                    onClick={() => navigate(`/app/${item.link}`)}
-                    className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md focus:outline-none'
-                    key={key}
-                  >
-                    <div className={cn('flex items-center justify-center rounded-xl px-5 py-5', colorMap[item.color] || 'bg-gray-50 text-gray-600')}>
-                      <Icon
-                        svgProp={{ width: 24, height: 24, className: ' ' }}
-                        name={item.icon as iconTypes}
-                      />
-                    </div>
-                    <div className='flex flex-col gap-1 text-[#1A1A1A]'>
-                      <p className='text-xl font-black'>{item.count}</p>
-                      <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>
-                        {item.text}
-                      </h3>
-                    </div>
-                  </div>
-                );
-              })}
+              <div
+                onClick={() => navigate('/app/users')}
+                className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md'
+              >
+                <div className='flex items-center justify-center rounded-xl bg-blue-50 px-5 py-5'>
+                  <Icon svgProp={{ width: 24, height: 24, className: 'text-blue-600' }} name='RegUsers' />
+                </div>
+                <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                  <p className='text-xl font-black text-blue-950'>{dashboardStats?.usersCount ?? 0}</p>
+                  <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>Registered Users</h3>
+                </div>
+              </div>
+
+              <div
+                onClick={() => navigate('/app/products')}
+                className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md'
+              >
+                <div className='flex items-center justify-center rounded-xl bg-amber-50 px-5 py-5'>
+                  <Icon svgProp={{ width: 24, height: 24, className: 'text-amber-600' }} name='ProductIcon' />
+                </div>
+                <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                  <p className='text-xl font-black text-amber-950'>{dashboardStats?.productsCount ?? 0}</p>
+                  <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>Products</h3>
+                </div>
+              </div>
+
+              <div
+                onClick={() => navigate('/app/categories')}
+                className='flex items-center gap-5 rounded-xl border bg-white px-6 py-5 shadow-sm transition-all hover:scale-[1.02] hover:shadow-md'
+              >
+                <div className='flex items-center justify-center rounded-xl bg-emerald-50 px-5 py-5'>
+                  <Icon svgProp={{ width: 24, height: 24, className: 'text-emerald-600' }} name='CategoryIcon' />
+                </div>
+                <div className='flex flex-col gap-1 text-[#1A1A1A]'>
+                  <p className='text-xl font-black text-emerald-950'>{dashboardStats?.categoriesCount ?? 0}</p>
+                  <h3 className='text-[0.7rem] font-bold uppercase tracking-wider text-gray-400'>Categories</h3>
+                </div>
+              </div>
             </div>
           </InlineLoader>
 
@@ -336,7 +358,7 @@ const Dashboard = () => {
             <p className='mb-10 text-lg font-bold text-primary-1'>Sales Overview</p>
             {dashboardStats?.chartData && dashboardStats.chartData.length > 0 ? (
               <div className='rounded-xl border p-4 shadow-sm'>
-                <LineChartComponent data={dashboardStats.chartData} dataKey='pv' width={800} />
+                <LineChartComponent data={dashboardStats.chartData} dataKey='revenue' width={800} />
               </div>
             ) : (
               <div className='flex h-[300px] items-center justify-center rounded-xl border bg-gray-50'>
@@ -439,7 +461,7 @@ const Dashboard = () => {
           </div>
 
           <div className='mt-4 flex flex-col gap-3 rounded-xl border bg-primary-1/5 p-6 shadow-sm'>
-            <p className='text-lg font-bold italic text-primary-1'>Analytics Deep Dive</p>
+            <p className='text-lg font-bold  text-primary-1'>Analytics Deep Dive</p>
             <p className='text-[0.7rem] text-gray-600'>
               Discover top-selling products by quantity and revenue, and track your customer growth
               trends.

@@ -14,7 +14,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatDate = (i: string) => {
-  return moment(i).format('MMM Do YY');
+  return moment(i).format('MMM D, YYYY');
 };
 export function getCreatedDateFromDocument(documentData: DocumentData): string {
   const createTime = documentData._document.createTime.timestamp;

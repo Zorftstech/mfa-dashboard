@@ -100,10 +100,10 @@ const Analytics = () => {
       });
 
       const salesTrend = Object.entries(dailyRevenue)
-        .map(([date, pv]) => ({ 
+        .map(([date, revenue]) => ({ 
           date, 
           name: moment(date).format('MMM D'), 
-          pv 
+          revenue 
         }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
@@ -215,7 +215,7 @@ const Analytics = () => {
                   data={analyticsData.salesTrend}
                   width={600}
                   height={300}
-                  dataKey='pv'
+                  dataKey='revenue'
                 />
               ) : (
                 <div className='flex h-[300px] items-center justify-center rounded-xl bg-gray-50 italic text-gray-400 text-sm'>
