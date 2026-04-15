@@ -109,7 +109,10 @@ function OrderTableComponent() {
     // Iterate over each document in the querySnapshot
     querySnapshot.forEach((doc) => {
       const created = getCreatedDateFromDocument(doc as any);
-      orders.push({ id: doc.id, ...doc.data(), created });
+      const docData = doc.data();
+      // Use the actual timestamp for sorting if available, fallback to created string
+      const created_at = (doc as any)._document?.createTime?.timestamp?.seconds || 0;
+      orders.push({ id: doc.id, ...docData, created, created_at });
     });
 
     return orders;
@@ -249,19 +252,23 @@ function OrderTableComponent() {
     },
     {
       id: 'created',
-      accessorKey: 'created',
+      accessorKey: 'created_at',
       header: ({ column }) => {
         return (
-          <Button className='px-0 text-[0.71rem]  font-semibold' variant='ghost'>
+          <Button
+            className='px-0 text-[0.71rem] font-semibold'
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
             Created
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
           </Button>
         );
       },
 
       cell: ({ row }) => (
         <div className='text-[0.71rem] capitalize'>
-          {/* {formatDate(new Date((row.getValue('created') as number) * 1000).toString())} */}
-          {row.getValue('created')}
+          {row.original.created}
         </div>
       ),
     },
@@ -481,9 +488,7 @@ function OrderTableComponent() {
           </Button>
         </div>
       </div>
-      <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
-        Export
-      </button>
+   
     </div>
   );
 }
