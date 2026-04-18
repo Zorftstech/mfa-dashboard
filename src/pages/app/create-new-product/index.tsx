@@ -210,7 +210,7 @@ const CreateNewProduct = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       nameYourPrice: editData?.nameYourPrice === undefined ? false : editData?.nameYourPrice,
-      category: String(editData?.category?.loystarId) || '',
+      category: editData?.category?.loystarId ? String(editData?.category?.loystarId) : '',
       productName: editData?.name || '',
       description: editData?.desc || '',
       minimumPrice: Number(editData?.minimumPrice || 0),
@@ -259,7 +259,7 @@ const CreateNewProduct = () => {
         name: data.productName,
         desc: data.description,
 
-        category: categories.find((c: any) => c.loystarId === Number(data.category)),
+        category: categories.find((c: any) => String(c.loystarId) === String(data.category)) || editData?.category || null,
         price: Number(data.price),
         costprice: Number(data.costprice),
         quantity: Number(data.quantity),

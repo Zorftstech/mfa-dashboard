@@ -146,6 +146,7 @@ import { ReactComponent as ProductIcon } from 'assets/svg/productsIcon.svg';
 import { ReactComponent as SettingWhite } from 'assets/svg/settingsIcon1.svg';
 import { ReactComponent as Users } from 'assets/svg/profileIcon.svg';
 import { ReactComponent as Camera } from 'assets/svg/camera.svg';
+import { ReactComponent as NairaIcon } from 'assets/svg/nairaIcon.svg';
 
 export type iconTypes =
   | 'sort'
@@ -296,7 +297,8 @@ export type iconTypes =
   | 'OrderIcon'
   | 'ProductIcon'
   | 'SettingWhite'
-  | 'Camera';
+  | 'Camera'
+  | 'NairaIcon';
 
 interface IconInterface {
   name: iconTypes;
@@ -455,6 +457,7 @@ const Icon = ({ name, svgProp }: IconInterface) => {
     setting: <Setting {...svgProp} />,
     menu: <Menu {...svgProp} />,
     trash: <Trash {...svgProp} />,
+    NairaIcon: <NairaIcon {...svgProp} />,
   };
 
   return icons[name];

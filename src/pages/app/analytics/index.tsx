@@ -162,7 +162,7 @@ const Analytics = () => {
             <div className='flex items-center justify-between mb-4'>
                 <p className='text-xs font-bold uppercase tracking-wider text-gray-400'>Total Revenue</p>
                 <div className='p-2 bg-emerald-50 rounded-lg'>
-                    <Icon svgProp={{width: 24, height: 24, className: 'text-emerald-600'}} name='cashIcon' />
+                    <Icon svgProp={{width: 24, height: 24, className: 'text-emerald-600'}} name='NairaIcon' />
                 </div>
             </div>
             <h3 className='text-4xl font-extrabold text-emerald-950'>
@@ -193,7 +193,7 @@ const Analytics = () => {
             <div className='flex items-center justify-between mb-4'>
                 <p className='text-xs font-bold uppercase tracking-wider text-gray-400'>Average Order Value</p>
                 <div className='p-2 bg-amber-50 rounded-lg'>
-                    <Icon svgProp={{width: 24, height: 24, className: 'text-amber-600'}} name='billing' />
+                    <Icon svgProp={{width: 24, height: 24, className: 'text-amber-600'}} name='NairaIcon' />
                 </div>
             </div>
             <h3 className='text-4xl font-extrabold text-amber-950'>

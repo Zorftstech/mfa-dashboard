@@ -263,7 +263,7 @@ const Dashboard = () => {
                 <div className='flex items-center justify-center rounded-xl bg-emerald-50 px-5 py-5 '>
                   <Icon
                     svgProp={{ width: 24, height: 24, className: 'text-emerald-600' }}
-                    name='cashIcon'
+                    name='NairaIcon'
                   />
                 </div>
                 <div className='flex flex-col gap-1 text-[#1A1A1A]'>
@@ -300,7 +300,7 @@ const Dashboard = () => {
                 <div className='flex items-center justify-center rounded-xl bg-amber-50 px-5 py-5 '>
                   <Icon
                     svgProp={{ width: 24, height: 24, className: 'text-amber-600' }}
-                    name='billing'
+                    name='NairaIcon'
                   />
                 </div>
                 <div className='flex flex-col gap-1 text-[#1A1A1A]'>
