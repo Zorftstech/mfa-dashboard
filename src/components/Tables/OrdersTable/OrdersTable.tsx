@@ -106,12 +106,14 @@ function OrderTableComponent() {
     // Initialize an array to hold user data
     const orders: any = [];
 
-    // Iterate over each document in the querySnapshot
     querySnapshot.forEach((doc) => {
-      const created = getCreatedDateFromDocument(doc as any);
       const docData = doc.data();
-      // Use the actual timestamp for sorting if available, fallback to created string
-      const created_at = (doc as any)._document?.createTime?.timestamp?.seconds || 0;
+      const created = getCreatedDateFromDocument(doc);
+      
+      // Use the actual timestamp for sorting: Priority created_date > createTime
+      const rawTimestamp = docData.created_date || (doc as any).createTime;
+      const created_at = rawTimestamp?.seconds || 0;
+
       orders.push({ id: doc.id, ...docData, created, created_at });
     });
 
@@ -123,7 +125,6 @@ function OrderTableComponent() {
     queryFn: () => fetchOrders(),
     enabled: !!authDetails?.uid,
     onSuccess: (data) => {
-      console.log("data resp",data)
       setOrders(data);
     },
 

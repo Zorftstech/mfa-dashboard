@@ -16,10 +16,47 @@ export function cn(...inputs: ClassValue[]) {
 export const formatDate = (i: string) => {
   return moment(i).format('MMM D, YYYY');
 };
-export function getCreatedDateFromDocument(documentData: DocumentData): string {
-  const createTime = documentData._document.createTime.timestamp;
-  const createdDate = new Date(createTime.seconds * 1000); // Convert seconds to milliseconds
-  return formatDate(createdDate.toDateString());
+export function getCreatedDateFromDocument(doc: any): string {
+  const data = doc.data ? doc.data() : doc;
+
+  // Collect potential date candidates from data and metadata
+  const candidates = [
+    data?.created_date,
+    data?.createdDate,
+    data?.createdAt,
+    doc?._document?.createTime?.timestamp,
+    (doc as any).createTime,
+  ];
+
+  let bestDate: Date | null = null;
+  let maxMillis = 0;
+
+  candidates.forEach((raw) => {
+    if (!raw) return;
+
+    let date: Date | null = null;
+
+    // Handle Firestore Timestamp
+    if (typeof raw === 'object' && 'seconds' in raw) {
+      date = new Date(raw.seconds * 1000 + (raw.nanoseconds || 0) / 1000000);
+    } else {
+      // Handle string or Date
+      const parsed = moment(raw);
+      if (parsed.isValid()) {
+        date = parsed.toDate();
+      }
+    }
+
+    // Pick the most recent valid date (creation is usually the latest timestamp related to an item's birth)
+    if (date && date.getTime() > maxMillis) {
+      maxMillis = date.getTime();
+      bestDate = date;
+    }
+  });
+
+  if (!bestDate) return 'N/A';
+
+  return moment(bestDate).format('MMM D, YYYY');
 }
 export const statusColor = (status: string) => {
   switch (status?.toLowerCase()) {
