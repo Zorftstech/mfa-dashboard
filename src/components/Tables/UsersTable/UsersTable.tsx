@@ -60,7 +60,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import useStore from 'store';
 import { cn, checkStatus, getCreatedDateFromDocument } from 'lib/utils';
 import { de } from 'date-fns/locale';
-import { collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where, increment } from 'firebase/firestore';
 import { db } from 'firebase';
 import { formatToNaira, statusColor } from 'lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -99,6 +99,48 @@ function UserTableComponent() {
   const [userOrders, setUserOrders] = React.useState<any[]>([]);
   const [isLoadingDetails, setIsLoadingDetails] = React.useState(false);
 
+  // Refund modal state
+  const [refundOpen, setRefundOpen] = React.useState(false);
+  const [refundAmount, setRefundAmount] = React.useState('');
+  const [isRefunding, setIsRefunding] = React.useState(false);
+
+  const handleUpdateWalletBalance = async () => {
+    if (!selectedUser || !userWallet || !refundAmount) return;
+    const amount = parseFloat(refundAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid positive amount');
+      return;
+    }
+
+    setIsRefunding(true);
+    try {
+      const walletId = userWallet.id;
+      const walletRef = doc(db, 'wallets', walletId);
+
+      await updateDoc(walletRef, {
+        balance: increment(amount),
+        totalDeposit: increment(amount),
+      });
+
+      // Update local state
+      setUserWallet((prev: any) => ({
+        ...prev,
+        balance: (prev.balance || 0) + amount,
+        totalDeposit: (prev.totalDeposit || 0) + amount,
+      }));
+
+      toast.success(`Successfully refunded ${formatToNaira(amount)} to user wallet`);
+      setRefundOpen(false);
+      setRefundAmount('');
+    } catch (error) {
+      console.error('[handleUpdateWalletBalance] error:', error);
+      processError(error);
+    } finally {
+      setIsRefunding(false);
+    }
+  };
+
+
   const fetchUserDetails = async (targetUser: any) => {
     const userId = targetUser?.id;
     const email = (targetUser?.email || '').trim().toLowerCase();
@@ -114,7 +156,7 @@ function UserTableComponent() {
         const walletDocSnap = await getDoc(walletDocRef);
         if (walletDocSnap.exists()) {
           foundWallet = { id: walletDocSnap.id, ...walletDocSnap.data() };
-          
+
         }
       }
       // Strategy 2: query by email field
@@ -122,7 +164,7 @@ function UserTableComponent() {
         const walletSnap = await getDocs(
           query(collection(db, 'wallets'), where('email', '==', email)),
         );
-        
+
         if (!walletSnap.empty) {
           foundWallet = { id: walletSnap.docs[0].id, ...walletSnap.docs[0].data() };
         }
@@ -136,7 +178,7 @@ function UserTableComponent() {
         const ordersSnap = await getDocs(
           query(collection(db, 'orders'), where('email', '==', email)),
         );
-        
+
         orderDocs = ordersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
       }
       // Strategy 2: if empty, try querying by userId field
@@ -144,7 +186,7 @@ function UserTableComponent() {
         const ordersSnap2 = await getDocs(
           query(collection(db, 'orders'), where('userId', '==', userId)),
         );
-       
+
         orderDocs = ordersSnap2.docs.map((d) => ({ id: d.id, ...d.data() }));
       }
       const sortedOrders = orderDocs
@@ -638,11 +680,10 @@ function UserTableComponent() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 rounded-md py-1.5 text-xs font-semibold capitalize transition-all ${
-                  activeTab === tab
+                className={`flex-1 rounded-md py-1.5 text-xs font-semibold capitalize transition-all ${activeTab === tab
                     ? 'bg-white text-primary-1 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 {tab === 'orders' ? 'Recent Orders' : tab === 'wallet' ? 'Wallet' : 'Profile'}
               </button>
@@ -669,13 +710,13 @@ function UserTableComponent() {
                         label: 'Joined',
                         value: selectedUser?._createdAtRaw
                           ? (() => {
-                              const d = (selectedUser._createdAtRaw as any)?.seconds
-                                ? new Date((selectedUser._createdAtRaw as any).seconds * 1000)
-                                : new Date(selectedUser._createdAtRaw);
-                              return isNaN(d.getTime())
-                                ? selectedUser.created
-                                : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-                            })()
+                            const d = (selectedUser._createdAtRaw as any)?.seconds
+                              ? new Date((selectedUser._createdAtRaw as any).seconds * 1000)
+                              : new Date(selectedUser._createdAtRaw);
+                            return isNaN(d.getTime())
+                              ? selectedUser.created
+                              : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                          })()
                           : selectedUser?.created,
                       },
                     ].map(({ label, value }) => (
@@ -691,19 +732,27 @@ function UserTableComponent() {
                 {activeTab === 'wallet' && (
                   <div>
                     {userWallet ? (
-                      <div className='grid grid-cols-3 gap-4'>
-                        <div className='rounded-xl bg-emerald-50 p-4 text-center'>
-                          <p className='text-[0.6rem] font-bold uppercase tracking-wider text-emerald-600'>Balance</p>
-                          <p className='mt-1 text-lg font-black text-emerald-800'>{formatToNaira(userWallet.balance ?? 0)}</p>
+                      <div className='flex flex-col gap-4'>
+                        <div className='grid grid-cols-3 gap-4'>
+                          <div className='rounded-xl bg-emerald-50 p-4 text-center'>
+                            <p className='text-[0.6rem] font-bold uppercase tracking-wider text-primary-1'>Balance</p>
+                            <p className='mt-1 text-lg font-black text-primary-1'>{formatToNaira(userWallet.balance ?? 0)}</p>
+                          </div>
+                          <div className='rounded-xl bg-blue-50 p-4 text-center'>
+                            <p className='text-[0.6rem] font-bold uppercase tracking-wider text-blue-600'>Total Deposits</p>
+                            <p className='mt-1 text-lg font-black text-blue-800'>{formatToNaira(userWallet.totalDeposit ?? 0)}</p>
+                          </div>
+                          <div className='rounded-xl bg-amber-50 p-4 text-center'>
+                            <p className='text-[0.6rem] font-bold uppercase tracking-wider text-amber-600'>Total Spent</p>
+                            <p className='mt-1 text-lg font-black text-amber-800'>{formatToNaira(userWallet.totalSpent ?? 0)}</p>
+                          </div>
                         </div>
-                        <div className='rounded-xl bg-blue-50 p-4 text-center'>
-                          <p className='text-[0.6rem] font-bold uppercase tracking-wider text-blue-600'>Total Deposits</p>
-                          <p className='mt-1 text-lg font-black text-blue-800'>{formatToNaira(userWallet.totalDeposit ?? 0)}</p>
-                        </div>
-                        <div className='rounded-xl bg-amber-50 p-4 text-center'>
-                          <p className='text-[0.6rem] font-bold uppercase tracking-wider text-amber-600'>Total Spent</p>
-                          <p className='mt-1 text-lg font-black text-amber-800'>{formatToNaira(userWallet.totalSpent ?? 0)}</p>
-                        </div>
+                        <Button
+                          onClick={() => setRefundOpen(true)}
+                          className='w-full bg-primary-1 mt-6 text-white hover:bg-primary-1/80 h-10 py-1'
+                        >
+                          Refund / Add Funds
+                        </Button>
                       </div>
                     ) : (
                       <div className='flex h-[160px] flex-col items-center justify-center gap-2 rounded-xl bg-gray-50'>
@@ -832,7 +881,7 @@ function UserTableComponent() {
         </DialogContent>
       </Dialog>
 
-     
+
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>
@@ -862,6 +911,40 @@ function UserTableComponent() {
       {/* <button className='ml-4 w-fit rounded-sm bg-primary-1 px-4 py-1 text-[0.71rem]  text-white  '>
         Export
       </button> */}
+      {/* ── Refund / Add Funds Dialog ─────────────────── */}
+      <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
+        <DialogContent className='sm:max-w-md bg-white'>
+          <DialogHeader>
+            <DialogTitle>Refund / Add Funds</DialogTitle>
+            <DialogDescription>
+              Add funds to <span className='font-semibold text-gray-800'>{selectedUser?.displayName}</span>'s wallet.
+              The amount will be added to both current balance and total deposits.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='mt-4 flex flex-col gap-4'>
+            <div className='flex flex-col gap-1'>
+              <label className='text-xs font-semibold text-gray-600'>Amount (₦)</label>
+              <Input
+                type='number'
+                className='rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-1/40'
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                placeholder='Enter amount to refund'
+              />
+            </div>
+          </div>
+          <DialogFooter className='mt-6'>
+            <Button variant='outline' onClick={() => setRefundOpen(false)} disabled={isRefunding}>Cancel</Button>
+            <Button
+              onClick={handleUpdateWalletBalance}
+              disabled={isRefunding || !refundAmount}
+              className='bg-primary-1 text-white hover:bg-primary-1/80'
+            >
+              {isRefunding ? 'Processing…' : 'Confirm Refund'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
