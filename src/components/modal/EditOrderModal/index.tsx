@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogTrigger } from 'components/shadcn/dialog';
 import { useNavigate } from 'react-router-dom';
 import { db } from 'firebase';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { processError } from 'helper/error';
 import toast from 'helper';
-import { useQuery } from '@tanstack/react-query';
 import ContentLoader from 'components/general/ContentLoader';
 import { Order } from 'types';
 import {
@@ -32,7 +31,6 @@ interface Iprop {
   triggerClassName?: string;
   title?: string;
   orderId: string;
-  refetchAllOrders: () => void;
 }
 
 const ViewOrderDetailsModal = ({
@@ -40,10 +38,10 @@ const ViewOrderDetailsModal = ({
   triggerClassName,
   title,
   orderId,
-  refetchAllOrders,
 }: Iprop) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const queryClient = useQueryClient();
   const [orderStatus, setOrderStatus] = useState<string>('');
 
   const navigate = useNavigate();
@@ -95,8 +93,9 @@ const ViewOrderDetailsModal = ({
     },
     onSuccess: () => {
       toast.success('Order status updated successfully');
-      refetch();
-      refetchAllOrders();
+      queryClient.invalidateQueries(['get-orders']);
+      queryClient.invalidateQueries(['get-single-order', orderId]);
+      queryClient.invalidateQueries(['dashboard-stats']);
       setUpdating(false);
     },
     onError: (err) => {
@@ -109,6 +108,8 @@ const ViewOrderDetailsModal = ({
     setOrderStatus(value);
     updateOrderStatus.mutate(value);
   };
+
+  console.log(order)
 
   return (
     <Dialog onOpenChange={(i) => setModalOpen(i)} open={modalOpen}>

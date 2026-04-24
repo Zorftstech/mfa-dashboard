@@ -78,7 +78,6 @@ export type User = {
 
 function OrderTableComponent() {
   const navigate = useNavigate();
-  const [orders, setOrders] = React.useState<any[]>([]);
   const { authDetails } = useStore();
 
   // refactor this
@@ -104,7 +103,7 @@ function OrderTableComponent() {
     const querySnapshot = await getDocs(ordersQuery);
 
     // Initialize an array to hold user data
-    const orders: any = [];
+    const fetchedOrders: any = [];
 
     querySnapshot.forEach((doc) => {
       const docData = doc.data();
@@ -114,27 +113,21 @@ function OrderTableComponent() {
       const rawTimestamp = docData.created_date || (doc as any).createTime;
       const created_at = rawTimestamp?.seconds || 0;
 
-      orders.push({ id: doc.id, ...docData, created, created_at });
+      fetchedOrders.push({ id: doc.id, ...docData, created, created_at });
     });
 
-    return orders;
+    return fetchedOrders;
   }
 
   const { isLoading, data, refetch } = useQuery({
     queryKey: ['get-orders', authDetails?.uid],
     queryFn: () => fetchOrders(),
     enabled: !!authDetails?.uid,
-    onSuccess: (data) => {
-      setOrders(data);
-    },
 
     onError: (err) => {
       processError(err);
     },
   });
-  const refetchAllOrders = () => {
-    refetch();
-  };
 
   const columns: ColumnDef<any>[] = [
     {
@@ -246,7 +239,7 @@ function OrderTableComponent() {
             statusColor(row.getValue('status')),
           )}
         >
-          {row.getValue('status') || 'Pending'}
+          {(row.getValue('status') as string)?.toLowerCase() || 'Pending'}
         </span>
       ),
       enableSorting: false,
@@ -308,7 +301,6 @@ function OrderTableComponent() {
                       </Button>
                     }
                     orderId={row.getValue('orderId')}
-                    refetchAllOrders={refetchAllOrders}
                   ></EditOrderModal>
                 }
                 <DropdownMenuSeparator />
@@ -327,7 +319,7 @@ function OrderTableComponent() {
   const [position, setPosition] = React.useState('bottom');
 
   const table = useReactTable({
-    data: orders,
+    data: data || [],
     columns,
 
     onSortingChange: setSorting,
@@ -466,7 +458,7 @@ function OrderTableComponent() {
 
       <div className='flex items-center justify-end space-x-2 p-4'>
         <div className='flex-1 text-xs text-muted-foreground'>
-          Showing {table.getRowModel().rows?.length ?? 0} of {orders?.length} results
+          Showing {table.getRowModel().rows?.length ?? 0} of {data?.length} results
         </div>
         <div className='space-x-2'>
           <Button
