@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) => {
-  const [sortedAndFilteredProducts, setSortedAndFilteredProducts] = useState<any[]>();
-
   const monthNames = [
     'Jan',
     'Feb',
@@ -18,8 +16,11 @@ const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) =>
     'Dec',
   ];
 
-  function parseCustomDate(dateString: { split: (arg0: string) => [any, any, any] }) {
-    const [monthPart, dayPart, yearPart] = dateString.split(' ');
+  function parseCustomDate(dateString: any) {
+    if (!dateString || typeof dateString !== 'string') return { day: 0, month: 0, year: 0 };
+    const parts = dateString.split(' ');
+    if (parts.length < 3) return { day: 0, month: 0, year: 0 };
+    const [monthPart, dayPart, yearPart] = parts;
     const month = monthNames.indexOf(monthPart) + 1;
     const day = parseInt(dayPart, 10);
     const year = parseInt(yearPart, 10) + 2000;
@@ -27,7 +28,7 @@ const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) =>
   }
 
   const sortProducts = (products: any[], criterion: any) => {
-    return products.sort((a: { createdDate: any }, b: { createdDate: any }) => {
+    return [...products].sort((a: { createdDate: any }, b: { createdDate: any }) => {
       const parsedA = parseCustomDate(a.createdDate);
       const parsedB = parseCustomDate(b.createdDate);
 
@@ -48,8 +49,8 @@ const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) =>
     });
   };
 
-  useEffect(() => {
-    let updatedProducts = [...products];
+  return useMemo(() => {
+    let updatedProducts = products ? [...products] : [];
 
     // Search
     if (searchTerm) {
@@ -67,10 +68,8 @@ const useSortAndSearch = (products: any, searchTerm: any, sortCriterion: any) =>
       updatedProducts = sortProducts(updatedProducts, sortCriterion);
     }
 
-    setSortedAndFilteredProducts(updatedProducts);
+    return updatedProducts;
   }, [products, searchTerm, sortCriterion]);
-
-  return sortedAndFilteredProducts;
 };
 
 export default useSortAndSearch;

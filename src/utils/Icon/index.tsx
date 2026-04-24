@@ -149,6 +149,7 @@ import { ReactComponent as Camera } from 'assets/svg/camera.svg';
 import { ReactComponent as NairaIcon } from 'assets/svg/nairaIcon.svg';
 
 export type iconTypes =
+  | 'archive'
   | 'sort'
   | 'help'
   | 'reports'
@@ -325,6 +326,7 @@ const Icon = ({ name, svgProp }: IconInterface) => {
     Orders: <Orders {...svgProp} />,
     RegUsers: <RegUsers {...svgProp} />,
 
+    archive: <Inventory {...svgProp} />,
     sort: <Sort {...svgProp} />,
     help: <Help {...svgProp} />,
     reports: <Reports {...svgProp} />,

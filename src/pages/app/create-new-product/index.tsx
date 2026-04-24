@@ -309,8 +309,9 @@ const CreateNewProduct = () => {
         // const snapshot = await uploadBytes(storageRef, file);
         // const downloadURL = await getDownloadURL(snapshot.ref);
         const downloadURL = await uploadFile(file, 'image');
-        productData = { ...productData, image: downloadURL } as typeof productData & {
+        productData = { ...productData, image: downloadURL, isArchived: false } as typeof productData & {
           image: string;
+          isArchived: boolean;
         };
 
         const productsCollectionRef = collection(db, 'newProducts');
@@ -336,6 +337,20 @@ const CreateNewProduct = () => {
     }
   }
 
+  async function handleUnarchive() {
+    try {
+      const productRef = doc(db, 'newProducts', editData.id);
+      await updateDoc(productRef, { isArchived: false });
+      toast.success('Product unarchived successfully');
+      navigate(-1);
+      setIsEditing(false);
+      setEditData(null);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error unarchiving product');
+    }
+  }
+
   function updateUnitsArray(unit: Units, index?: number) {
     if (typeof index === 'number' && index !== -1) {
       setUnitsArray(
@@ -353,7 +368,7 @@ const CreateNewProduct = () => {
     }
   }
 
-  console.log('categories', categories);
+ 
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-8 px-container-base pb-[2.1rem] md:px-container-md'>
@@ -384,12 +399,23 @@ const CreateNewProduct = () => {
         </div>
 
         <div className='flex  gap-4'>
-          {isEditing && (
+          {isEditing && !editData?.isArchived && (
             <DeleteModal
-              btnText='Delete Product'
+              btnText='Archive Product'
               collectionName='newProducts'
               documentId={editData?.id}
+              isArchive={true}
             />
+          )}
+          {isEditing && editData?.isArchived && (
+            <button
+              onClick={handleUnarchive}
+              className='group flex items-center justify-center gap-2 rounded-[5px] border border-green-600 px-8 py-2 text-base font-semibold text-green-600 transition-all duration-300 ease-in-out hover:bg-green-50 hover:opacity-90'
+            >
+              <span className='text-xs font-[500] leading-[24px] tracking-[0.4px] md:text-sm'>
+                Unarchive
+              </span>
+            </button>
           )}
           <button
             onClick={() => {

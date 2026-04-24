@@ -12,7 +12,8 @@ import {
 import { Button } from 'components/shadcn/ui/button';
 import { tr } from 'date-fns/locale';
 import Icon from 'utils/Icon';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { cn } from 'lib/utils';
+import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +28,7 @@ export default function DeleteModal({
   cancel,
   documentId,
   collectionName,
+  isArchive,
 }: {
   btnText?: string;
   title?: string;
@@ -35,6 +37,7 @@ export default function DeleteModal({
   cancel?: string;
   collectionName?: string;
   documentId?: string;
+  isArchive?: boolean;
 }) {
   const [isloading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -45,18 +48,20 @@ export default function DeleteModal({
    * @param {string} documentId The ID of the document to delete.
    */
 
-  async function deleteItemFromCollection(collectionName: string, documentId: string) {
+  async function handleAction(collectionName: string, documentId: string) {
     setIsLoading(true);
     try {
-
-      await deleteDoc(doc(db, collectionName, documentId));
+      if (isArchive) {
+        await updateDoc(doc(db, collectionName, documentId), { isArchived: true });
+        toast.success('Successfully archived');
+      } else {
+        await deleteDoc(doc(db, collectionName, documentId));
+        toast.success('Successfully deleted');
+      }
       navigate(-1);
-      console.log(`Document with ID ${documentId} successfully deleted from ${collectionName}.`);
-      toast.success('Successfully deleted');
-      // Optionally, add more UI feedback here (e.g., showing a success message to the user)
     } catch (error) {
-      console.error('Error deleting document:', error);
-      // Optionally, add more UI feedback here (e.g., showing an error message to the user)
+      console.error('Error:', error);
+      toast.error(`Error ${isArchive ? 'archiving' : 'deleting'} item`);
     }
     setIsLoading(false);
   }
@@ -71,14 +76,12 @@ export default function DeleteModal({
         </Button> */}
         <Button
           variant='outline'
-          className='flex w-full items-center  justify-start gap-2 border-0 p-0 px-2 text-[0.71rem] capitalize text-red-500 disabled:cursor-not-allowed disabled:opacity-50'
-          onClick={() => {
-            setTimeout(() => {
-              console.log('delete');
-            }, 500);
-          }}
+          className={cn(
+            'flex w-full items-center justify-start gap-2 border-0 p-0 px-2 text-[0.71rem] capitalize disabled:cursor-not-allowed disabled:opacity-50',
+            isArchive ? 'text-blue-500' : 'text-red-500',
+          )}
         >
-          <Icon name='trash' svgProp={{ className: 'text-black' }}></Icon>
+          <Icon name={isArchive ? 'archive' : 'trash'} svgProp={{ className: 'text-black' }}></Icon>
           <p>{btnText}</p>
         </Button>
       </AlertDialogTrigger>
@@ -88,19 +91,17 @@ export default function DeleteModal({
           {/* <AlertDialogDescription className='text-center text-gray-400'>
             Deleting this patient’s profile removes all the information for this patient completely
           </AlertDialogDescription> */}
-          <AlertDialogDescription className='text-center font-semibold text-red-600'>
-            This action can not be reversed!
+          <AlertDialogDescription className={cn('text-center font-semibold', isArchive ? 'text-blue-600' : 'text-red-600')}>
+            {isArchive ? 'This product will be hidden from the storefront.' : 'This action can not be reversed!'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className='sm:justify-center'>
           <Button
             type='submit'
             disabled={isloading}
-            className={`bg-red-600 capitalize transition-all duration-150 ease-in-out md:px-8 ${
-              isloading ? 'cursor-not-allowed opacity-40' : ''
-            }`}
+            className={cn('capitalize transition-all duration-150 ease-in-out md:px-8', isArchive ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-600 hover:bg-red-700', isloading && 'cursor-not-allowed opacity-40')}
             onClick={() => {
-              deleteItemFromCollection(collectionName || '', documentId || '');
+              handleAction(collectionName || '', documentId || '');
             }}
           >
             {isloading ? <Spinner /> : btnText}

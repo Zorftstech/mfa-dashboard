@@ -2,11 +2,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import SearchComboBox from 'components/general/SearchComboBox';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from 'components/shadcn/ui/button';
-import { processError } from 'helper/error';
-import { useQuery } from '@tanstack/react-query';
 import CONSTANTS from 'constant';
 import { formatCurrentDateTime } from 'helper';
 import { Link } from 'react-router-dom';
@@ -29,6 +27,8 @@ import {
   orderBy,
   query,
   FieldValue,
+  updateDoc,
+  doc,
 } from 'firebase/firestore';
 import { db } from 'firebase';
 import useStore from 'store';
@@ -59,12 +59,13 @@ export interface TFirebaseProduct {
   costprice: number;
   createdDate: string;
   is_subscription_enabled?: boolean;
+  isArchived?: boolean;
   category: {
     desc: string;
     image: string;
     name: string;
     slug: string;
-    loystarId:string
+    loystarId: string
   };
   units: {
     price: number;
@@ -84,6 +85,7 @@ const ProductsPage = () => {
   const [sortCriterion, setSortCriterion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'archived'>('all');
 
 
   async function fetchCategories() {
@@ -146,6 +148,8 @@ const ProductsPage = () => {
     setAllProducts(products);
   }
 
+
+
   // const { isLoading } = useQuery({
   //   queryKey: ['get-products'],
   //   queryFn: () => ,
@@ -172,10 +176,25 @@ const ProductsPage = () => {
   };
 
   const handleSortChange = (newValue: string) => {
-    setSortCriterion(newValue);
+    if (newValue === 'archived' || newValue === 'active' || newValue === 'all') {
+      setFilterStatus(newValue as any);
+      setSortCriterion('');
+    } else {
+      setSortCriterion(newValue);
+    }
   };
 
-  const sortedAndFilteredProducts = useSortAndSearch(allProducts, searchTerm, sortCriterion);
+
+
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((p) => {
+      if (filterStatus === 'all') return true;
+      const isArchived = p.isArchived === true;
+      return filterStatus === 'archived' ? isArchived : !isArchived;
+    });
+  }, [allProducts, filterStatus]);
+
+  const sortedAndFilteredProducts = useSortAndSearch(filteredProducts, searchTerm, sortCriterion);
 
   return (
     <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 overflow-auto  px-container-base pb-[2.1rem] md:px-container-md'>
@@ -185,6 +204,7 @@ const ProductsPage = () => {
           <p className='hidden text-[0.85rem] md:block '>
             All products you have added will appear here
           </p>
+
         </div>
         <div>
           <p className='mb-6 hidden text-end text-[0.75rem] text-gray-400 md:block'>
@@ -205,7 +225,14 @@ const ProductsPage = () => {
               <DropdownMenuContent className='w-56 text-[0.65rem]'>
                 <DropdownMenuLabel>Filter by</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup value={sortCriterion} onValueChange={handleSortChange}>
+                <DropdownMenuRadioGroup
+                  value={filterStatus === 'all' ? (sortCriterion || 'all') : filterStatus}
+                  onValueChange={handleSortChange}
+                >
+                  <DropdownMenuRadioItem value='all'>All</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='active'>Active</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value='archived'>Archived</DropdownMenuRadioItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuRadioItem value='year'>Year</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value='month'>Month</DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value='day'>Day</DropdownMenuRadioItem>
