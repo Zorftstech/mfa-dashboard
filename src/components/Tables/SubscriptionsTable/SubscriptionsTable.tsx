@@ -34,6 +34,16 @@ import {
   TableHeader,
   TableRow,
 } from 'components/shadcn/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from 'components/shadcn/ui/alert-dialog';
 import { collection, getDocs, orderBy, query, doc, updateDoc } from 'firebase/firestore';
 import { db } from 'firebase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -45,6 +55,75 @@ import toast from 'helper';
 import { processError } from 'helper/error';
 import { Subscription } from 'types';
 import moment from 'moment';
+
+const ActionCell = ({ row, updateSubStatus }: { row: any, updateSubStatus: any }) => {
+  const sub = row.original;
+  const [alertOpen, setAlertOpen] = React.useState(false);
+  const [actionType, setActionType] = React.useState<'pause' | 'stop' | null>(null);
+
+  const handleActionClick = (type: 'pause' | 'stop') => {
+    setActionType(type);
+    setAlertOpen(true);
+  };
+
+  const confirmAction = () => {
+    if (actionType === 'pause') {
+      updateSubStatus.mutate({ id: sub.id, status: 'paused' });
+    } else if (actionType === 'stop') {
+      updateSubStatus.mutate({ id: sub.id, status: 'stopped' });
+    }
+    setAlertOpen(false);
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='ghost' className='h-8 w-8 p-0'>
+            <MoreVertical className='h-4 w-4' />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end' className='w-40'>
+          {sub.status === 'paused' ? (
+            <DropdownMenuItem onClick={() => updateSubStatus.mutate({ id: sub.id, status: 'active' })}>
+              <Play className='mr-2 h-4 w-4 text-green-600' />
+              <span>Resume</span>
+            </DropdownMenuItem>
+          ) : sub.status === 'active' ? (
+            <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleActionClick('pause'); }}>
+              <Pause className='mr-2 h-4 w-4 text-yellow-600' />
+              <span>Pause</span>
+            </DropdownMenuItem>
+          ) : null}
+          {sub.status !== 'stopped' && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleActionClick('stop'); }}>
+                <StopCircle className='mr-2 h-4 w-4 text-red-600' />
+                <span>Stop</span>
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will {actionType === 'pause' ? 'pause' : 'stop'} the subscription for {sub.productName}. You can {actionType === 'pause' ? 'resume' : 'not resume'} it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAction}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
 
 function SubscriptionsTable() {
   const { authDetails } = useStore();
@@ -87,14 +166,24 @@ function SubscriptionsTable() {
     {
       accessorKey: 'productName',
       header: 'Product',
-      cell: ({ row }) => (
-        <div className='flex items-center gap-3 text-[0.71rem]'>
-          {row.original.productImage && (
-            <img src={row.original.productImage} className='h-8 w-8 rounded-md object-cover' alt='' />
-          )}
-          <span className='font-semibold'>{row.getValue('productName')}</span>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const rawImage = row.original.productImage || (row.original as any).image || (row.original as any).productImg || (row.original as any).product_image || (row.original as any).imageUrl;
+        let image = '';
+        if (typeof rawImage === 'string') {
+          image = rawImage;
+        } else if (Array.isArray(rawImage) && rawImage.length > 0) {
+          image = rawImage[0]?.url || rawImage[0];
+        }
+
+        return (
+          <div className='flex items-center gap-3 text-[0.71rem]'>
+            {image && (
+              <img src={image} className='h-8 w-8 rounded-md object-cover' alt='' />
+            )}
+            <span className='font-semibold'>{row.getValue('productName')}</span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'userName',
@@ -162,40 +251,7 @@ function SubscriptionsTable() {
     {
       id: 'actions',
       header: 'Actions',
-      cell: ({ row }) => {
-        const sub = row.original;
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='ghost' className='h-8 w-8 p-0'>
-                <MoreVertical className='h-4 w-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-40'>
-              {sub.status === 'paused' ? (
-                <DropdownMenuItem onClick={() => updateSubStatus.mutate({ id: sub.id, status: 'active' })}>
-                  <Play className='mr-2 h-4 w-4 text-green-600' />
-                  <span>Resume</span>
-                </DropdownMenuItem>
-              ) : sub.status === 'active' ? (
-                <DropdownMenuItem onClick={() => updateSubStatus.mutate({ id: sub.id, status: 'paused' })}>
-                  <Pause className='mr-2 h-4 w-4 text-yellow-600' />
-                  <span>Pause</span>
-                </DropdownMenuItem>
-              ) : null}
-              {sub.status !== 'stopped' && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => updateSubStatus.mutate({ id: sub.id, status: 'stopped' })}>
-                    <StopCircle className='mr-2 h-4 w-4 text-red-600' />
-                    <span>Stop</span>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      },
+      cell: ({ row }) => <ActionCell row={row} updateSubStatus={updateSubStatus} />,
     },
   ];
 
@@ -213,6 +269,9 @@ function SubscriptionsTable() {
       columnFilters,
     },
   });
+
+
+  console.log("ew", subscriptions)
 
   return (
     <div className='flex w-full flex-col gap-4'>

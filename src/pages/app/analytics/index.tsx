@@ -139,13 +139,15 @@ const Analytics = () => {
   return (
     <div className='container flex h-full w-full flex-col overflow-auto px-container-base py-[2rem] pb-20 md:px-container-md'>
       <div className='mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4'>
-        <div>
+        <div className='min-w-0'>
           <h2 className='text-3xl font-bold text-primary-1'>Analytics Dashboard</h2>
           <p className='text-sm text-gray-500'>Detailed insights across selected timeframes.</p>
         </div>
-        <div className='flex items-center gap-4'>
-            <DateRangePicker onRangeChange={(range) => setDateRange(range)} />
-            <div className='flex items-center gap-3 rounded-lg bg-white p-2 shadow-sm border h-11 px-4'>
+        <div className='flex w-full flex-col gap-4 md:w-auto md:flex-row md:items-center'>
+            <div className='w-full overflow-x-auto pb-1 md:w-auto md:pb-0'>
+              <DateRangePicker onRangeChange={(range) => setDateRange(range)} />
+            </div>
+            <div className='flex items-center gap-3 rounded-lg bg-white p-2 shadow-sm border h-11 px-4 w-full md:w-auto'>
                 <Icon svgProp={{width: 20, height: 20, className: 'text-primary-1'}} name='RegUsers' />
                 <div className='text-xs'>
                     <p className='text-gray-400 capitalize font-bold leading-none mb-1'>Customer Base</p>
@@ -207,16 +209,18 @@ const Analytics = () => {
 
         <div className='grid gap-8 lg:grid-cols-2'>
           {/* Sales Trend */}
-          <div className='rounded-2xl border bg-white p-6 shadow-sm'>
+          <div className='rounded-2xl border bg-white p-6 shadow-sm w-full overflow-hidden'>
             <h3 className='mb-8 text-xl font-bold text-gray-800'>Revenue Trend</h3>
-            <div className='h-[350px] w-full'>
+            <div className='h-[350px] w-full overflow-x-auto'>
               {analyticsData?.salesTrend && analyticsData.salesTrend.length > 0 ? (
-                <LineChartComponent
-                  data={analyticsData.salesTrend}
-                  width={600}
-                  height={300}
-                  dataKey='revenue'
-                />
+                <div className='min-w-[600px] h-full'>
+                  <LineChartComponent
+                    data={analyticsData.salesTrend}
+                    width={600}
+                    height={300}
+                    dataKey='revenue'
+                  />
+                </div>
               ) : (
                 <div className='flex h-[300px] items-center justify-center rounded-xl bg-gray-50 italic text-gray-400 text-sm'>
                    No trend data for this period.
@@ -263,12 +267,12 @@ const Analytics = () => {
                   key={idx}
                   className='flex items-center justify-between rounded-xl bg-gray-50 p-4 transition-transform hover:scale-[1.01]'
                 >
-                  <div className='flex items-center gap-4'>
-                    <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary-1 text-sm font-bold text-white shadow-lg'>
+                  <div className='flex items-center gap-4 min-w-0'>
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-1 text-sm font-bold text-white shadow-lg'>
                       #{idx + 1}
                     </div>
-                    <div>
-                      <p className='font-bold text-gray-800 capitalize'>{product.name}</p>
+                    <div className='min-w-0'>
+                      <p className='font-bold text-gray-800 capitalize truncate'>{product.name}</p>
                       <p className='text-xs text-gray-500'>Best seller</p>
                     </div>
                   </div>
@@ -290,12 +294,12 @@ const Analytics = () => {
                   key={idx}
                   className='flex items-center justify-between rounded-xl bg-gray-50 p-4 border-l-4 border-l-green-500'
                 >
-                  <div className='flex items-center gap-4'>
-                    <div className='flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white shadow-lg'>
+                  <div className='flex items-center gap-4 min-w-0'>
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white shadow-lg'>
                       #{idx + 1}
                     </div>
-                    <div>
-                      <p className='font-bold text-gray-800 capitalize'>{product.name}</p>
+                    <div className='min-w-0'>
+                      <p className='font-bold text-gray-800 capitalize truncate'>{product.name}</p>
                       <p className='text-xs text-gray-500'>High value</p>
                     </div>
                   </div>

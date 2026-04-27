@@ -87,7 +87,123 @@ const ViewOrderDetailsModal = ({
       if (order?.id) {
         setUpdating(true);
         const orderRef = doc(db, 'orders', order.id);
-        await updateDoc(orderRef, { status: newStatus.toLowerCase() });
+        const updatedStatus = newStatus.toLowerCase();
+        await updateDoc(orderRef, { status: updatedStatus });
+
+        // Email sending logic
+        try {
+          const zeptoUrl = "https://api.zeptomail.com/v1.1/email";
+          const zeptoToken = import.meta.env.VITE_ZEPTO_TOKEN;
+          const senderEmail = import.meta.env.VITE_EMAIL ;
+
+          const LOGO_URL = "https://res.cloudinary.com/dkdrbjfdt/image/upload/v1749708851/icon_r1mapo.png";
+          const PRIMARY_COLOR = "#7AB42C";
+          const isSubscription = updatedStatus.includes("subscription") || order.isSubscriptionOrder;
+
+          const itemsHTML = (order.cartItems || [])
+            .map(
+               (item) => `
+          <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #eeeeee;">
+               <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;" />
+            </td>
+            <td style="padding: 12px; border-bottom: 1px solid #eeeeee; color: #333333; font-weight: 500;">${item.name}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #eeeeee; color: #666666; text-align: center;">${item.no_of_items || (item as any).qty || 1}</td>
+            <td style="padding: 12px; border-bottom: 1px solid #eeeeee; color: #333333; font-weight: 600; text-align: right;">₦${Number(item.price).toLocaleString()}</td>
+          </tr>
+        `
+            )
+            .join("");
+            
+          const orderDate = order.created_date && typeof order.created_date === 'object' && 'seconds' in order.created_date ? new Date(order.created_date.seconds * 1000) : new Date(order.createdDate || (order as any).created_date || Date.now());
+
+          const emailBody = `
+        <div style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; background-color: #f4f7f6; padding: 40px 20px;">
+          <div style="background-color: #ffffff; padding: 40px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-top: 6px solid ${PRIMARY_COLOR};">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <img src="${LOGO_URL}" alt="My Food Angels" style="width: 120px; height: auto;" />
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h2 style="color: #333333; font-size: 24px; margin-bottom: 10px;">Order Status Update!</h2>
+              <p style="color: #666666; font-size: 16px; line-height: 1.5;">Your ${isSubscription ? "subscription" : "order"} status has been updated to: <strong style="color: ${PRIMARY_COLOR}; text-transform: capitalize;">${updatedStatus}</strong></p>
+            </div>
+
+            <div style="background-color: #f9fbf9; border: 1px solid #e1e9e1; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="color: #888888; font-size: 14px; padding-bottom: 8px;">Order Date</td>
+                  <td style="text-align: right; color: #333333; font-weight: 600; padding-bottom: 8px;">${orderDate.toLocaleDateString(undefined, { dateStyle: 'long' })}</td>
+                </tr>
+                <tr>
+                  <td style="color: #888888; font-size: 14px; padding-bottom: 8px;">Order ID</td>
+                  <td style="text-align: right; color: #333333; font-weight: 600; padding-bottom: 8px;">${order.orderId || order.id}</td>
+                </tr>
+                <tr>
+                  <td style="color: #888888; font-size: 14px; padding-bottom: 8px;">Status</td>
+                  <td style="text-align: right; color: ${PRIMARY_COLOR}; font-weight: 600; padding-bottom: 8px; text-transform: capitalize;">${updatedStatus}</td>
+                </tr>
+                <tr>
+                   <td style="color: #888888; font-size: 14px; padding-bottom: 8px;">Shipping to</td>
+                   <td style="text-align: right; color: #333333; font-weight: 600; padding-bottom: 8px;">${order.address}</td>
+                </tr>
+                <tr style="border-top: 1px solid #e1e9e1;">
+                  <td style="color: #333333; font-size: 16px; font-weight: 700; padding-top: 12px;">Total Amount</td>
+                  <td style="text-align: right; color: ${PRIMARY_COLOR}; font-weight: 800; font-size: 20px; padding-top: 12px;">₦${Number(order.totalAmount || (order as any).totalPrice || 0).toLocaleString()}</td>
+                </tr>
+              </table>
+            </div>
+
+            <h3 style="color: #333333; font-size: 18px; margin-bottom: 15px; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px;">Items in your ${isSubscription ? "Subscription" : "Order"}</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              ${itemsHTML}
+            </table>
+
+            <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eeeeee; padding-top: 30px;">
+              <p style="color: #555555; font-size: 14px; line-height: 1.6;">If you have any questions, feel free to reply to this email. We're always happy to help!</p>
+              <div style="margin-top: 20px;">
+                 <a href="https://myfoodangels.com/dashboard/order-history" style="display: inline-block; background-color: ${PRIMARY_COLOR}; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: 14px;">Manage Orders</a>
+              </div>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; color: #999999; font-size: 12px;">
+            &copy; ${new Date().getFullYear()} My Food Angels. All rights reserved.<br>
+            info@myfoodangels.com
+          </div>
+        </div>
+      `;
+
+          if (order.email) {
+            await fetch(zeptoUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Zoho-enczapikey ${zeptoToken}`,
+              },
+              body: JSON.stringify({
+                from: {
+                  address: senderEmail,
+                  name: "MyFoodAngels",
+                },
+                to: [
+                  {
+                    email_address: {
+                      address: order.email,
+                      name: order.name || order.firstName || "Customer",
+                    },
+                  },
+                ],
+                subject: `Order Status Update: ${updatedStatus.charAt(0).toUpperCase() + updatedStatus.slice(1)} - My Food Angels`,
+                htmlbody: emailBody,
+              }),
+            });
+            console.log('Status update email sent successfully to', order.email);
+          }
+        } catch (err) {
+          console.error('Failed to send status update email', err);
+        }
+
         return newStatus;
       }
     },

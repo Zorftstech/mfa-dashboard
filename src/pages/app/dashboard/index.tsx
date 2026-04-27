@@ -242,18 +242,20 @@ const Dashboard = () => {
           <SearchComboBox />
         </div>
       </div> */}
-      <section className=' grid gap-[4rem]  rounded-lg md:grid-cols-[2fr_1fr] '>
-        <div>
-          <div className='mb-16 flex items-center justify-between'>
-            <h3 className='text-base font-bold md:text-2xl'>
+      <section className='grid gap-8 rounded-lg lg:grid-cols-[2fr_1fr] md:gap-[4rem]'>
+        <div className='min-w-0'>
+          <div className='mb-8 flex flex-col items-start gap-4 md:mb-16 md:flex-row md:items-center md:justify-between'>
+            <h3 className='text-lg font-bold md:text-2xl'>
               Welcome, {authDetails?.displayName ? authDetails.displayName : 'Admin'}
             </h3>
-            <DateRangePicker onRangeChange={(range) => setDateRange(range)} />
+            <div className='w-full overflow-x-auto pb-2 md:w-auto md:pb-0'>
+              <DateRangePicker onRangeChange={(range) => setDateRange(range)} />
+            </div>
           </div>
           <InlineLoader isLoading={statsLoading}>
             <div
               className={cn(
-                'grid cursor-pointer grid-cols-[1fr] gap-[2rem] rounded-lg transition-all duration-500 ease-in-out md:grid-cols-[1fr_1fr_1fr] xxl:grid-cols-[1fr_1fr_1fr]',
+                'grid cursor-pointer grid-cols-1 gap-4 sm:grid-cols-2 md:gap-[2rem] lg:grid-cols-3 rounded-lg transition-all duration-500 ease-in-out',
               )}
             >
               <div
@@ -354,11 +356,13 @@ const Dashboard = () => {
             </div>
           </InlineLoader>
 
-          <div className='mt-12 hidden md:block'>
+          <div className='mt-12 hidden md:block w-full overflow-hidden'>
             <p className='mb-10 text-lg font-bold text-primary-1'>Sales Overview</p>
             {dashboardStats?.chartData && dashboardStats.chartData.length > 0 ? (
-              <div className='rounded-xl border p-4 shadow-sm'>
-                <LineChartComponent data={dashboardStats.chartData} dataKey='revenue' width={800} />
+              <div className='w-full overflow-x-auto rounded-xl border p-4 shadow-sm'>
+                <div className='min-w-[700px]'>
+                  <LineChartComponent data={dashboardStats.chartData} dataKey='revenue' width={800} />
+                </div>
               </div>
             ) : (
               <div className='flex h-[300px] items-center justify-center rounded-xl border bg-gray-50'>
@@ -367,8 +371,8 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className='mt-12'>
-            <div className='mb-6 flex items-center justify-between'>
+          <div className='mt-12 w-full overflow-hidden'>
+            <div className='mb-6 flex flex-wrap items-center justify-between gap-4'>
               <p className='text-lg font-bold text-primary-1'>Recent Orders</p>
               <Button
                 variant='ghost'
@@ -378,8 +382,8 @@ const Dashboard = () => {
                 See all
               </Button>
             </div>
-            <div className='overflow-x-auto rounded-lg border shadow-sm'>
-              <table className='w-full text-left text-sm'>
+            <div className='w-full overflow-x-auto rounded-lg border shadow-sm'>
+              <table className='w-full text-left text-sm whitespace-nowrap'>
                 <thead className='bg-gray-50 text-xs uppercase text-gray-700'>
                   <tr>
                     <th className='px-4 py-3'>Order ID</th>
