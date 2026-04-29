@@ -146,3 +146,19 @@ export function convertFirebaseTimestampToDate(timestamp: FirebaseTimestamp): Da
   const dateInMilliseconds = timestamp?.seconds * 1000 + timestamp?.nanoseconds / 1000000;
   return new Date(dateInMilliseconds);
 }
+
+export function generateReferralCode(firstName: string, lastName: string): string {
+  const f = firstName.replace(/\W/g, '').substring(0, 3).toUpperCase();
+  const l = lastName.replace(/\W/g, '').substring(0, 3).toUpperCase();
+  const r = Math.floor(100 + Math.random() * 900);
+  return `${f}${l}${r}`;
+}
+
+export const formatToNaira = (amount: number | bigint) => {
+  return new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};

@@ -40,6 +40,7 @@ export type routePathTypes =
   | 'wallets'
   | 'analytics'
   | 'subscriptions'
+  | 'referrals'
   | 'delivery-fee';
 
 export interface routesInterface<T> {

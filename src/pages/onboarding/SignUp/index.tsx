@@ -13,6 +13,7 @@ import { SignUpFormInterface, SignUpFormSchema } from './signUp.model';
 import InputErrorWrapper from 'components/Hocs/InputError';
 import { DevTool } from '@hookform/devtools';
 import { useMutation } from '@tanstack/react-query';
+import { generateReferralCode, formatCurrentDateTime } from 'helper';
 import { processError } from 'helper/error';
 
 import BtnLoader from 'components/Hocs/BtnLoader';
@@ -59,6 +60,10 @@ const SignUp = () => {
           email,
           photoURL: '',
           role: 'admin',
+          referralCode: generateReferralCode(first_name, last_name),
+          referralBalance: 0,
+          hasUsedReferral: false,
+          created_at: new Date(),
         });
 
         //create admin on firestore
@@ -68,6 +73,7 @@ const SignUp = () => {
           email,
           photoURL: '',
           role: 'admin',
+          referralCode: generateReferralCode(first_name, last_name),
         });
       } catch (err) {
         console.log(err);

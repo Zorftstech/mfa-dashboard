@@ -49,25 +49,19 @@ import {
   TableHeader,
   TableRow,
 } from 'components/shadcn/ui/table';
-import { Link } from 'react-router-dom';
-import CONSTANTS from 'constant';
 import Icon from 'utils/Icon';
 // import API from 'services';
 import toast, { formatCurrentDateTime } from 'helper';
 import { processError } from 'helper/error';
-import Spinner from 'components/shadcn/ui/spinner';
-import { useNavigate, useLocation } from 'react-router-dom';
-import useStore from 'store';
-import { cn, checkStatus, getCreatedDateFromDocument } from 'lib/utils';
-import { de } from 'date-fns/locale';
-import { collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where, increment } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { cn,  getCreatedDateFromDocument } from 'lib/utils';
+import { collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where, increment, writeBatch } from 'firebase/firestore';
 import { db } from 'firebase';
 import { formatToNaira, statusColor } from 'lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import FeaturedLoader from 'components/Loaders/FeaturedLoader';
-import { Filter } from 'lucide-react';
 import SearchComboBox from 'components/general/SearchComboBox';
-import axios from 'axios';
+
 export type User = {
   id: string;
   number: string;
@@ -78,6 +72,8 @@ export type User = {
   orders: number;
   created: string;
   total: string;
+  referralCode?: string;
+  referredBy?: string;
 };
 
 function UserTableComponent() {
@@ -103,6 +99,8 @@ function UserTableComponent() {
   const [refundOpen, setRefundOpen] = React.useState(false);
   const [refundAmount, setRefundAmount] = React.useState('');
   const [isRefunding, setIsRefunding] = React.useState(false);
+
+
 
   const handleUpdateWalletBalance = async () => {
     if (!selectedUser || !userWallet || !refundAmount) return;
@@ -253,23 +251,42 @@ function UserTableComponent() {
 
 
   async function fetchAllUsers() {
-
-    // Create a reference to the 'users' collection
+    // 1. Fetch all users
     const usersCollectionRef = collection(db, 'users');
-
-    // Await the completion of the getDocs call
     const querySnapshot = await getDocs(usersCollectionRef);
 
-    // Initialize an array to hold user data
+    // 2. Fetch all wallets to get referral balances
+    const walletsCollectionRef = collection(db, 'wallets');
+    const walletsSnapshot = await getDocs(walletsCollectionRef);
+    
+    // Create a map for quick lookup
+    const walletMap: Record<string, any> = {};
+    walletsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      // Use doc.id (UID) or the userId field
+      const key = data.userId || data.uid || doc.id;
+      walletMap[key] = data;
+    });
+
     const users: any = [];
 
-    // Iterate over each document in the querySnapshot
     querySnapshot.forEach((doc) => {
       const createdDate = getCreatedDateFromDocument(doc as any);
       const rawData = doc.data();
       const _createdAtRaw =
         rawData.createdAt || rawData.created_at || rawData.created_date || rawData.createdDate || null;
-      users.push({ id: doc.id, ...rawData, created: createdDate, _createdAtRaw });
+      
+      // Merge referralBalance from wallet map
+      const userWallet = walletMap[doc.id];
+      const referralBalance = userWallet?.referralBalance || 0;
+
+      users.push({ 
+        id: doc.id, 
+        ...rawData, 
+        referralBalance, // Injected from wallet
+        created: createdDate, 
+        _createdAtRaw 
+      });
     });
 
     return users;
@@ -331,6 +348,46 @@ function UserTableComponent() {
         // </Link>
       ),
       enableHiding: false,
+    },
+    {
+      accessorKey: 'referralCode',
+      header: ({ column }) => {
+        return (
+          <Button
+            className='px-0 text-[0.71rem] font-semibold'
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Ref Code
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className='flex w-fit items-center gap-2 rounded bg-blue-50 px-2 py-0.5 font-mono text-[0.71rem] text-blue-700'>
+          {row.original.referralCode || '—'}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'referralBalance',
+      header: ({ column }) => {
+        return (
+          <Button
+            className='px-0 text-[0.71rem] font-semibold'
+            variant='ghost'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Ref Earnings
+            <Icon name='sort' svgProp={{ className: 'ml-2 h-3 w-2' }} />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className='text-[0.71rem] font-semibold text-green-600'>
+          {formatToNaira(row.original.referralBalance || 0)}
+        </div>
+      ),
     },
     {
       accessorKey: 'email',
@@ -552,6 +609,7 @@ function UserTableComponent() {
               value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
             />
+           
             <div className='flex  items-center justify-between gap-3'>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -705,6 +763,8 @@ function UserTableComponent() {
                       { label: 'Phone', value: selectedUser?.phone },
                       { label: 'Address', value: selectedUser?.addressDetails?.address },
                       { label: 'City', value: selectedUser?.addressDetails?.city },
+                      { label: 'Referral Code', value: selectedUser?.referralCode },
+                      { label: 'Referred By', value: selectedUser?.referredBy },
                       { label: 'Status', value: selectedUser?.status || 'active' },
                       {
                         label: 'Joined',
@@ -733,10 +793,14 @@ function UserTableComponent() {
                   <div>
                     {userWallet ? (
                       <div className='flex flex-col gap-4'>
-                        <div className='grid grid-cols-3 gap-4'>
+                        <div className='grid grid-cols-2 gap-4'>
                           <div className='rounded-xl bg-emerald-50 p-4 text-center'>
-                            <p className='text-[0.6rem] font-bold uppercase tracking-wider text-primary-1'>Balance</p>
+                            <p className='text-[0.6rem] font-bold uppercase tracking-wider text-primary-1'>Main Balance</p>
                             <p className='mt-1 text-lg font-black text-primary-1'>{formatToNaira(userWallet.balance ?? 0)}</p>
+                          </div>
+                          <div className='rounded-xl bg-purple-50 p-4 text-center'>
+                            <p className='text-[0.6rem] font-bold uppercase tracking-wider text-purple-600'>Referral Earnings</p>
+                            <p className='mt-1 text-lg font-black text-purple-800'>{formatToNaira(userWallet.referralBalance ?? 0)}</p>
                           </div>
                           <div className='rounded-xl bg-blue-50 p-4 text-center'>
                             <p className='text-[0.6rem] font-bold uppercase tracking-wider text-blue-600'>Total Deposits</p>
