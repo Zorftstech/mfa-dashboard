@@ -40,6 +40,7 @@ const ROUTES: Record<routePathTypes, routePathTypes> = {
   'delivery-fee': 'delivery-fee',
   analytics: 'analytics',
   subscriptions: 'subscriptions',
+  referrals: 'referrals'
 };
 
 const TIMBU_KEYS = {
