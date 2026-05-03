@@ -59,9 +59,9 @@ import moment from 'moment';
 const ActionCell = ({ row, updateSubStatus }: { row: any, updateSubStatus: any }) => {
   const sub = row.original;
   const [alertOpen, setAlertOpen] = React.useState(false);
-  const [actionType, setActionType] = React.useState<'pause' | 'stop' | null>(null);
+  const [actionType, setActionType] = React.useState<'pause' | 'stop' | 'resume' | 'reactivate' | null>(null);
 
-  const handleActionClick = (type: 'pause' | 'stop') => {
+  const handleActionClick = (type: 'pause' | 'stop' | 'resume' | 'reactivate') => {
     setActionType(type);
     setAlertOpen(true);
   };
@@ -71,9 +71,44 @@ const ActionCell = ({ row, updateSubStatus }: { row: any, updateSubStatus: any }
       updateSubStatus.mutate({ id: sub.id, status: 'paused' });
     } else if (actionType === 'stop') {
       updateSubStatus.mutate({ id: sub.id, status: 'stopped' });
+    } else if (actionType === 'resume' || actionType === 'reactivate') {
+      updateSubStatus.mutate({ id: sub.id, status: 'active' });
     }
     setAlertOpen(false);
   };
+
+  const getAlertConfig = () => {
+    switch (actionType) {
+      case 'pause':
+        return {
+          title: 'Pause Subscription?',
+          description: `This will pause the subscription for ${sub.productName}. You can resume it at any time to continue billing.`,
+          actionClass: 'bg-yellow-600 hover:bg-yellow-700',
+        };
+      case 'stop':
+        return {
+          title: 'Stop Subscription?',
+          description: `This will completely stop the subscription for ${sub.productName}. You can reactivate it later if needed.`,
+          actionClass: 'bg-red-600 hover:bg-red-700',
+        };
+      case 'resume':
+        return {
+          title: 'Resume Subscription?',
+          description: `This will reactivate billing and service for ${sub.productName}.`,
+          actionClass: 'bg-green-600 hover:bg-green-700',
+        };
+      case 'reactivate':
+        return {
+          title: 'Reactivate Subscription?',
+          description: `This will restart the subscription for ${sub.productName} and resume billing cycles.`,
+          actionClass: 'bg-green-600 hover:bg-green-700',
+        };
+      default:
+        return { title: '', description: '', actionClass: '' };
+    }
+  };
+
+  const alertConfig = getAlertConfig();
 
   return (
     <>
@@ -85,9 +120,14 @@ const ActionCell = ({ row, updateSubStatus }: { row: any, updateSubStatus: any }
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='w-40'>
           {sub.status === 'paused' ? (
-            <DropdownMenuItem onClick={() => updateSubStatus.mutate({ id: sub.id, status: 'active' })}>
+            <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleActionClick('resume'); }}>
               <Play className='mr-2 h-4 w-4 text-green-600' />
               <span>Resume</span>
+            </DropdownMenuItem>
+          ) : sub.status === 'stopped' ? (
+            <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleActionClick('reactivate'); }}>
+              <Play className='mr-2 h-4 w-4 text-green-600' />
+              <span>Reactivate</span>
             </DropdownMenuItem>
           ) : sub.status === 'active' ? (
             <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleActionClick('pause'); }}>
@@ -95,6 +135,7 @@ const ActionCell = ({ row, updateSubStatus }: { row: any, updateSubStatus: any }
               <span>Pause</span>
             </DropdownMenuItem>
           ) : null}
+          
           {sub.status !== 'stopped' && (
             <>
               <DropdownMenuSeparator />
@@ -110,14 +151,19 @@ const ActionCell = ({ row, updateSubStatus }: { row: any, updateSubStatus: any }
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{alertConfig.title}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will {actionType === 'pause' ? 'pause' : 'stop'} the subscription for {sub.productName}. You can {actionType === 'pause' ? 'resume' : 'not resume'} it later.
+              {alertConfig.description}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmAction}>Continue</AlertDialogAction>
+            <AlertDialogAction 
+              onClick={confirmAction}
+              className={alertConfig.actionClass}
+            >
+              Continue
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

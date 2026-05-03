@@ -52,7 +52,7 @@ const ReferralsPage = () => {
   });
 
   return (
-    <div className='container flex h-full w-full max-w-[180.75rem] flex-col gap-6 overflow-auto px-container-base pb-[2.1rem] md:px-container-md'>
+    <div className='container flex w-full max-w-[180.75rem] flex-col gap-6 px-container-base pb-[2.1rem] md:px-container-md'>
       <div className='justify-between md:flex'>
         <div>
           <h3 className='mb-4 text-base font-semibold md:text-2xl'>Referral Management</h3>
@@ -75,7 +75,7 @@ const ReferralsPage = () => {
 
       {activeTab === 'Overview' ? (
         <FeaturedLoader isLoading={loadingUsers}>
-          <div className='overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm'>
+          <div className='overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm'>
             <table className='w-full text-left text-sm'>
               <thead className='bg-gray-50 text-xs uppercase text-gray-700'>
                 <tr>
@@ -117,7 +117,7 @@ const ReferralsPage = () => {
         </FeaturedLoader>
       ) : (
         <FeaturedLoader isLoading={loadingHistory}>
-          <div className='overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm'>
+          <div className='overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm'>
             <table className='w-full text-left text-sm'>
               <thead className='bg-gray-50 text-xs uppercase text-gray-700'>
                 <tr>
