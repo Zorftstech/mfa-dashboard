@@ -144,7 +144,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 20.75,
           className: 'text-current',
         }}
-        name='OrderIcon'
+        name='billing'
       />
     ),
   },
