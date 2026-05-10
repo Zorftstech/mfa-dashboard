@@ -115,7 +115,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 22.75,
           className: 'text-current',
         }}
-        name='cashIcon'
+        name='WalletIcon'
       />
     ),
   },

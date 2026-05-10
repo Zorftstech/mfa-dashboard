@@ -405,8 +405,8 @@ function UserTableComponent() {
       },
       cell: ({ row }) => (
         // <Link to={`/mc/${CONSTANTS.ROUTES['overview']}}`}>
-        <div className='flex w-fit items-center   gap-2 rounded-lg'>
-          <p className='text-center text-[0.71rem]  '>{row.getValue('email')}</p>
+        <div className='flex w-fit items-start flex-wrap   gap-2 rounded-lg'>
+          <p className='text-start text-[0.71rem]  '>{row.getValue('email')}</p>
         </div>
         // </Link>
       ),
@@ -428,8 +428,8 @@ function UserTableComponent() {
       cell: ({ row }) => {
         const city = row.original.addressDetails?.address;
         return (
-          <div className='flex w-fit items-center   gap-2 rounded-lg'>
-            <p className='text-center text-[0.71rem]  '>{city}</p>
+          <div className='flex w-fit items-start  gap-2 rounded-lg'>
+            <p className='text-start text-[0.71rem]  '>{city}</p>
           </div>
         );
       },

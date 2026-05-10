@@ -1,0 +1,73 @@
+PROJECT OVERVIEW
+================
+The MFA Dashboard is a modern administrative platform designed to streamline product management and order fulfillment. It serves as a central hub that integrates with third-party services like Loystar for inventory management while leveraging Firebase for persistent data storage and organization. The platform features an automated synchronization engine that ensures product data (pricing, stock levels, and categories) remains consistent across Loystar and Firebase, providing administrators with an accurate, real-time view of their business operations.
+
+1. TECH STACK
+-------------
+- Frontend Framework: React 18 (Vite-powered)
+- Programming Language: TypeScript
+- Styling:
+  * Tailwind CSS (Utility-first CSS)
+  * SCSS (Advanced styling)
+  * Radix UI (Headless accessible components)
+  * Shadcn UI (Component library foundation)
+  * Lucide React (Iconography)
+- State Management:
+  * Zustand (Global application state)
+  * TanStack Query / React Query (Server state and data fetching)
+- Form Handling:
+  * React Hook Form (Form state management)
+  * Zod (Schema-based validation)
+- Routing: React Router DOM v6
+- API & Services:
+  * Axios (HTTP client)
+  * Firebase (Authentication and potentially real-time features)
+- Utilities:
+  * date-fns & Moment.js (Date manipulation)
+  * Recharts (Data visualization)
+  * XLSX (Excel data handling)
+
+2. CORE FEATURES
+----------------
+- Dashboard & Analytics: Comprehensive overview of platform metrics and performance tracking.
+- Product Management: Tools for creating and managing products, categories, subcategories, and food bundles.
+- Order Management: Full lifecycle tracking and management of customer orders.
+- Marketing & Sales: Management of coupons, flash sales, and referral programs.
+- Content Management: Built-in systems for managing blogs, FAQs, and system notifications.
+- User Management: Admin controls for managing user accounts, profiles, and wallet balances.
+- Logistics: Configuration for delivery fees and shipping parameters.
+- Farm Offtake: Specialized module for managing farm-related supply and inventory.
+
+3. CODE STRUCTURE
+-----------------
+- /src
+  - /assets: Static assets like images, icons, and SVGs.
+  - /components: Reusable UI elements organized by type (ui, partials, tables, loaders).
+  - /constant: Application-wide constants and configuration values.
+  - /firebase: Firebase initialization and configuration.
+  - /guards: Route protection logic (e.g., AuthGuard).
+  - /hooks: Custom React hooks for shared logic.
+  - /layouts: Page layout wrappers (Auth layout, App layout).
+  - /lib: Third-party library instances and configurations.
+  - /pages: Component-based page views organized by feature modules.
+  - /routes: Centralized routing configuration for public and private paths.
+  - /services: API interaction layer for data fetching and mutations.
+  - /store: Zustand store definitions for global state.
+  - /types: TypeScript definitions and interfaces.
+  - /utils: Helper functions and general utilities.
+
+4. KEY THINGS TO KNOW
+---------------------
+- Authentication: Managed via Firebase Auth and protected by Route Guards in the /src/guards directory.
+- Data Fetching: All API calls should be made through services in /src/services and wrapped in React Query hooks for caching and synchronization.
+- Validation: Forms are strictly typed using Zod schemas, ensuring data integrity before API submission.
+- Design System: The project uses a hybrid of Tailwind utility classes and customized Shadcn UI components for a consistent look and feel.
+- Component Organization: Layout-specific components (Sidebar, Navbar) are found in /src/components/partials.
+
+5. DEVELOPMENT WORKFLOW
+-----------------------
+- Local Development: Run 'npm run dev' to start the Vite development server.
+- Environment Variables: Ensure a .env file is present based on the env.sample template.
+- Code Quality: Run 'npm run lint' to check for TypeScript and ESLint errors.
+- Production Build: Use 'npm run build' to generate the optimized production bundle in the /dist folder.
+- Type Safety: Always define interfaces for API responses and component props in the /src/types directory.
