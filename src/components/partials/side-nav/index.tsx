@@ -1,5 +1,3 @@
-import CONSTANTS from 'constant';
-import usePlan from 'hooks/business-logic/usePlan';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useStore from 'store';
@@ -72,8 +70,10 @@ export const sideNavLinks: extendedRouteInterface[] = [
           width: 22.75,
           height: 22.75,
           className: 'text-current',
+          stroke: 'currentColor',
+          fill: 'currentColor',
         }}
-        name='FlashSale'
+        name='reports'
       />
     ),
   },
@@ -101,7 +101,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 22.75,
           className: 'text-current',
         }}
-        name='CategoryIcon'
+        name='personAdd'
       />
     ),
   },
@@ -115,7 +115,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 22.75,
           className: 'text-current',
         }}
-        name='CouponsIcon'
+        name='cashIcon'
       />
     ),
   },
@@ -143,8 +143,10 @@ export const sideNavLinks: extendedRouteInterface[] = [
           width: 22.75,
           height: 20.75,
           className: 'text-current',
+          stroke: 'currentColor',
+          fill: 'currentColor',
         }}
-        name='billing'
+        name='inventory'
       />
     ),
   },
@@ -158,7 +160,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 17.75,
           className: 'text-current',
         }}
-        name='ProductIcon'
+        name='Products'
       />
     ),
   },
@@ -171,6 +173,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           width: 22.75,
           height: 22.75,
           className: 'text-current',
+          stroke: 'currentColor',
         }}
         name='CategoryIcon'
       />
@@ -208,7 +211,6 @@ export const sideNavLinks: extendedRouteInterface[] = [
   {
     link: 'blogs',
     title: 'Blogs',
-
     icons: (
       <Icon
         svgProp={{
@@ -216,7 +218,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 20.75,
           className: 'text-current',
         }}
-        name='billing'
+        name='fileIcon'
       />
     ),
   },
@@ -243,8 +245,10 @@ export const sideNavLinks: extendedRouteInterface[] = [
           width: 22.75,
           height: 20.75,
           className: 'text-current',
+          stroke: 'currentColor',
+          fill: 'currentColor',
         }}
-        name='Categories'
+        name='help'
       />
     ),
   },
@@ -287,7 +291,7 @@ export const sideNavLinks: extendedRouteInterface[] = [
           height: 17.75,
           className: 'text-current',
         }}
-        name='ProductIcon'
+        name='notificationIcon'
       />
     ),
   },
@@ -300,8 +304,10 @@ export const sideNavLinks: extendedRouteInterface[] = [
           width: 22.75,
           height: 22.75,
           className: 'text-current',
+          stroke: 'currentColor',
+          fill: 'currentColor',
         }}
-        name='CouponsIcon'
+        name='location'
       />
     ),
   },
