@@ -274,7 +274,13 @@ function UserTableComponent() {
       const createdDate = getCreatedDateFromDocument(doc as any);
       const rawData = doc.data();
       const _createdAtRaw =
-        rawData.createdAt || rawData.created_at || rawData.created_date || rawData.createdDate || null;
+        rawData.createdAt || 
+        rawData.created_at || 
+        rawData.created_date || 
+        rawData.createdDate || 
+        (doc as any)._document?.createTime?.timestamp || 
+        (doc as any).createTime ||
+        null;
       
       // Merge referralBalance from wallet map
       const userWallet = walletMap[doc.id];
@@ -289,13 +295,32 @@ function UserTableComponent() {
       });
     });
 
-    return users;
+    // Sort users by date (recent to oldest)
+    return users.sort((a: any, b: any) => {
+      const getTs = (raw: any) => {
+        if (!raw) return 0;
+        if (typeof raw === 'object' && 'seconds' in raw) return raw.seconds;
+        const d = new Date(raw);
+        return isNaN(d.getTime()) ? 0 : d.getTime() / 1000;
+      };
+      return getTs(b) - getTs(a);
+    });
   }
 
   const columns: ColumnDef<any>[] = [
     {
       id: 'created',
       accessorKey: 'created',
+      sortingFn: (rowA: any, rowB: any) => {
+        const getTs = (row: any) => {
+          const raw = row.original._createdAtRaw;
+          if (!raw) return 0;
+          if (typeof raw === 'object' && 'seconds' in raw) return raw.seconds;
+          const d = new Date(raw);
+          return isNaN(d.getTime()) ? 0 : d.getTime() / 1000;
+        };
+        return getTs(rowA) - getTs(rowB);
+      },
       header: ({ column }) => {
         return (
           <Button
@@ -519,7 +544,7 @@ function UserTableComponent() {
       },
     },
   ];
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: 'created', desc: true }]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -569,7 +594,7 @@ function UserTableComponent() {
 
 
   return (
-    <div className='flex w-full flex-col gap-2 rounded-xl   '>
+    <div className='flex w-full min-w-0 flex-col gap-2 rounded-xl   '>
       <div className='mb-8 flex flex-col md:mb-4 md:flex-row md:justify-between '>
         <h3 className='mb-6 flex items-center gap-3 text-base font-semibold md:mb-16 md:text-2xl'>
           User Accounts
@@ -670,53 +695,55 @@ function UserTableComponent() {
       </div>
 
       <FeaturedLoader isLoading={isLoading}>
-        <Table className=''>
-          <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className='border-0   '>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className='border-b border-b-black/0 px-4  text-black'
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, index) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className=' py-3 font-medium'>
-                      {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      {/* </Link> */}
-                    </TableCell>
-                  ))}
+        <div className='w-full overflow-x-auto pb-4'>
+          <Table className='min-w-[1200px]'>
+            <TableHeader className='border-0 bg-primary-6 [&_tr]:border-b-0'>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className='border-0   '>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className='border-b border-b-black/0 px-4  text-black'
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className='h-[400px] text-center'>
-                  <div>
-                    <p className='text-base font-semibold text-gray-500'>No Users Records</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row, index) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    className={cn('border-0 ', index % 2 === 0 ? '' : 'bg-slate-50')}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className=' py-3 font-medium'>
+                        {/* <Link to={`/${CONSTANTS.ROUTES['view-usersList']}/${cell.id}`}> */}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {/* </Link> */}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className='h-[400px] text-center'>
+                    <div>
+                      <p className='text-base font-semibold text-gray-500'>No Users Records</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </FeaturedLoader>
 
       {/* ── View Profile Modal (tabbed) ─────────────────── */}
