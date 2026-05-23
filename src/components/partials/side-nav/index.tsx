@@ -134,22 +134,22 @@ export const sideNavLinks: extendedRouteInterface[] = [
       />
     ),
   },
-  {
-    link: 'subscriptions',
-    title: 'Subscribed Products',
-    icons: (
-      <Icon
-        svgProp={{
-          width: 22.75,
-          height: 20.75,
-          className: 'text-current',
-          stroke: 'currentColor',
-          fill: 'currentColor',
-        }}
-        name='inventory'
-      />
-    ),
-  },
+  // {
+  //   link: 'subscriptions',
+  //   title: 'Subscribed Products',
+  //   icons: (
+  //     <Icon
+  //       svgProp={{
+  //         width: 22.75,
+  //         height: 20.75,
+  //         className: 'text-current',
+  //         stroke: 'currentColor',
+  //         fill: 'currentColor',
+  //       }}
+  //       name='inventory'
+  //     />
+  //   ),
+  // },
   {
     link: 'products',
     title: 'Products',

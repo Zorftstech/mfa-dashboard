@@ -503,7 +503,7 @@ const CreateNewProduct = () => {
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name='isSubscriptionEnabled'
               render={({ field }) => (
@@ -517,7 +517,7 @@ const CreateNewProduct = () => {
                   </FormControl>
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FormField
               control={form.control}

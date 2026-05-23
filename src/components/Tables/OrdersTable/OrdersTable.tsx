@@ -147,11 +147,11 @@ function OrderTableComponent() {
       cell: ({ row }) => (
         <div className='flex flex-col gap-1 uppercase'>
           <div className='text-[0.71rem]  text-green-600'>{row.getValue('orderId')}</div>
-          {row.original.isSubscriptionOrder && (
+          {/* {row.original.isSubscriptionOrder && (
             <div className='w-fit rounded bg-primary-1/10 px-1.5 py-0.5 text-[10px] font-bold text-primary-1 border border-primary-1/20'>
               Monthly Subscription
             </div>
-          )}
+          )} */}
         </div>
       ),
       enableHiding: false,

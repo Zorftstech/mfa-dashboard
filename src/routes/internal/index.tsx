@@ -30,7 +30,7 @@ import CreateFarmOfftake from 'pages/app/create-farm-offtake';
 import AllBlogs from 'pages/app/blogs';
 import CreateBlog from 'pages/app/create-blog';
 import Analytics from 'pages/app/analytics';
-import Subscriptions from 'pages/app/subscriptions';
+// import Subscriptions from 'pages/app/subscriptions';
 import Referrals from 'pages/app/referrals';
 
 const internalRoute: routeTypes = [
@@ -154,10 +154,10 @@ const internalRoute: routeTypes = [
     element: <Analytics />,
     path: 'analytics',
   },
-  {
-    element: <Subscriptions />,
-    path: 'subscriptions',
-  },
+  // {
+  //   element: <Subscriptions />,
+  //   path: 'subscriptions',
+  // },
   {
     element: <Referrals />,
     path: 'referrals',
